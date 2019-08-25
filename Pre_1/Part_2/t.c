@@ -80,17 +80,26 @@ int C(int x, int y)
     puts("Printing stack frame list:");
     char mytemp[5];
     gets(mytemp);
-    while(FP != NULL)
+    while(FP != 0)
     {
-        printf("%x", &FP);
+        printf("*FP=%x | FP=%x\n", *FP, FP);
         // TODO: Clean this up --> FP = FP - 4;
+        FP = *FP;
     }
 
 
-p = (int *)&p;
+//p = (int *)&p;
+u = (int *)&u;
 
 //! (3). Print the stack contents from p to the frame of main()
 //!     YOU MAY JUST PRINT 128 entries of the stack contents.
+
+    i=0;
+    while( i != 128)
+    {
+        printf("p=%x | *p=%x\n", p, *p);
+        p++;
+    }
 
 //! (4). On a hard copy of the print out, identify the stack contents
 //!      as LOCAL VARIABLES, PARAMETERS, stack frame pointer of each function.
