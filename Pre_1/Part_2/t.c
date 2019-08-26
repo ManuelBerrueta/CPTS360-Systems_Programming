@@ -103,7 +103,8 @@ int C(int x, int y)
     {
         printf("At i=%d  \t|\t ", i);
         printf("p=%8x  \t|\t*p=%8x\n", p, *p);
-        p = (int *)&p +(4*i++);
+        p = (int *)&p +i++;
+        //p = (int *)&p +(4*i++);
         //p = &p -(4*i++);65
     }
 
