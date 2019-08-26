@@ -74,33 +74,41 @@ int C(int x, int y)
     printf("Address of *p: %x\n", &p);
 
     u=10; v=11; w=12; i=13; 
-    FP = (int *)getebp();  // FP = stack frame pointer of the C() function
 
 //! (2). Write C code to print the stack frame link list.
-    puts("Printing stack frame list:");
-    char mytemp[5];
-    gets(mytemp);
+    FP = (int *)getebp();  // FP = stack frame pointer of the C() function
+    puts("\nPrinting stack frame list:");
     while(FP != 0)
     {
-        printf("*FP=%x | FP=%x\n", *FP, FP);
+        if( *FP != 0)
+        {
+            printf("*FP=%x \t|\t FP=%x  \t|\n", *FP, FP);
+        }
+        else
+        {
+            printf("*FP=%x    \t|\t FP=%x  \t|\n", *FP, FP);
+        }
+
         // TODO: Clean this up --> FP = FP - 4;
         FP = *FP;
     }
 
-
-//p = (int *)&p;
-u = (int *)&u;
-
 //! (3). Print the stack contents from p to the frame of main()
 //!     YOU MAY JUST PRINT 128 entries of the stack contents.
 
+    p = (int *)&p;
+    puts("\nPrinting stack content:");
     i=0;
     while( i != 128)
     {
-        printf("p=%x | *p=%x\n", p, *p);
-        p++;
+        printf("At i=%d  \t|\t ", i);
+        printf("p=%8x  \t|\t*p=%8x\n", p, *p);
+        p = (int *)&p +(4*i++);
+        //p = &p -(4*i++);65
     }
+
+    printf("exit C\n");
+}
 
 //! (4). On a hard copy of the print out, identify the stack contents
 //!      as LOCAL VARIABLES, PARAMETERS, stack frame pointer of each function.
-}
