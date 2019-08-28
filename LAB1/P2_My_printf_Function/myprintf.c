@@ -185,7 +185,12 @@ int notprintf(char *fmt, ...)
                 cp++;
                 break;
             case 's':   //? string
-                /* code */
+                /*TODO: Read that string until '\0' 
+                */
+                while(*(++ip) != '\0')
+                {
+                    putchar(ip);
+                }
                 cp++;
                 break;
             case 'u':   //? unsigned integer
@@ -193,7 +198,8 @@ int notprintf(char *fmt, ...)
                 cp++;
                 break;
             case 'd':   //? integer
-                /* code */
+                /*TODO: if it has negative sign, putchar('-') else possibly just use printu?;
+                */
                 cp++;
                 break;
             case 'o':   //? unsigned integer in OCT
@@ -223,7 +229,9 @@ int main(int argc, char *argv[], char*env[])
 
     //notprintf("Testing"); //!TESTER
 
-    notprintf("%u%c%x%o\n", 214, 'a', 100, 16);
+    //notprintf("%u%c%x%o\n", 214, 'a', 100, 16);
+    //! String test
+    notprintf("%s", "myStr");
 
     // myprintf("cha=%c string=%s      dec=%d hex=%x oct=%o neg=%d\n", 
 	//         'A', "this is a test", 100,    100,   100,  -100);
