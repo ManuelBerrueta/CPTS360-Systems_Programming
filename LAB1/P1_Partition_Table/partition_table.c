@@ -1,3 +1,10 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   Read the virtual disk "vdisk" as the Linux utility fdisk would          *
+ *                                                                           *
+ *                                                                           *
+ * 																			 *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -31,7 +38,7 @@ int main()
     int fd;
     char buf[512];
 	int i=0;
-	int partition_number = 0;
+	int partition_number = 1;
 	int end_of_sector = 0;
 
     fd = open("vdisk", O_RDONLY);  // check fd value: -1 means open() failed
@@ -49,7 +56,7 @@ int main()
 	p = &(buf[0x1BE]); //*0x1BE = 446
 
 	//! Traverse through the first 4 partitions
-	while(partition_number < 4)
+	while(partition_number <= 4)
 	{
 		printf("==== Partion %d ====\n", partition_number);
 		printf("start_sector: %d   |  ", p->start_sector);
@@ -60,14 +67,37 @@ int main()
 		printf("sys_type: %x\n", p->sys_type); 
 
 		p++; //! Move to the next partition
-		partition_number++;
+		partition_number++; // Increment partition number
 	}
 
-	//! Increment partition number
-	partition_number++;
+	//! p=*p? EXTENDED Partition
+	//? p=&p; this assignment works... TODO:Possible fix/remove?
 
-    lseek(fd, (long)123*512, SEEK_SET);  // lseek to byte 123*512 OR sector 123
+	lseek(fd, (long)(end_of_sector+1)*512, SEEK_SET);  // lseek to byte p4s start sector*512 OR in this case sector 1440
     read(fd, buf, 512);                  // read sector 123 into buf[ ]
+	p = &(buf[0x1BE]); // This should be the start of the first sector..
+	//! NOTES: The idea is that the P4's begin sector is a local MBR
+	//!        Thus, we should be able to access it like we had before?
+	//? Also if they are relative to P4's sector can't we just seek from there?
+	//? may be multiply the size of the partition *512 (size of sector)
+	//? To move on to the next partition...
+
+	while(p != 0)
+	{
+		printf("%x", p->start_sector);
+		p++;
+		partition_number++; // Increment partition number
+		
+		//! FOR TESTING ONLY -REMOVE AFTER DEBUG
+		if (partition_number == 7)
+		{
+			break;
+		}
+	}
+
+
+    //lseek(fd, (long)123*512, SEEK_SET);  // lseek to byte 123*512 OR sector 123
+    //read(fd, buf, 512);                  // read sector 123 into buf[ ]
 
 	i=0;
 /* 	while(i++ <= 512)
@@ -75,5 +105,7 @@ int main()
 		printf("%x\n", buf[i]);
 	} */
 
+	fclose(fd);
 
+	return 0;
 }
