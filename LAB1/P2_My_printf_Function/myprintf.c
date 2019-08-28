@@ -156,13 +156,22 @@ int notprintf(char *fmt, ...)
 
     while(i < fmtSize)
     {
-        if( *cp != '%')
+        i++;
+        if (*cp == '\n')  //~ "\0"
+        {
+            printf("Testing");
+            putchar('\n');
+            putchar('\r');
+            cp++;
+            //i++;
+        }
+        else if( *cp != '%')
         {
             putchar(*cp);
             putchar('\n'); //! GDB won't print without this
             //cp=cp+1; //? cp++ will not work....
             cp++;
-            i++;    
+            //i++;    
         }
         else
         {
@@ -214,7 +223,7 @@ int main(int argc, char *argv[], char*env[])
 
     //notprintf("Testing"); //!TESTER
 
-    notprintf("%u%c%x%o", 214, 'a', 100, 16);
+    notprintf("%u%c%x%o\n", 214, 'a', 100, 16);
 
     // myprintf("cha=%c string=%s      dec=%d hex=%x oct=%o neg=%d\n", 
 	//         'A', "this is a test", 100,    100,   100,  -100);
