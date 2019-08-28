@@ -43,15 +43,18 @@ int printo(u32 x)
 
 int myprintf(char *fmt, ...)
 {
-    while(fmt) //* While is not null
+    int i = 0;
+    int fmtSize = sizeof(fmt);
+    while(i < fmtSize) //* While is not null
     {
-        if(fmt != '%')
+        if(fmt[i] != '%')
         {
-            putchar(fmt++);
+            putchar(fmt[i]);
+            printf(fmt);
         }
         else
         {
-            fmt++; //Move up to the next character after %
+            fmt; //Move up to the next character after %
 
             switch ((int)fmt)
             {
@@ -89,6 +92,7 @@ int main(int argc, char const *argv[])
     Given: putchar(char c) of Linux, which prints a char.
     2-1. Write YOUR own prints(char *s) fucntion to print a string.
     Given: The following printu() function prints an unsigned integer. */
-
+    //printf("testing\n");
+    myprintf("Testing");
     return 0;
 }
