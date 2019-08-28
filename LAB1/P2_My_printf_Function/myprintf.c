@@ -44,22 +44,22 @@ int printo(u32 x)
 int myprintf(char *fmt, ...)
 {
     int i = 0;
-    int fmtSize = sizeof(fmt);
+    int fmtSize = strlen(fmt);
     while(i < fmtSize) //* While is not null
     {
         if(fmt[i] != '%')
         {
-            putchar(fmt[i]);
-            printf(fmt);
+            putchar(fmt[i++]);
+            //printf(fmt);
         }
         else
         {
-            fmt; //Move up to the next character after %
+            fmt[i++]; //Move up to the next character after %
 
             switch ((int)fmt)
             {
             case 'c':   //? char
-                putchar(fmt);
+                putchar(fmt[i]);
                 break;
             case 's':   //? string
                 /* code */
@@ -93,6 +93,6 @@ int main(int argc, char const *argv[])
     2-1. Write YOUR own prints(char *s) fucntion to print a string.
     Given: The following printu() function prints an unsigned integer. */
     //printf("testing\n");
-    myprintf("Testing");
+    myprintf("Tes%cing");
     return 0;
 }
