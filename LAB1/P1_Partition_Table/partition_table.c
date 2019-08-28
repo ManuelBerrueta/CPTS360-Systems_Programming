@@ -32,6 +32,7 @@ int main()
     char buf[512];
 	int i=0;
 	int partition_number = 0;
+	int end_of_sector = 0;
 
     fd = open("vdisk", O_RDONLY);  // check fd value: -1 means open() failed
     read(fd, buf, 512);            // read sector 0 into buf[ ]
@@ -44,15 +45,23 @@ int main()
 		printf("%x\n", buf[i]);
 	} */
 
-	printf("TEST SPACE\n");
 	//! 0x1BE is the start of the First Partition
-
 	p = &(buf[0x1BE]); //*0x1BE = 446
-	printf("==== Partion %x ====\n", partition_number);
-	printf("start_sector: %x   |  ", p->start_sector);
-	printf("end_sector: %x   |  ", p->end_sector);
-	printf("nr_sectors: %x   |  ", p->nr_sectors);
-	printf("sys_type: %x\n", p->sys_type); //* Print system type
+
+	//! Traverse through the first 4 partitions
+	while(partition_number < 4)
+	{
+		printf("==== Partion %d ====\n", partition_number);
+		printf("start_sector: %d   |  ", p->start_sector);
+		end_of_sector = (p->start_sector + p->nr_sectors) - 1;
+		printf("end_sector: %d   |  ", end_of_sector);
+		//printf("end_sector: %d   |  ", p->end_sector); //TODO: Why isn't this printing out the right value??
+		printf("nr_sectors: %d   |  ", p->nr_sectors);
+		printf("sys_type: %x\n", p->sys_type); 
+
+		p++; //! Move to the next partition
+		partition_number++;
+	}
 
 	//! Increment partition number
 	partition_number++;
