@@ -102,6 +102,8 @@ int main()
 	read(fd, buf, 512);								   // read sector 123 into buf[ ]
 	p = &(buf[0x1BE]);								   // This should be the start of the first sector..
 	printf("start_sector: %d   |  ", p->start_sector); //? 18
+	//! Testing
+	printf("p->end_sector: %d   |  ", p->end_sector); //? TESTING
 	end_of_sector = (p->start_sector + p->nr_sectors) - 1;
 	printf("end_sector: %d  |  ", end_of_sector);
 	printf("nr sector: %d  |  ", p->nr_sectors);	   //? 342"
@@ -109,31 +111,23 @@ int main()
 
 	p++;
 	printf("start_sector: %d   |  ", p->start_sector); //? 377
+	//! Testing
+	printf("p->end_sector: %d   |  ", p->end_sector); //? TESTING
 	end_of_sector = (p->start_sector + p->nr_sectors) - 1;
 	printf("end_sector: %d  |  ", end_of_sector);
 	printf("nr_sector: %d  |  ", p->nr_sectors);		   //? 523
 	printf("sys_type: %d\n", p->sys_type);
 
 
-	/* 	//! Partition 5 P2 -Loopable
-	while(partition_number <=7)
-	{
-		lseek(fd, (long)p->start_sector*512, SEEK_SET); //!P4s start sector
-		read(fd, buf, 512);                  // read sector 123 into buf[ ]
-	} */
-
 	//! Partition 6
-	//int tempSector = p->start_sector + p->nr_sectors;
-	//tempSector = tempSector+1440;
-
-	//? 1440 + 523 = 1963 Xnot work
-	//?
-	//maintemp = p->nr_sectors + p->end_sector;
+	//? Here 377 is the start of the last sector
 
 	lseek(fd, (long)(1440 + 377) * 512, SEEK_SET); //!this works but skipped a part
 	read(fd, buf, 512);							   // read sector 123 into buf[ ]
 	p = &(buf[0x1BE]);							   // This should be the start of the first sector..
 	printf("start_sector: %d   |  ", p->start_sector); //? 377
+	//! Testing
+	printf("p->end_sector: %d   |  ", p->end_sector); //? TESTING
 	end_of_sector = (p->start_sector + p->nr_sectors) - 1;
 	printf("end_sector: %d  |  ", end_of_sector);
 	printf("nr_sector: %d  |  ", p->nr_sectors);		   //? 523
@@ -141,6 +135,8 @@ int main()
 	//? EXPERIMENTAL
 	p++;
 	printf("start_sector: %d   |  ", p->start_sector); //? 377
+	//! Testing
+	printf("p->end_sector: %d   |  ", p->end_sector); //? 
 	end_of_sector = (p->start_sector + p->nr_sectors) - 1;
 	printf("end_sector: %d  |  ", end_of_sector);
 	printf("nr_sector: %d  |  ", p->nr_sectors);		   //? 523
@@ -153,37 +149,20 @@ int main()
 	lseek(fd, (long)(1440+917) * 512, SEEK_SET);
 	read(fd, buf, 512); // read sector 123 into buf[ ]
 	p = &(buf[0x1BE]);  // This should be the start of the first sector..
-	printf("%d  |  ", p->start_sector);
-	printf("%d  |  ", p->nr_sectors);
-	getchar();
-
-	//! NOTES: The idea is that the P4's begin sector is a local MBR
-	//!        Thus, we should be able to access it like we had before?
-	//? Also if they are relative to P4's sector can't we just seek from there?
-	//? may be multiply the size of the partition *512 (size of sector)
-	//? To move on to the next partition...
-
-	/* 	while(p != 0)
-	{
-		printf("%x", p->start_sector);
-		p+1440;
-		partition_number++; // Increment partition number
-		
-		//! FOR TESTING ONLY -REMOVE AFTER DEBUG
- 		if (partition_number == 7)
-		{
-			break;
-		}
-	} */
-
-	//lseek(fd, (long)123*512, SEEK_SET);  // lseek to byte 123*512 OR sector 123
-	//read(fd, buf, 512);                  // read sector 123 into buf[ ]
-
-	i = 0;
-	/* 	while(i++ <= 512)
-	{
-		printf("%x\n", buf[i]);
-	} */
+	printf("start_sector: %d   |  ", p->start_sector);
+	printf("p->end_sector: %d   |  ", p->end_sector); //? 
+	end_of_sector = (p->start_sector + p->nr_sectors) - 1;
+	printf("end_sector: %d  |  ", end_of_sector);
+	printf("nr_sector: %d  |  ", p->nr_sectors);		   //? 
+	printf("sys_type: %d\n", p->sys_type);
+	p++;
+	printf("start_sector: %d   |  ", p->start_sector); //? 377
+	//! Testing
+	printf("p->end_sector: %d   |  ", p->end_sector); //? 
+	end_of_sector = (p->start_sector + p->nr_sectors) - 1;
+	printf("end_sector: %d  |  ", end_of_sector);
+	printf("nr_sector: %d  |  ", p->nr_sectors);		   //? 
+	printf("sys_type: %d\n", p->sys_type);
 
 	fclose(fd);
 
