@@ -8,8 +8,10 @@
             "label": "gcc build active file",
             "command": "/usr/bin/gcc",
             "args": [
+                "-m32",
                 "-g",
                 "${file}",
+                "~/Repos/CPTS360-Systems_Programming/LAB1/P2_My_printf_Function/myprintf.c",
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}"
             ],
