@@ -51,7 +51,7 @@ int main()
 	//! Print out first sector
 	/* 	while(i++ <= 512)
 	{
-		printf("%x\n", buf[i]);
+		myprintf("%x\n", buf[i]);
 	} */
 
 	//! 0x1BE is the start of the First Partition
@@ -60,13 +60,13 @@ int main()
 	//! Traverse through the first 4 partitions
 	while (partition_number <= 4)
 	{
-		printf("==== Partion %d ====\n", partition_number);
-		printf("start_sector: %d   |  ", p->start_sector);
+		myprintf("==== Partion %d ====\n", partition_number);
+		myprintf("start_sector: %d   |  ", p->start_sector);
 		end_of_sector = (p->start_sector + p->nr_sectors) - 1;
-		printf("end_sector: %d   |  ", end_of_sector);
-		//printf("end_sector: %d   |  ", p->end_sector); //TODO: Why isn't this printing out the right value??
-		printf("nr_sectors: %d   |  ", p->nr_sectors);
-		printf("sys_type: %x\n", p->sys_type);
+		myprintf("end_sector: %d   |  ", end_of_sector);
+		//myprintf("end_sector: %d   |  ", p->end_sector); //TODO: Why isn't this printing out the right value??
+		myprintf("nr_sectors: %d   |  ", p->nr_sectors);
+		myprintf("sys_type: %x\n", p->sys_type);
 
 		partition_number++; // Increment partition number
 		p++;
@@ -83,14 +83,14 @@ int main()
 		lseek(fd, (long)sectoroffset*512, SEEK_SET); //!P4s start sector
 		read(fd, buf, 512);                  // read sector 123 into buf[ ]
 		p = &(buf[0x1BE]); // This should be the start of the first sector..
-		printf("%d   |  ", p->start_sector); //? 18
-		printf("%d \n", p->nr_sectors);		//? 342
+		myprintf("%d   |  ", p->start_sector); //? 18
+		myprintf("%d \n", p->nr_sectors);		//? 342
 		p++;
-		printf("%d   |  ", p->start_sector); //? 377
-		printf("%d \n", p->nr_sectors); //? 523
+		myprintf("%d   |  ", p->start_sector); //? 377
+		myprintf("%d \n", p->nr_sectors); //? 523
 	} */
 
-	printf("********** Look for Extend Partition ************\n");
+	myprintf("********** Look for Extend Partition ************\n");
 	//! p=*p? EXTENDED Partition
 	//? p=&p; this assignment works... TODO:remove?
 
@@ -101,22 +101,22 @@ int main()
 	lseek(fd, (long)1440 * 512, SEEK_SET);
 	read(fd, buf, 512);								   // read sector 123 into buf[ ]
 	p = &(buf[0x1BE]);								   // This should be the start of the first sector..
-	printf("start_sector: %d   |  ", p->start_sector); //? 18
+	myprintf("start_sector: %d   |  ", p->start_sector); //? 18
 	//! Testing
-	printf("p->end_sector: %d   |  ", p->end_sector); //? TESTING
+	//myprintf("p->end_sector: %d   |  ", p->end_sector); //? TESTING
 	end_of_sector = (p->start_sector + p->nr_sectors) - 1;
-	printf("end_sector: %d  |  ", end_of_sector);
-	printf("nr sector: %d  |  ", p->nr_sectors);	   //? 342"
-	printf("sys_type: %d  \n", p->sys_type);
+	myprintf("end_sector: %d  |  ", end_of_sector);
+	myprintf("nr sector: %d  |  ", p->nr_sectors);	   //? 342"
+	myprintf("sys_type: %x  \n", p->sys_type);
 
 	p++;
-	printf("start_sector: %d   |  ", p->start_sector); //? 377
+	myprintf("start_sector: %d   |  ", p->start_sector); //? 377
 	//! Testing
-	printf("p->end_sector: %d   |  ", p->end_sector); //? TESTING
+	//myprintf("p->end_sector: %d   |  ", p->end_sector); //? TESTING
 	end_of_sector = (p->start_sector + p->nr_sectors) - 1;
-	printf("end_sector: %d  |  ", end_of_sector);
-	printf("nr_sector: %d  |  ", p->nr_sectors);		   //? 523
-	printf("sys_type: %d\n", p->sys_type);
+	myprintf("end_sector: %d  |  ", end_of_sector);
+	myprintf("nr_sector: %d  |  ", p->nr_sectors);		   //? 523
+	myprintf("sys_type: %x\n", p->sys_type);
 
 
 	//! Partition 6
@@ -125,22 +125,22 @@ int main()
 	lseek(fd, (long)(1440 + 377) * 512, SEEK_SET); //!this works but skipped a part
 	read(fd, buf, 512);							   // read sector 123 into buf[ ]
 	p = &(buf[0x1BE]);							   // This should be the start of the first sector..
-	printf("start_sector: %d   |  ", p->start_sector); //? 377
+	myprintf("start_sector: %d   |  ", p->start_sector); //? 377
 	//! Testing
-	printf("p->end_sector: %d   |  ", p->end_sector); //? TESTING
+	//myprintf("p->end_sector: %d   |  ", p->end_sector); //? TESTING
 	end_of_sector = (p->start_sector + p->nr_sectors) - 1;
-	printf("end_sector: %d  |  ", end_of_sector);
-	printf("nr_sector: %d  |  ", p->nr_sectors);		   //? 523
-	printf("sys_type: %x\n", p->sys_type);
+	myprintf("end_sector: %d  |  ", end_of_sector);
+	myprintf("nr_sector: %d  |  ", p->nr_sectors);		   //? 523
+	myprintf("sys_type: %x\n", p->sys_type);
 	//? EXPERIMENTAL
 	p++;
-	printf("start_sector: %d   |  ", p->start_sector); //? 377
+	myprintf("start_sector: %d   |  ", p->start_sector); //? 377
 	//! Testing
-	printf("p->end_sector: %d   |  ", p->end_sector); //? 
+	//myprintf("p->end_sector: %d   |  ", p->end_sector); //? 
 	end_of_sector = (p->start_sector + p->nr_sectors) - 1;
-	printf("end_sector: %d  |  ", end_of_sector);
-	printf("nr_sector: %d  |  ", p->nr_sectors);		   //? 523
-	printf("sys_type: %d\n", p->sys_type);
+	myprintf("end_sector: %d  |  ", end_of_sector);
+	myprintf("nr_sector: %d  |  ", p->nr_sectors);		   //? 523
+	myprintf("sys_type: %x\n", p->sys_type);
 
 	//!Partition 7
 	//int tempSector = p->start_sector + p->nr_sectors;
@@ -149,22 +149,20 @@ int main()
 	lseek(fd, (long)(1440+917) * 512, SEEK_SET);
 	read(fd, buf, 512); // read sector 123 into buf[ ]
 	p = &(buf[0x1BE]);  // This should be the start of the first sector..
-	printf("start_sector: %d   |  ", p->start_sector);
-	printf("p->end_sector: %d   |  ", p->end_sector); //? 
+	myprintf("start_sector: %d   |  ", p->start_sector);
+	//myprintf("p->end_sector: %d   |  ", p->end_sector); //? 
 	end_of_sector = (p->start_sector + p->nr_sectors) - 1;
-	printf("end_sector: %d  |  ", end_of_sector);
-	printf("nr_sector: %d  |  ", p->nr_sectors);		   //? 
-	printf("sys_type: %d\n", p->sys_type);
+	myprintf("end_sector: %d  |  ", end_of_sector);
+	myprintf("nr_sector: %d  |  ", p->nr_sectors);		   //? 
+	myprintf("sys_type: %x\n", p->sys_type);
 	p++;
-	printf("start_sector: %d   |  ", p->start_sector); //? 377
+	myprintf("start_sector: %d   |  ", p->start_sector); //? 377
 	//! Testing
-	printf("p->end_sector: %d   |  ", p->end_sector); //? 
+	//myprintf("p->end_sector: %d   |  ", p->end_sector); //? 
 	end_of_sector = (p->start_sector + p->nr_sectors) - 1;
-	printf("end_sector: %d  |  ", end_of_sector);
-	printf("nr_sector: %d  |  ", p->nr_sectors);		   //? 
-	printf("sys_type: %d\n", p->sys_type);
-
-	fclose(fd);
+	myprintf("end_sector: %d  |  ", end_of_sector);
+	myprintf("nr_sector: %d  |  ", p->nr_sectors);		   //? 
+	myprintf("sys_type: %x\n", p->sys_type);
 
 	return 0;
 }
