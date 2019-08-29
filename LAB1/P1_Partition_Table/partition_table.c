@@ -103,7 +103,7 @@ int main()
 	p = &(buf[0x1BE]);								   // This should be the start of the first sector..
 	printf("start_sector: %d   |  ", p->start_sector); //? 18
 	end_of_sector = (p->start_sector + p->nr_sectors) - 1;
-	printf("end_sector: %d\n  |  ", end_of_sector);
+	printf("end_sector: %d  |  ", end_of_sector);
 	printf("nr sector: %d  |  ", p->nr_sectors);	   //? 342"
 	printf("sys_type: %d  \n", p->sys_type);
 
@@ -130,17 +130,27 @@ int main()
 	//?
 	//maintemp = p->nr_sectors + p->end_sector;
 
-	lseek(fd, (long)(1440 + 342) * 512, SEEK_SET); //!this works but skipped a part
+	lseek(fd, (long)(1440 + 377) * 512, SEEK_SET); //!this works but skipped a part
 	read(fd, buf, 512);							   // read sector 123 into buf[ ]
 	p = &(buf[0x1BE]);							   // This should be the start of the first sector..
-	printf("%d  |  ", p->start_sector);
-	printf("%d  |  \n", p->nr_sectors);
+	printf("start_sector: %d   |  ", p->start_sector); //? 377
+	end_of_sector = (p->start_sector + p->nr_sectors) - 1;
+	printf("end_sector: %d  |  ", end_of_sector);
+	printf("nr_sector: %d  |  ", p->nr_sectors);		   //? 523
+	printf("sys_type: %x\n", p->sys_type);
+	//? EXPERIMENTAL
+	p++;
+	printf("start_sector: %d   |  ", p->start_sector); //? 377
+	end_of_sector = (p->start_sector + p->nr_sectors) - 1;
+	printf("end_sector: %d  |  ", end_of_sector);
+	printf("nr_sector: %d  |  ", p->nr_sectors);		   //? 523
+	printf("sys_type: %d\n", p->sys_type);
 
 	//!Partition 7
 	//int tempSector = p->start_sector + p->nr_sectors;
 	//tempSector = tempSector+1440;
 
-	lseek(fd, (long)1452 * 512, SEEK_SET);
+	lseek(fd, (long)(1440+917) * 512, SEEK_SET);
 	read(fd, buf, 512); // read sector 123 into buf[ ]
 	p = &(buf[0x1BE]);  // This should be the start of the first sector..
 	printf("%d  |  ", p->start_sector);
