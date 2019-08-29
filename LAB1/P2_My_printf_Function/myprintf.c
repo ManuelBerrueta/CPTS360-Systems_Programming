@@ -70,6 +70,15 @@ int printo(u32 x)
     putchar(' ');
 }
 
+int prints(char* buf)
+{
+    int i=0;
+    while (buf[i] != '\0')
+    {
+        putchar(buf[i]);
+        i++;
+    }
+}
 
 
 int myprintf(char *fmt, ...)
@@ -84,6 +93,7 @@ int myprintf(char *fmt, ...)
     
     //! Traversing up the stack to the parameters passed to myprintf
     char *temp = cp;
+    int negcheck=0;
 
 
     while(i < fmtSize) //* While is not null
@@ -122,7 +132,7 @@ int myprintf(char *fmt, ...)
                 printu(*ip-1);
                 break;
             case 'd':   //? integer
-                printd(*ip-1);
+                temp = (*ip-1);
                 break;
             case 'o':   //? unsigned integer in OCT
                 printo(*ip-1);
@@ -135,8 +145,6 @@ int myprintf(char *fmt, ...)
                 break;
             }
         }
-        
-        
     }
     putchar('\n');
     putchar('\r');
@@ -146,6 +154,7 @@ int notprintf(char *fmt, ...)
 {
     int i = 0;
     int fmtSize = strlen(fmt);
+    int negcheck=0;
 
     //cp = (int*)fmt; //!worked
     cp = fmt;
@@ -159,7 +168,6 @@ int notprintf(char *fmt, ...)
         i++;
         if (*cp == '\n')  //~ "\0"
         {
-            printf("Testing");
             putchar('\n');
             putchar('\r');
             cp++;
@@ -187,10 +195,7 @@ int notprintf(char *fmt, ...)
             case 's':   //? string
                 /*TODO: Read that string until '\0' 
                 */
-                while(*(++ip) != '\0')
-                {
-                    putchar(ip);
-                }
+                prints((char *)(*(++ip)));
                 cp++;
                 break;
             case 'u':   //? unsigned integer
@@ -198,8 +203,13 @@ int notprintf(char *fmt, ...)
                 cp++;
                 break;
             case 'd':   //? integer
-                /*TODO: if it has negative sign, putchar('-') else possibly just use printu?;
-                */
+                negcheck = (*(++ip));
+                if (negcheck < 0)
+                {
+                    putchar('-');
+                    negcheck = negcheck * -1;
+                }
+                printd(negcheck);
                 cp++;
                 break;
             case 'o':   //? unsigned integer in OCT
@@ -229,9 +239,12 @@ int main(int argc, char *argv[], char*env[])
 
     //notprintf("Testing"); //!TESTER
 
-    //notprintf("%u%c%x%o\n", 214, 'a', 100, 16);
+    notprintf("%u%c%x%o%d%s\n", 214, 'a', 100, 16, -1, "hello");
     //! String test
-    notprintf("%s", "myStr");
+    //notprintf("%s", "myStr");
+    //notprintf("%s%d", "Hello you are the: ", -1);
+    //myprintf("cha=%c string=%s      dec=%d hex=%x oct=%o neg=%d\n", 
+	//         'A', "this is a test", 100,    100,   100,  -100); 
 
     // myprintf("cha=%c string=%s      dec=%d hex=%x oct=%o neg=%d\n", 
 	//         'A', "this is a test", 100,    100,   100,  -100);
