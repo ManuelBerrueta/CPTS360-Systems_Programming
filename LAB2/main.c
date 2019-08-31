@@ -1,4 +1,8 @@
-#include <stdio.h>
+#include "bst.h"
+
+//!------------------------------  Globals ---------------------------------   
+NODE *root, *cwd;
+
 
 char *cmd[] = {"mkdir", "rmdir", "ls", "cd", "pwd", "creat", "rm",
                "reload", "save", "menu", "quit", NULL};
@@ -35,6 +39,5 @@ int main()
         //! Parsing: Seperating command from pathname
         sscanf(line, “%s %s”, command, pathname);
         index = fidnCmd(command);
-
     }
 }
