@@ -1,12 +1,5 @@
 #include "bst.h"
 
-//!------------------------------  Globals ---------------------------------   
-NODE *root, *cwd;
-
-
-char *cmd[] = {"mkdir", "rmdir", "ls", "cd", "pwd", "creat", "rm",
-               "reload", "save", "menu", "quit", NULL};
-
 int findCmd(char *command)
 {
     int i = 0;
