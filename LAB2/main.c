@@ -32,7 +32,7 @@ int (*fptr[])(char*)={ (int (*) ())mkdir, rmdir, ls, cd, pwd, creat, rm, save,
                                    reload, menu, quit};
 
 int findCmd(char *command);
-int intitialize();
+void intitialize();
 
 int main()
 {
