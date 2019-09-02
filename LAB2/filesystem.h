@@ -17,7 +17,7 @@
 #define FILESYSTEM_H
 
 #include <stdio.h>
-//#include <stdlib.h>
+#include <stdlib.h>
 //#include <fcntl.h>
 #include <libgen.h>
 #include <string.h>

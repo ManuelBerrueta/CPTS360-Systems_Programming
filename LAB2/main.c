@@ -64,12 +64,6 @@ int main()
     return 0;
 }
 
-void initialize()
-{
-    printf("===> Initialized file system\n\n");
-    root = new_node('/');
-}
-
 int findCmd(char *command)
 {
     int i = 0;
@@ -80,4 +74,10 @@ int findCmd(char *command)
         i++;
     }
     return -1; // not found: return -1
+}
+
+void initialize()
+{
+    printf("===> Initialized file system\n\n");
+    root = new_node("/");
 }
