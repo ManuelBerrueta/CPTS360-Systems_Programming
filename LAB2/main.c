@@ -123,6 +123,9 @@ int tokenize(char *pathname)
     while (s)
     {
         printf("%s ", s);
+        //TODO: Check if dir exist using search_child
+        //TODO: return how deep it goes?
+        //TODO: NEXT move up next dir with name of above
         s = strtok(0, "/");
     }
 }
@@ -134,6 +137,7 @@ int mkdir(char *pathname)
     NODE *p;
     NODE *q;
     NODE *start;
+    char *tempPath;
 
     printf("mkdir: name=%s\n", pathname);
 
@@ -154,6 +158,12 @@ int mkdir(char *pathname)
         start = cwd;
     }
     printf("check whether %s already exists\n", pathname);
+
+/*     tempPath = pathname;
+    while (tempPath = strtok(tempPath, "/") */
+
+    dbname(pathname); //This will separate the path and the basename
+
     p = search_child(start, pathname);
     if (p)
     {
