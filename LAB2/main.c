@@ -28,6 +28,8 @@ char *cmd[] = {"mkdir", "rmdir", "ls", "cd", "pwd", "creat", "rm", "reload",
 
 int findCmd(char *command);
 void initialize();
+int dbname(char *pathname);
+int tokenize(char *pathname);
 
 int mkdir(char *pathname);
 int rmdir(char *pathname);
@@ -67,10 +69,10 @@ int main()
         index = findCmd(command);
         int r = fptr[index](pathname); //TODO: Break this down
 
-        if( r == 0)
+/*         if( r == 0)
         {
             break;
-        }
+        } */
 
     }
     return 0;
@@ -104,10 +106,69 @@ void initialize()
     cwd = root;
 }
 
+int dbname(char *pathname)
+{
+    //! dirname() and basename() from libgen.h destroy the pathname!
+    char temp[128];
+    strcpy(temp, pathname); //* Make a copy of the path name
+    strcpy(dname, dirname(temp));
+    strcpy(temp, pathname);
+    strcpy(bname, basename(temp));
+}
+
+int tokenize(char *pathname)
+{
+    char *s;
+    s = strtok(pathname, "/");
+    while (s)
+    {
+        printf("%s ", s);
+        s = strtok(0, "/");
+    }
+}
+
+
 //?============================== COMMANDS ====================================
 int mkdir(char *pathname)
 {
-    printf("mkdir: %s\n", pathname);
+    NODE *p;
+    NODE *q;
+    NODE *start;
+
+    printf("mkdir: name=%s\n", pathname);
+
+    //TODO: Check pathname for the '/' at the end
+    //TODO: strok
+    
+    if (strcmp(pathname, "/")==0)
+    {
+        printf("can't mkdir with /\n");
+        return -1;
+    }
+    if (pathname[0]=='/')
+    {
+        start = root;
+    }
+    else
+    {
+        start = cwd;
+    }
+    printf("check whether %s already exists\n", pathname);
+    p = search_child(start, pathname);
+    if (p)
+    {
+        printf("name %s already exists, mkdir FAILED\n", pathname);
+        return -1;
+    }
+
+    printf("ready to mkdir %s\n", pathname);
+    q = (NODE *)malloc(sizeof(NODE));
+    q->type = 'D';
+    strcpy(q->name, pathname);
+    insert_child(start, q);
+    printf("mkdir %s OK\n", pathname);
+    
+    return 0;
 }
 
 int rmdir(char *pathname)
@@ -122,8 +183,17 @@ int cd(char *pathname)
 
 int ls(char *pathname)
 {
-    printf("ls: %s\n", pathname);
+    NODE *p = cwd->childPtr;
+    printf("cwd contents = ");
+    while(p)
+    {
+        printf("[%c %s] ", p->type, p->name);
+        p = p->siblingPtr;
+    }
+    printf("\n");
 }
+
+// NOTE: You MUST improve ls() to ls(char *pathname)
 
 int pwd(char *pathname)
 {
