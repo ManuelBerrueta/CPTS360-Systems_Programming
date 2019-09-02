@@ -83,6 +83,5 @@ void initialize()
     root->parentPtr = root;
     root->siblingPtr = root;
     strcpy(root->type, "D"); //! Using '' passes as int, using "" passes char
-
     cwd = root;
 }

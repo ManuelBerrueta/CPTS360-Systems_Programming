@@ -19,6 +19,25 @@ NODE *insert(NODE *node, char *name)
     //TODO: may choose to share what kind of file it is ? dir or file?
 }
 
+NODE *search_child(NODE *parent, char *name)
+{
+    NODE *p = parent->childPtr;
+    printf("search for %s in parent DIR\n", name);
+    if (p==0)
+    {
+        return 0;
+    }
+    while(p)
+    {
+        if (strcmp(p->name, name) == 0)
+        {
+            return p;
+        }
+        p = p->siblingPtr;
+    }
+    return 0;
+}
+
 
 
 //?============================== COMMANDS ====================================
@@ -59,9 +78,11 @@ int rm(char *pathname)
 
 int save()
 {
+    puts("==> Saving File System");
     FILE *fp = fopen("mySavedFileSystem", "w+");
     fprintf(fp, "%c %s", 'D', "string\n");
     fclose(fp);
+    puts("==> File System Saved Succesfuklly\n");
 }
 
 int reload(char *filename)
@@ -77,5 +98,7 @@ int menu(char *pathname)
 int quit(char *pathname)
 {
     puts("Goodbye\n\n");
+    //save();
+    exit(0);
     return 0;
 }
