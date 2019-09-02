@@ -3,10 +3,23 @@
 NODE *new_node(char *name)
 {
     NODE *node = (NODE *)malloc(sizeof(NODE));
-    strncpy(node->name, name, (strlen(name) + 1)); //TODO: TEST THIS!
+    strcpy(node->name, name); //strcpy copies the str including the null char
     node->childPtr = node->parentPtr = node->siblingPtr = 0;
     return node;
 }
+
+NODE *insert(NODE *node, char *name)
+{
+    if ( node == 0 ) //! If node is empty
+    {
+        return new_node(name);
+    }
+
+    //TODO: if the file/directory already exist return printf("*Error: %s already exists \n", name);
+    //TODO: may choose to share what kind of file it is ? dir or file?
+}
+
+
 
 //?============================== COMMANDS ====================================
 int mkdir(char *pathname)

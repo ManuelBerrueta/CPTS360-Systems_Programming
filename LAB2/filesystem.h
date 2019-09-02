@@ -32,6 +32,9 @@ typedef struct node
     struct node *siblingPtr;
 }NODE;
 
+NODE *new_node(char *name);
+NODE *insert(NODE *node, char *name);
+
 void initialize();
 
 int mkdir(char *pathname);

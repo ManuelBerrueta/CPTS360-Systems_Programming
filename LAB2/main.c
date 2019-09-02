@@ -67,7 +67,7 @@ int main()
 void initialize()
 {
     printf("===> Initialized file system\n\n");
-    root = new_node('\\');
+    root = new_node('/');
 }
 
 int findCmd(char *command)
