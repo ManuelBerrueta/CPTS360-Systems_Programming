@@ -80,4 +80,9 @@ void initialize()
 {
     printf("===> Initialized file system\n\n");
     root = new_node("/");
+    root->parentPtr = root;
+    root->siblingPtr = root;
+    strcpy(root->type, "D"); //! Using '' passes as int, using "" passes char
+
+    cwd = root;
 }
