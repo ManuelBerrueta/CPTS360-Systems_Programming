@@ -13,28 +13,33 @@
 //* (3). Execute the command, with appropriate tracing messages.
 //* (4). Repeat (2) until the "quit" command, which terminates the program.
 
-#include "filesystem.h"
+#ifndef FILESYSTEM_H
+#define FILESYSTEM_H
 
-int main()
+#include <stdio.h>
+//#include <stdlib.h>
+//#include <fcntl.h>s
+
+//!------------------------------  Globals ---------------------------------!\\   
+NODE *root, *cwd;
+char line[128];         //? User command line input
+char command[16];       //? Command string
+char pathname[64];      //? Pathname string
+char dname[64];         //? Directory string holder
+char bname[64];         //? Basename string holder
+char *cmd[] = {"mkdir", "rmdir", "ls", "cd", "pwd", "creat", "rm",
+               "reload", "save", "menu", "quit", NULL};
+
+typedef struct node
 {
-    int index;
-    char line[128], command[16], pathname[64];
+    char name[64]; //? Name of the node
+    char type;     //? 'D' = Directory, 'F' = File
+    struct node *parentPtr;
+    struct node *childPtr;
+    struct node *siblingPtr;
+}NODE;
 
-    
-    initialize(); //initialize root node of the file system tree
-    
-    while(1)
-    {
-        printf("input a commad line : ");
-        fgets(line,128,stdin);
-    
-        //? "\n" is introduced by the return after the input
-        //! Getting rid of the \n at the end of the string
-        line[strlen(line)-1] = 0;
-        
-        //! Parsing: Seperating command from pathname
-        sscanf(line, “%s %s”, command, pathname);
-        index = fidnCmd(command);
-    }
-    return 0;
-}
+int findCmd(char *command);
+
+
+#endif
