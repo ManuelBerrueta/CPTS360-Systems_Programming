@@ -15,6 +15,10 @@
 
 #include "filesystem.h"
 
+char *cmd[] = {"mkdir", "rmdir", "ls", "cd", "pwd", "creat", "rm",
+               "reload", "save", "menu", "quit", NULL};
+
+
 int main()
 {
     int index;
@@ -33,8 +37,14 @@ int main()
         line[strlen(line)-1] = 0;
         
         //! Parsing: Seperating command from pathname
-        sscanf(line, “%s %s”, command, pathname);
-        index = fidnCmd(command);
+        sscanf(line, "%s %s", command, pathname);
+        index = findCmd(command);
+        int r = fptr[index](pathname); //TODO: Break this down
+
+        if(r == 0)
+        {
+            break;
+        }
     }
     return 0;
 }
