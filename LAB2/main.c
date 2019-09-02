@@ -26,13 +26,25 @@ char bname[64];         //? Basename string holder
 char *cmd[] = {"mkdir", "rmdir", "ls", "cd", "pwd", "creat", "rm", "reload", 
                "save", "menu", "quit", NULL};
 
+int findCmd(char *command);
+void initialize();
+
+int mkdir(char *pathname);
+int rmdir(char *pathname);
+int cd(char *pathname);
+int ls(char *pathname);
+int pwd(char *pathname);
+int creat(char *pathname);
+int rm(char *pathname);
+int save();
+int reload(char *filename);
+int menu(char *pathname);
+int quit(char *pathname);
+
 //TODO: Breakdown the table of function pointers
 //? Table of function pointers
 int (*fptr[])(char*)={ (int (*) ())mkdir, rmdir, ls, cd, pwd, creat, rm, save,
                                    reload, menu, quit};
-
-int findCmd(char *command);
-void intitialize();
 
 int main()
 {
@@ -90,4 +102,67 @@ void initialize()
     root->type = 'D';
     //strcpy(root->type, "D"); //! Using '' passes as int, using "" passes char
     cwd = root;
+}
+
+//?============================== COMMANDS ====================================
+int mkdir(char *pathname)
+{
+    printf("mkdir: %s\n", pathname);
+}
+
+int rmdir(char *pathname)
+{
+    printf("rmdir: %s\n", pathname);
+}
+
+int cd(char *pathname)
+{
+    printf("cd: %s\n", pathname);
+}
+
+int ls(char *pathname)
+{
+    printf("ls: %s\n", pathname);
+}
+
+int pwd(char *pathname)
+{
+    printf("pwd: %s\n", pathname);
+}
+
+int creat(char *pathname)
+{
+    printf("creat: %s\n", pathname);
+}
+
+int rm(char *pathname)
+{
+    printf("rm: %s\n", pathname);
+}
+
+int save()
+{
+    puts("==> Saving File System");
+    FILE *fp = fopen("mySavedFileSystem", "w+");
+    fprintf(fp, "%c %s", 'D', "string\n");
+    fclose(fp);
+    puts("==> File System Saved Succesfuklly\n");
+}
+
+int reload(char *filename)
+{
+    initialize();
+}
+
+int menu(char *pathname)
+{
+    puts("Terminal menu - Select a Command from the following:\n");
+}
+
+int quit(char *pathname)
+{
+    puts("Goodbye\n\n");
+    //save();
+    exit(0);
+    return 0;
 }

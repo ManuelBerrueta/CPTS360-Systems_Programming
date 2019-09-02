@@ -36,18 +36,4 @@ NODE *new_node(char *name);
 NODE *search_child(NODE *parent, char *name);
 int insert_child(NODE *parent, NODE *q);
 
-void initialize();
-
-int mkdir(char *pathname);
-int rmdir(char *pathname);
-int cd(char *pathname);
-int ls(char *pathname);
-int pwd(char *pathname);
-int creat(char *pathname);
-int rm(char *pathname);
-int save();
-int reload(char *filename);
-int menu(char *pathname);
-int quit(char *pathname);
-
 #endif
