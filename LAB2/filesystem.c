@@ -8,12 +8,6 @@ NODE *new_node(char *name)
     return node;
 }
 
-void initialize()
-{
-    printf("===> Initialized file system\n\n");
-}
-
-
 //?============================== COMMANDS ====================================
 int mkdir(char *pathname)
 {

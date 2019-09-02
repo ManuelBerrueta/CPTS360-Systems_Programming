@@ -15,8 +15,9 @@
 
 #include "filesystem.h"
 
-//!------------------------------  Globals ---------------------------------!\\   
-NODE *root, *cwd;
+//!------------------------------  Globals ---------------------------------   
+NODE *root;
+NODE *cwd;
 char line[128];         //? User command line input
 char command[16];       //? Command string
 char pathname[64];      //? Pathname string
@@ -31,6 +32,7 @@ int (*fptr[])(char*)={ (int (*) ())mkdir, rmdir, ls, cd, pwd, creat, rm, save,
                                    reload, menu, quit};
 
 int findCmd(char *command);
+int intitialize();
 
 int main()
 {
@@ -60,6 +62,12 @@ int main()
 
     }
     return 0;
+}
+
+void initialize()
+{
+    printf("===> Initialized file system\n\n");
+    root = new_node('\\');
 }
 
 int findCmd(char *command)
