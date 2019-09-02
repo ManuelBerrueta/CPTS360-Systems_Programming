@@ -69,10 +69,11 @@ int main()
         index = findCmd(command);
         int r = fptr[index](pathname); //TODO: Break this down
 
-/*         if( r == 0)
+        if( r < 0)
         {
-            break;
-        } */
+            puts("Last command was not succesful");
+            puts("Check error output");
+        }
 
     }
     return 0;
@@ -123,7 +124,10 @@ int tokenize(char *pathname)
     while (s)
     {
         printf("%s ", s);
+        
         //TODO: Check if dir exist using search_child
+
+
         //TODO: return how deep it goes?
         //TODO: NEXT move up next dir with name of above
         s = strtok(0, "/");
@@ -193,14 +197,84 @@ int cd(char *pathname)
 
 int ls(char *pathname)
 {
-    NODE *p = cwd->childPtr;
-    printf("cwd contents = ");
-    while(p)
+
+
+    //! If no string is passed after ls, then just list the CWD
+    if ( *pathname == '\0')
     {
-        printf("[%c %s] ", p->type, p->name);
-        p = p->siblingPtr;
+        NODE *p = cwd->childPtr;
+        printf("cwd contents = ");
+
+        while(p)
+        {
+            printf("[%c %s] ", p->type, p->name);
+            p = p->siblingPtr;
+        }
+        printf("\n");
+        return 0;
     }
-    printf("\n");
+    //! Else if the first char is /, then we start at root
+    else if( *pathname == '/')
+    {
+        NODE *p = root->childPtr; //! *p = Traversing pointer
+        //TODO: 2 cases if it just / and if it's / + other str
+        if ( strlen(pathname) == 1) //! This is the case to print root
+        {       
+            printf("root contents = ");
+            while(p)
+            {
+                printf("[%c %s] ", p->type, p->name);
+                p = p->siblingPtr;
+            }
+            printf("\n");
+            return 0;
+        }
+        
+        
+        char *tempPath;
+        tempPath = strtok(pathname, "/");
+        printf("%s", "Traversing through: ");
+        while (tempPath)
+        {
+            printf("%s", tempPath);
+            printf("%s", "/");
+
+            //TODO: Check if current tokenized dir exists using search_child
+            p = search_child(p, tempPath);
+            //! If at anytime during this traversal p=0, then the target path
+            //! does not exist
+            if (p == 0)
+            {
+                printf("%s of the given %s path does not exist", tempPath, 
+                        pathname);
+                return -1;
+            }
+            if ( p->type != 'D' )
+            {
+                printf("%s of the given %s path is not a Directory", tempPath, 
+                pathname);
+                return -1;
+            }
+            //TODO: return how deep it goes?
+            //TODO: NEXT move up next dir with name of above
+            tempPath = strtok(0, "/");
+        }
+        //! Here we have traversed to the path and found the directory
+    }
+    else //! Else... a string is passed
+    {
+        dbname(pathname);
+        //! use dname to search for the file path
+        /* if 
+        {
+
+        } */
+
+    }
+    
+    *bname='\0';
+    *dname='\0';
+    *pathname=0;
 }
 
 // NOTE: You MUST improve ls() to ls(char *pathname)
