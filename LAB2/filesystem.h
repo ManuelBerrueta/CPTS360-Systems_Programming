@@ -17,18 +17,11 @@
 #define FILESYSTEM_H
 
 #include <stdio.h>
-#include <stdlib.h>
+//#include <stdlib.h>
 //#include <fcntl.h>
+#include <libgen.h>
 #include <string.h>
 #include <strings.h>
-
-//!------------------------------  Globals ---------------------------------!\\   
-NODE *root, *cwd;
-char line[128];         //? User command line input
-char command[16];       //? Command string
-char pathname[64];      //? Pathname string
-char dname[64];         //? Directory string holder
-char bname[64];         //? Basename string holder
 
 typedef struct node
 {
@@ -41,8 +34,6 @@ typedef struct node
 
 void initialize();
 
-int findCmd(char *command);
-
 int mkdir(char *pathname);
 int rmdir(char *pathname);
 int cd(char *pathname);
@@ -54,10 +45,5 @@ int save();
 int reload(char *filename);
 int menu(char *pathname);
 int quit(char *pathname);
-
-//TODO: Breakdown the table of function pointers
-//? Table of function pointers
-int (*fptr[])(char*)={ (int (*) ())mkdir, rmdir, ls, cd, pwd, creat, rm, save,
-                                   reload, menu, quit};
 
 #endif

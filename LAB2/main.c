@@ -15,16 +15,28 @@
 
 #include "filesystem.h"
 
-char *cmd[] = {"mkdir", "rmdir", "ls", "cd", "pwd", "creat", "rm",
-               "reload", "save", "menu", "quit", NULL};
+//!------------------------------  Globals ---------------------------------!\\   
+NODE *root, *cwd;
+char line[128];         //? User command line input
+char command[16];       //? Command string
+char pathname[64];      //? Pathname string
+char dname[64];         //? Directory string holder
+char bname[64];         //? Basename string holder
+char *cmd[] = {"mkdir", "rmdir", "ls", "cd", "pwd", "creat", "rm", "reload", 
+               "save", "menu", "quit", NULL};
 
+//TODO: Breakdown the table of function pointers
+//? Table of function pointers
+int (*fptr[])(char*)={ (int (*) ())mkdir, rmdir, ls, cd, pwd, creat, rm, save,
+                                   reload, menu, quit};
+
+int findCmd(char *command);
 
 int main()
 {
     int index;
     char line[128], command[16], pathname[64];
 
-    
     initialize(); //initialize root node of the file system tree
     
     while(1)
@@ -41,10 +53,23 @@ int main()
         index = findCmd(command);
         int r = fptr[index](pathname); //TODO: Break this down
 
-        if(r == 0)
+        if( r == 0)
         {
             break;
         }
+
     }
     return 0;
+}
+
+int findCmd(char *command)
+{
+    int i = 0;
+    while(cmd[i])
+    {
+        if (!strcmp(command, cmd[i]))
+        return i; // found command: return index i
+        i++;
+    }
+    return -1; // not found: return -1
 }
