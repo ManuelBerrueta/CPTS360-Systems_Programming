@@ -26,14 +26,15 @@
 typedef struct node
 {
     char name[64]; //? Name of the node
-    char type[2];     //? 'D' = Directory, 'F' = File
+    char type;     //? 'D' = Directory, 'F' = File
     struct node *parentPtr;
     struct node *childPtr; //! Points to the oldest child
     struct node *siblingPtr; //! Points to the oldest sibling
 }NODE;
 
 NODE *new_node(char *name);
-NODE *insert(NODE *node, char *name);
+NODE *search_child(NODE *parent, char *name);
+int insert_child(NODE *parent, NODE *q);
 
 void initialize();
 

@@ -79,9 +79,15 @@ int findCmd(char *command)
 void initialize()
 {
     printf("===> Initialized file system\n\n");
-    root = new_node("/");
+    //! sizeof(NODE): Returns the size of the struct in bytes,
+    //!   by default memory is allocated in 4 byte increments.
+    //!   Therefore anything allocated that is less than 4 bytes will be padded
+    //! malloc: Allocates memory the size of NODE
+    //! (NODE *) casts the newly allocated memory as a NODE type.
+    root = (NODE *)malloc(sizeof(NODE));
     root->parentPtr = root;
     root->siblingPtr = root;
-    strcpy(root->type, "D"); //! Using '' passes as int, using "" passes char
+    root->type = 'D';
+    //strcpy(root->type, "D"); //! Using '' passes as int, using "" passes char
     cwd = root;
 }
