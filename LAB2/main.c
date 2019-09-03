@@ -18,6 +18,7 @@
 //!------------------------------  Globals ---------------------------------   
 NODE *root;
 NODE *cwd;
+NODE *pwd_traverse;
 char line[128];         //? User command line input
 char command[16];       //? Command string
 char pathname[64];      //? Pathname string
@@ -35,7 +36,7 @@ int mkdir(char *pathname);
 int rmdir(char *pathname);
 int cd(char *pathname);
 int ls(char *pathname);
-int pwd(char *pathname);
+int pwd();
 int creat(char *pathname);
 int rm(char *pathname);
 int save();
@@ -68,7 +69,7 @@ int main()
         sscanf(line, "%s %s", command, pathname);
         index = findCmd(command);
         int r = fptr[index](pathname); //TODO: Break this down
-
+        memset(pathname,0,sizeof(pathname));//!clear path buffer
         if( r < 0)
         {
             puts("Last command was not succesful");
@@ -105,6 +106,7 @@ void initialize()
     root->type = 'D';
     //strcpy(root->type, "D"); //! Using '' passes as int, using "" passes char
     cwd = root;
+    pwd_traverse = cwd;
 }
 
 int dbname(char *pathname)
@@ -136,21 +138,23 @@ int tokenize(char *pathname)
 
 
 //?============================== COMMANDS ====================================
+
 int mkdir(char *pathname)
 {
     NODE *p;
     NODE *q;
     NODE *start;
-    char *tempPath;
+    char *tempPath = pathname;
 
     printf("mkdir: name=%s\n", pathname);
 
     //TODO: Check pathname for the '/' at the end
     //TODO: strok
-    
-    if (strcmp(pathname, "/")==0)
+    //TODO: Fix mkdir  " " blank folder name
+
+    if (strcmp(pathname, "/") == 0 || strcmp(pathname, ".") == 0 || strcmp(pathname, "..") == 0)
     {
-        printf("can't mkdir with /\n");
+        printf("can't mkdir with %s\n", pathname);
         return -1;
     }
     if (pathname[0]=='/')
@@ -163,10 +167,9 @@ int mkdir(char *pathname)
     }
     printf("check whether %s already exists\n", pathname);
 
-/*     tempPath = pathname;
-    while (tempPath = strtok(tempPath, "/") */
-
-    dbname(pathname); //This will separate the path and the basename
+    
+    //TODO: Idea is break the path down each time and see if it exists
+    dbname(tempPath); //This will separate the path and the basename
 
     p = search_child(start, pathname);
     if (p)
@@ -175,18 +178,23 @@ int mkdir(char *pathname)
         return -1;
     }
 
+    printf("--------------------------------------\n");
     printf("ready to mkdir %s\n", pathname);
     q = (NODE *)malloc(sizeof(NODE));
     q->type = 'D';
     strcpy(q->name, pathname);
     insert_child(start, q);
     printf("mkdir %s OK\n", pathname);
+    printf("--------------------------------------\n");
     
     //! Set pathname to null
     memset(pathname,0,sizeof(pathname));
 
     return 0;
 }
+
+
+
 
 int rmdir(char *pathname)
 {
@@ -198,6 +206,8 @@ int cd(char *pathname)
     //? 1. Find pathname node;
     //? 2. Check if it;s a DIR
     //? 3. Change CWD to point at DIR
+
+    //TODO: Add functionality to use ../ and if you see . ignore it
     
     dbname(pathname); //! Split pathname
 
@@ -269,6 +279,7 @@ int cd(char *pathname)
     else
     {
         cwd = tempCWD;
+        pwd_traverse = cwd;
         printf("cd: %s was succesful\n", pathname);
         memset(pathname,0,sizeof(pathname));
         return 0;
@@ -291,6 +302,7 @@ int ls(char *pathname)
             p = p->siblingPtr;
         }
         printf("\n");
+        memset(pathname,0,sizeof(pathname));
         return 0;
     }
     //! Else if the first char is /, then we start at root
@@ -308,14 +320,18 @@ int ls(char *pathname)
                 p = p->siblingPtr;
             }
             printf("\n");
+            memset(pathname,0,sizeof(pathname));
             return 0;
         }
         
         //TODO: If pathname is / + other str
         //TODO: This will also be similar or the same for the case where
         //TODO:     it is just a folder bad using cwd as the start point
+        dbname(pathname); //!separe dir path and base name
+
+
         char *tempPath;
-        tempPath = strtok(pathname, "/");
+        tempPath = strtok(dname, "/");
         printf("%s", "Traversing through: ");
         while (tempPath)
         {
@@ -330,47 +346,68 @@ int ls(char *pathname)
             {
                 printf("%s of the given %s path does not exist", tempPath, 
                         pathname);
+                memset(pathname,0,sizeof(pathname));
                 return -1;
             }
             if ( p->type != 'D' )
             {
                 printf("%s of the given %s path is not a Directory", tempPath, 
                 pathname);
+                memset(pathname,0,sizeof(pathname));
                 return -1;
             }
             //TODO: Do we need to keep track how deep it goes?
             //TODO: NEXT move up next dir with name of above
             tempPath = strtok(0, "/");
         }
-        //! Here we have traversed to the path and found the parent directory
-        //!  to the new folder we are trying to make
-        NODE* tempNode = (NODE *)malloc(sizeof(NODE));
-        strcpy(tempNode->name, bname);
-        tempNode->type = 'D';
-        tempNode->parentPtr = p;
-        insert_child(p, tempNode);
+        //TODO: use basename
+        p = search_child(p, bname);
+        printf("Contents of dir %s: ", p->name);
+        while(p != 0)
+        {
+            while(p)
+            {
+                printf("[%c %s] ", p->type, p->name);
+                p = p->siblingPtr;
+            }
+        }
+        printf("\n");
+        memset(pathname,0,sizeof(pathname));
+        return 0;
     }
     else //! Else... a string is passed
     {
+        //TODO: NEED TO WORK ON THIS PART
         dbname(pathname);
-        //! use dname to search for the file path
+        //! use dname to search for the file pathsearch for
         /* if 
         {
-
+            
         } */
 
     }
     
     *bname='\0';
     *dname='\0';
-    *pathname=0;
+    memset(pathname,0,sizeof(pathname));
 }
 
 // NOTE: You MUST improve ls() to ls(char *pathname)
 
-int pwd(char *pathname)
+int pwd()
 {
-    printf("pwd: %s\n", pathname);
+    //TODO: while temp->name != "/"
+    char temp[128];
+    if (pwd_traverse->name == "/")
+    {
+        printf("pwd: %s", pathname);
+        memset(pathname,0,sizeof(pathname));
+    }
+    strcat(temp, "/"); //TODO: Possible issue with null characters
+    strcat(temp, pwd_traverse->name);
+    strcat(temp, pathname);
+    strcpy(pathname, temp);
+    pwd_traverse = pwd_traverse->parentPtr;    
 }
 
 int creat(char *pathname)

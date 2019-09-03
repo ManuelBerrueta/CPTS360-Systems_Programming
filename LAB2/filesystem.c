@@ -13,8 +13,9 @@ NODE *search_child(NODE *parent, char *name)
     //! Here you start with the child and then look at the siblings
     //! for a possible match
     
-    NODE *p = parent->childPtr;
+    NODE *p;
     printf("search for %s in parent DIR\n", name);
+    p = parent->childPtr;
     if (p==0)
     {
         return 0;
