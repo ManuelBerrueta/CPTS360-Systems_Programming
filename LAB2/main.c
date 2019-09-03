@@ -182,6 +182,9 @@ int mkdir(char *pathname)
     insert_child(start, q);
     printf("mkdir %s OK\n", pathname);
     
+    //! Set pathname to null
+    memset(pathname,0,sizeof(pathname));
+
     return 0;
 }
 
@@ -192,7 +195,84 @@ int rmdir(char *pathname)
 
 int cd(char *pathname)
 {
-    printf("cd: %s\n", pathname);
+    //? 1. Find pathname node;
+    //? 2. Check if it;s a DIR
+    //? 3. Change CWD to point at DIR
+    
+    dbname(pathname); //! Split pathname
+
+    NODE *tempCWD = cwd;
+
+    if ( *pathname == "/" )
+    {
+        tempCWD = root->childPtr;
+    }
+    
+    //! if next name is one of the sibling pointers && it's a dir
+    //! then tempCWD point to this sibling
+
+    //TODO: First we can check if the ending of the string has a "/"
+    //TODO: If it does not, then we don't need strtok and
+    //TODO: we just compare pathname
+
+    if ( (pathname+(strlen(pathname) -1)) == "/" )
+    {
+        char tempPath = strtok(dname, "/");
+        printf("%s", "Traversing through: ");
+    
+        while (tempPath)
+        {
+            printf("%s", tempPath);
+            printf("%s", "/");
+
+            //TODO: Check if current tokenized dir exists using search_child
+            tempCWD = search_child(tempCWD, tempPath);
+            //! If at anytime during this traversal p=0, then the target path
+            //! does not exist
+            if (tempCWD == 0)
+            {
+                printf("%s of the given %s path does not exist", tempPath, 
+                        pathname);
+                memset(pathname,0,sizeof(pathname));
+                return -1;
+            }
+            if ( tempCWD->type != 'D' )
+            {
+                printf("%s of the given %s path is not a Directory", tempPath, 
+                pathname);
+                memset(pathname,0,sizeof(pathname));
+                return -1;
+            }
+            //TODO: Do we need to keep track how deep it goes?
+            //TODO: NEXT move up next dir with name of above
+            tempPath = strtok(0, "/");
+        }
+    }
+
+    //! Here we should be at the parent directory
+    //! Check if basename matches one of the childrenPtr of the parentPtr
+    tempCWD = search_child(tempCWD, bname);
+
+    if ( tempCWD == 0 )
+    {
+        printf("The given %s path does not exist", pathname);
+        memset(pathname,0,sizeof(pathname));
+        return -1;
+    }
+    if ( tempCWD->type != 'D' )
+    {
+        printf("%s of the given %s path is not a Directory", tempCWD->name, 
+        pathname);
+        memset(pathname,0,sizeof(pathname));
+        return -1;
+    }
+    else
+    {
+        cwd = tempCWD;
+        printf("cd: %s was succesful\n", pathname);
+        memset(pathname,0,sizeof(pathname));
+        return 0;
+    }
 }
 
 int ls(char *pathname)
@@ -217,8 +297,9 @@ int ls(char *pathname)
     else if( *pathname == '/')
     {
         NODE *p = root->childPtr; //! *p = Traversing pointer
-        //TODO: 2 cases if it just / and if it's / + other str
-        if ( strlen(pathname) == 1) //! This is the case to print root
+        
+        //! This is the case to print root
+        if ( strlen(pathname) == 1) 
         {       
             printf("root contents = ");
             while(p)
@@ -230,7 +311,9 @@ int ls(char *pathname)
             return 0;
         }
         
-        
+        //TODO: If pathname is / + other str
+        //TODO: This will also be similar or the same for the case where
+        //TODO:     it is just a folder bad using cwd as the start point
         char *tempPath;
         tempPath = strtok(pathname, "/");
         printf("%s", "Traversing through: ");
@@ -255,11 +338,17 @@ int ls(char *pathname)
                 pathname);
                 return -1;
             }
-            //TODO: return how deep it goes?
+            //TODO: Do we need to keep track how deep it goes?
             //TODO: NEXT move up next dir with name of above
             tempPath = strtok(0, "/");
         }
-        //! Here we have traversed to the path and found the directory
+        //! Here we have traversed to the path and found the parent directory
+        //!  to the new folder we are trying to make
+        NODE* tempNode = (NODE *)malloc(sizeof(NODE));
+        strcpy(tempNode->name, bname);
+        tempNode->type = 'D';
+        tempNode->parentPtr = p;
+        insert_child(p, tempNode);
     }
     else //! Else... a string is passed
     {
