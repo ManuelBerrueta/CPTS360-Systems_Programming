@@ -18,6 +18,7 @@
 //!------------------------------  Globals ---------------------------------   
 NODE *root;
 NODE *cwd;
+NODE *start;
 NODE *pwd_traverse;
 char line[128];         //? User command line input
 char command[16];       //? Command string
@@ -141,9 +142,8 @@ int tokenize(char *pathname)
 
 int mkdir(char *pathname)
 {
-    NODE *p;
+    NODE *searchNode;
     NODE *q;
-    NODE *start;
     char *tempPath = pathname;
 
     printf("mkdir: name=%s\n", pathname);
@@ -169,14 +169,40 @@ int mkdir(char *pathname)
 
     
     //TODO: Idea is break the path down each time and see if it exists
+    //! dbname breaks directory path to dname and new dirName in bname
     dbname(tempPath); //This will separate the path and the basename
 
-    p = search_child(start, pathname);
-    if (p)
+    //! Now we have dname and bname, we will iterate through dname
+    //!TODO: Tokenize dname, for each token search the name
+    //! Issue: What if it doesn't have a / TODO: FIX THIS
+    //?      If name is found move to the next child
+    //?      If name is not found, return FAIL
+
+    tempPath = strtok(dname, "/");
+    searchNode = start;
+
+    while(tempPath)
     {
-        printf("name %s already exists, mkdir FAILED\n", pathname);
-        return -1;
+        printf("Traversing through: %s/", tempPath);
+        searchNode = search_child(start, tempPath);
+        if (searchNode) //* If the current part of the path exists then it fails
+        {
+            if(searchNode->type == 'F')
+            {
+                printf("%s is a file, not a DIR\n");
+            }
+            printf("name %s already exists, mkdir FAILED\n", pathname);
+            return -1;
+        }
+        else
+        {
+            searchNode = searchNode->childPtr;
+        }
     }
+    //! If we made it to here, then we are good
+
+    start = searchNode;
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     printf("--------------------------------------\n");
     printf("ready to mkdir %s\n", pathname);
