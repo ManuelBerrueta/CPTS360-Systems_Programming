@@ -167,7 +167,8 @@ int mkdir(char *pathname)
     }
     printf("check whether %s already exists\n", pathname);
 
-    
+    searchNode = start;
+
     //TODO: Idea is break the path down each time and see if it exists
     //! dbname breaks directory path to dname and new dirName in bname
     dbname(tempPath); //This will separate the path and the basename
@@ -178,27 +179,65 @@ int mkdir(char *pathname)
     //?      If name is found move to the next child
     //?      If name is not found, return FAIL
 
-    tempPath = strtok(dname, "/");
-    searchNode = start;
-
-    while(tempPath)
+    //! Check to see if there is any '/' in the pathname
+    int i=0;
+    int pathCounter = 0;
+    while(pathname[i] != '\0')
     {
-        printf("Traversing through: %s/", tempPath);
-        searchNode = search_child(start, tempPath);
-        if (searchNode) //* If the current part of the path exists then it fails
-        {
-            if(searchNode->type == 'F')
+        if(pathname[i] == '/')
+        { 
+            if(i == 0)
             {
-                printf("%s is a file, not a DIR\n");
+
             }
-            printf("name %s already exists, mkdir FAILED\n", pathname);
-            return -1;
+            else
+            {
+                pathCounter++;
+            }
+            
         }
-        else
+        i++;
+    }
+
+    if (pathCounter > 0) //! Means there is at least one '/' in the path
+    {
+        tempPath = strtok(dname, "/");
+        printf("Traversing through: %s/ ", tempPath);
+        
+        i=0; //reset counter
+        while(i<pathCounter)
         {
-            searchNode = searchNode->childPtr;
+            //! Check the name is within the child & siblings
+            searchNode = search_child(searchNode, tempPath);
+            if (searchNode) //* If the current part of the path exists then it fails
+            {
+                if(searchNode->type == 'D')
+                {
+                    printf("%s exists", tempPath);
+                }
+                else
+                {
+                    printf("%s exists but it's not a directory\n", tempPath);
+                    printf("mkdir %s FAIL", pathname);
+                }
+                
+/*                 if(searchNode->type == 'F')
+                {
+                    printf("%s is a file, not a DIR\n");
+                }
+                printf("name %s already exists, mkdir FAILED\n", pathname);
+                return -1; */
+            }
+            else
+            {
+                printf("Path at %s does not exist", tempPath);
+                return -1; //! Move to the next child
+            }
+            tempPath = strtok(dname, "/");
+            i++;
         }
     }
+
     //! If we made it to here, then we are good
 
     start = searchNode;
@@ -208,7 +247,7 @@ int mkdir(char *pathname)
     printf("ready to mkdir %s\n", pathname);
     q = (NODE *)malloc(sizeof(NODE));
     q->type = 'D';
-    strcpy(q->name, pathname);
+    strcpy(q->name, bname);
     insert_child(start, q);
     printf("mkdir %s OK\n", pathname);
     printf("--------------------------------------\n");
