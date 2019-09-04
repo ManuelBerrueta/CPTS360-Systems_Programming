@@ -73,7 +73,7 @@ int main()
         memset(pathname,0,sizeof(pathname));//!clear path buffer
         if( r < 0)
         {
-            puts("Last command was not succesful");
+            puts("\nLast command was not succesful");
             puts("Check error output");
         }
 
@@ -174,7 +174,6 @@ int mkdir(char *pathname)
     dbname(tempPath); //This will separate the path and the basename
 
     //! Now we have dname and bname, we will iterate through dname
-    //!TODO: Tokenize dname, for each token search the name
     //! Issue: What if it doesn't have a / TODO: FIX THIS
     //?      If name is found move to the next child
     //?      If name is not found, return FAIL
@@ -205,7 +204,7 @@ int mkdir(char *pathname)
         printf("Traversing through: %s/ ", tempPath);
         
         i=0; //reset counter
-        while(i<pathCounter)
+        while(i < (pathCounter -1))
         {
             //! Check the name is within the child & siblings
             searchNode = search_child(searchNode, tempPath);
@@ -274,23 +273,111 @@ int cd(char *pathname)
 
     //TODO: Add functionality to use ../ and if you see . ignore it
     
-    dbname(pathname); //! Split pathname
-
     NODE *tempCWD = cwd;
+    char *tempPath = pathname;
 
-    if ( *pathname == "/" )
+    //! If pathname is '.' - Don't do anything
+    if ( strcmp(pathname, "." ) == 0)
     {
-        tempCWD = root->childPtr;
+        memset(pathname,0,sizeof(pathname)); //Clear pathname
+        return 0;
+    }
+    if ( strcmp(pathname, ".." ) == 0 ) 
+    {
+        cwd = cwd->parentPtr;
+        memset(pathname,0,sizeof(pathname)); //Clear pathname
+        return 0;        
+    }
+    if ( strcmp(pathname, "../" ) == 0 )
+    {
+        cwd = cwd->parentPtr;
+        memset(pathname,0,sizeof(pathname)); //Clear pathname
+        return 0;        
     }
     
+    if ( strcmp(pathname, "/" ) == 0 )//TODO: This might need to be fixed
+    {
+        //tempCWD = root->childPtr;
+        cwd = root;
+        memset(pathname,0,sizeof(pathname)); //Clear pathname
+        return 0; 
+    }
+    
+    dbname(pathname); //! Split pathname in to dname for dirs, and bname for base
     //! if next name is one of the sibling pointers && it's a dir
     //! then tempCWD point to this sibling
 
-    //TODO: First we can check if the ending of the string has a "/"
-    //TODO: If it does not, then we don't need strtok and
-    //TODO: we just compare pathname
+    //TODO: If we see a ".." we go back to tempCWD = tempCWD->parentPtr;
+    //TODO: else we used search to see if the tempPath
 
-    if ( (pathname+(strlen(pathname) -1)) == "/" )
+    //! We count the number of '/' in the path, we will use this to iterate
+    //! through the path
+    int i=0;
+    int pathCounter = 0;
+    while(pathname[i] != '\0')
+    {
+        if(pathname[i] == '/')
+        { 
+            if(i == 0)
+            {
+
+            }
+            else
+            {
+                pathCounter++;
+            }
+            
+        }
+        i++;
+    }
+
+    if (pathCounter > 0) //! Means there is at least one '/' in the path
+    {
+        tempPath = strtok(dname, "/");
+        printf("Traversing through: %s/ ", tempPath);
+        
+        i=0; //reset counter
+        while(i<(pathCounter-1))
+        {
+            if ( strcmp(tempPath, "..") == 0)
+            {
+                tempCWD = tempCWD->parentPtr;
+            }
+            else
+            {
+                //!Search for name
+                //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! HERE WE ARE
+                tempCWD = search_child(tempCWD, tempPath);
+                if (tempCWD) //* If the current part of the path exists then it fails
+                {
+                    if(tempCWD->type == 'D')
+                    {
+                        printf("%s exists", tempPath);
+                    }
+                    else
+                    {
+                        printf("%s exists but it's not a directory\n", tempPath);
+                        printf("cd %s FAIL", pathname);
+                    }
+                    
+/*                     if(searchNode->type == 'F')
+                    {
+                        printf("%s is a file, not a DIR\n");
+                    }
+                    printf("name %s already exists, mkdir FAILED\n", pathname);
+                    return -1; */
+                }
+                else
+                {
+                    printf("Path at %s does not exist", tempPath);
+                    return -1; //! Move to the next child
+                }
+                tempPath = strtok(dname, "/");
+                i++;
+            }
+        }
+    }
+/*     if ( (pathname+(strlen(pathname) -1)) == "/" )
     {
         char tempPath = strtok(dname, "/");
         printf("%s", "Traversing through: ");
@@ -300,32 +387,46 @@ int cd(char *pathname)
             printf("%s", tempPath);
             printf("%s", "/");
 
-            //TODO: Check if current tokenized dir exists using search_child
-            tempCWD = search_child(tempCWD, tempPath);
-            //! If at anytime during this traversal p=0, then the target path
-            //! does not exist
-            if (tempCWD == 0)
+            if ( tempPath == ".." )
             {
-                printf("%s of the given %s path does not exist", tempPath, 
-                        pathname);
-                memset(pathname,0,sizeof(pathname));
-                return -1;
+                tempCWD = cwd->parentPtr;
+                
+                return 0;        
             }
-            if ( tempCWD->type != 'D' )
+            else
             {
-                printf("%s of the given %s path is not a Directory", tempPath, 
-                pathname);
-                memset(pathname,0,sizeof(pathname));
-                return -1;
+                //TODO: Check if current tokenized dir exists using search_child
+                tempCWD = search_child(tempCWD, tempPath);
+                //! If at anytime during this traversal p=0, then the target path
+                //! does not exist
+                if (tempCWD == 0)
+                {
+                    printf("%s of the given %s path does not exist", tempPath, 
+                            pathname);
+                    memset(pathname,0,sizeof(pathname));
+                    return -1;
+                }
+                if ( tempCWD->type != 'D' )
+                {
+                    printf("%s of the given %s path is not a Directory", tempPath, 
+                    pathname);
+                    memset(pathname,0,sizeof(pathname));
+                    return -1;
+                }
+                //TODO: Do we need to keep track how deep it goes?
+                //TODO: NEXT move up next dir with name of above
+                tempPath = strtok(0, "/");
             }
-            //TODO: Do we need to keep track how deep it goes?
-            //TODO: NEXT move up next dir with name of above
-            tempPath = strtok(0, "/");
         }
-    }
+    } */
 
     //! Here we should be at the parent directory
     //! Check if basename matches one of the childrenPtr of the parentPtr
+    if (bname == "..")
+    {
+        memset(pathname,0,sizeof(pathname)); //Clear pathname
+        return 0;
+    }
     tempCWD = search_child(tempCWD, bname);
 
     if ( tempCWD == 0 )
