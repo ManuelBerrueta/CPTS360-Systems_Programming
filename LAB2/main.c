@@ -204,7 +204,7 @@ int mkdir(char *pathname)
         printf("Traversing through: %s/ ", tempPath);
         
         i=0; //reset counter
-        while(i < (pathCounter -1))
+        while(i < pathCounter)
         {
             //! Check the name is within the child & siblings
             searchNode = search_child(searchNode, tempPath);
@@ -232,7 +232,7 @@ int mkdir(char *pathname)
                 printf("Path at %s does not exist", tempPath);
                 return -1; //! Move to the next child
             }
-            tempPath = strtok(dname, "/");
+            tempPath = strtok(tempPath, "/");
             i++;
         }
     }
