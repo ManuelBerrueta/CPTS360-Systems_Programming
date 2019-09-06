@@ -137,11 +137,21 @@ int mkdir(char *pathname)
     printf("mkdir: name=%s\n", pathname);
 
     //TODO: Check pathname for the '/' at the end of the name
+    // ! Possibly use if pathname[strlen(line)-1] == "/" then
+    //!  { localPathname[strlen(line)-1] = 0} /get rid of slash
     //TODO:     It is possible if I used dname
     //! if dname == "." then use pathname alse you dname
     //TODO: deal with duplicates at root level
     //TODO: Fix mkdir  " " blank folder name
 
+    
+    if(pathname == '\0' || strcmp(pathname, "") == 0)
+    {
+        puts("can't mkdir with no pathname provided");
+        memset(pathname,0,sizeof(pathname));//!clear path buffer
+        return -1;
+    }
+    if(pathname)
     if (strcmp(pathname, "/") == 0 || strcmp(pathname, ".") == 0 || strcmp(pathname, "..") == 0)
     {
         printf("can't mkdir with %s\n", pathname);
@@ -339,6 +349,7 @@ int cd(char *pathname)
             if ( strcmp(tempPath, "..") == 0)
             {
                 tempCWD = tempCWD->parentPtr;
+                i++; //? NOT SURE
             }
             else
             {
