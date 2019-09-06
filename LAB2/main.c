@@ -120,22 +120,6 @@ int dbname(char *pathname)
     strcpy(bname, basename(temp));
 }
 
-int tokenize(char *pathname)
-{
-    char *s;
-    s = strtok(pathname, "/");
-    while (s)
-    {
-        printf("%s ", s);
-        
-        //TODO: Check if dir exist using search_child
-
-
-        //TODO: return how deep it goes?
-        //TODO: NEXT move up next dir with name of above
-        s = strtok(0, "/");
-    }
-}
 
 
 //?============================== COMMANDS ====================================
@@ -144,7 +128,11 @@ int mkdir(char *pathname)
 {
     NODE *searchNode;
     NODE *q;
-    char *tempPath = pathname;
+    char localPathname[64] = {'\0'};
+    strcat(localPathname, pathname);
+
+    //! dbname breaks directory path to dname and new dirName in bname
+    dbname(pathname); //This will separate the path and the basename
 
     printf("mkdir: name=%s\n", pathname);
 
@@ -169,9 +157,7 @@ int mkdir(char *pathname)
 
     searchNode = start;
 
-    //TODO: Idea is break the path down each time and see if it exists
-    //! dbname breaks directory path to dname and new dirName in bname
-    dbname(tempPath); //This will separate the path and the basename
+
 
     //! Now we have dname and bname, we will iterate through dname
     //! Issue: What if it doesn't have a / TODO: FIX THIS
@@ -200,7 +186,7 @@ int mkdir(char *pathname)
 
     if (pathCounter > 0) //! Means there is at least one '/' in the path
     {
-        tempPath = strtok(dname, "/");
+        char *tempPath = strtok(localPathname, "/");
         printf("Traversing through: %s/ ", tempPath);
         
         i=0; //reset counter
@@ -232,7 +218,7 @@ int mkdir(char *pathname)
                 printf("Path at %s does not exist", tempPath);
                 return -1; //! Move to the next child
             }
-            tempPath = strtok(tempPath, "/");
+            tempPath = strtok(NULL, "/");
             i++;
         }
     }
