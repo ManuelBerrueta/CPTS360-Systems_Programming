@@ -144,6 +144,13 @@ int mkdir(char *pathname)
     //TODO: deal with duplicates at root level
     //TODO: Fix mkdir  " " blank folder name
 
+
+    // ! Take care of any slash after the name of new dir
+    if (pathname[strlen(pathname)-1] == '/') 
+    {
+        localPathname[strlen(localPathname)-1] = 0;  //! /get rid of slash
+    }
+
     
     if(pathname == '\0' || strcmp(pathname, "") == 0)
     {
@@ -179,9 +186,9 @@ int mkdir(char *pathname)
     //! Check to see if there is any '/' in the pathname
     int i=0;
     int pathCounter = 0;
-    while(pathname[i] != '\0')
+    while(localPathname[i] != '\0')
     {
-        if(pathname[i] == '/')
+        if(localPathname[i] == '/')
         { 
             if(i == 0)
             {
