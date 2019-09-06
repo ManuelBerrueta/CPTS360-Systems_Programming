@@ -136,8 +136,10 @@ int mkdir(char *pathname)
 
     printf("mkdir: name=%s\n", pathname);
 
-    //TODO: Check pathname for the '/' at the end
-    //TODO: strok
+    //TODO: Check pathname for the '/' at the end of the name
+    //TODO:     It is possible if I used dname
+    //! if dname == "." then use pathname alse you dname
+    //TODO: deal with duplicates at root level
     //TODO: Fix mkdir  " " blank folder name
 
     if (strcmp(pathname, "/") == 0 || strcmp(pathname, ".") == 0 || strcmp(pathname, "..") == 0)
@@ -198,20 +200,13 @@ int mkdir(char *pathname)
             {
                 if(searchNode->type == 'D')
                 {
-                    printf("%s exists", tempPath);
+                    printf("-> %s exists in the path\n", tempPath);
                 }
                 else
                 {
                     printf("%s exists but it's not a directory\n", tempPath);
                     printf("mkdir %s FAIL", pathname);
                 }
-                
-/*                 if(searchNode->type == 'F')
-                {
-                    printf("%s is a file, not a DIR\n");
-                }
-                printf("name %s already exists, mkdir FAILED\n", pathname);
-                return -1; */
             }
             else
             {
@@ -220,12 +215,28 @@ int mkdir(char *pathname)
             }
             tempPath = strtok(NULL, "/");
             i++;
+            start = searchNode;
+        }
+    }
+    else if( strcmp(dname, ".") == 0)
+    {
+        searchNode = search_child(searchNode, bname );
+        if(searchNode)
+        {
+                if(searchNode->type == 'D')
+                {
+                    printf("-> %s already exists \n", bname);
+                    printf("mkdir %s FAIL", pathname);
+                    memset(pathname,0,sizeof(pathname));//!clear path buffer
+                    return -1;
+
+                }
         }
     }
 
     //! If we made it to here, then we are good
 
-    start = searchNode;
+    //! - TESTING    start = searchNode;
     //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     printf("--------------------------------------\n");
