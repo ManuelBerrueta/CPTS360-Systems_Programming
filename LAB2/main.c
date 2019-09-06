@@ -282,10 +282,18 @@ int rmdir(char *pathname)
 int cd(char *pathname)
 {
     //? 1. Find pathname node;
-    //? 2. Check if it;s a DIR
+    //? 2. Check if it's a DIR
     //? 3. Change CWD to point at DIR
 
     //TODO: Add functionality to use ../ and if you see . ignore it
+    //TODO: Use mkdir to implement some of the full path
+
+    char localPathname[64] = {'\0'};
+    strcat(localPathname, pathname);
+
+    //! Testing dname
+    dbname(pathname);
+
     
     NODE *tempCWD = cwd;
     char *tempPath = pathname;
@@ -328,9 +336,9 @@ int cd(char *pathname)
     //! through the path
     int i=0;
     int pathCounter = 0;
-    while(pathname[i] != '\0')
+    while(localPathname[i] != '\0')
     {
-        if(pathname[i] == '/')
+        if(localPathname[i] == '/')
         { 
             if(i == 0)
             {
