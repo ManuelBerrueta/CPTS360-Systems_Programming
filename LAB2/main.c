@@ -149,7 +149,7 @@ int mkdir(char *pathname)
     // ! Remove after the name of new dir
     if (pathname[strlen(pathname)-1] == '/') 
     {
-        localPathname[strlen(localPathname)-1] = 0;  //! /get rid of slash
+        localPathname[strlen(localPathname)-1] = 0;  //! /get rid of slash       TODO:LI MIGHT NEED THIS IN CD
     }
 
     
@@ -687,6 +687,12 @@ int ls(char *pathname)
 {
     char localPathname[64] = {'\0'};
     strcat(localPathname, pathname);
+
+    if (pathname[strlen(pathname)-1] == '/') 
+    {
+        localPathname[strlen(localPathname)-1] = 0;  //! /get rid of slash
+    }
+
     dbname(pathname);
     NODE *tempCWD = cwd;
     char *tempPath = pathname;
