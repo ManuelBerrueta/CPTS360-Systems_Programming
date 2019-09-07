@@ -726,10 +726,14 @@ int cd(char *pathname)
 
 int ls(char *pathname)
 {
-
+    char localPathname[64] = {'\0'};
+    strcat(localPathname, pathname);
+    dbname(pathname);
+    NODE *tempCWD = cwd;
+    char *tempPath = pathname;
 
     //! If no string is passed after ls, then just list the CWD
-    if ( *pathname == '\0')
+    if ( *pathname == '\0' || *pathname == '.')
     {
         NODE *p = cwd->childPtr;
         printf("cwd contents = ");
@@ -743,91 +747,34 @@ int ls(char *pathname)
         memset(pathname,0,sizeof(pathname));
         return 0;
     }
-    //! Else if the first char is /, then we start at root
+    //! Else if pathname ==  '/', then we start at root
     else if( *pathname == '/')
     {
         NODE *p = root->childPtr; //! *p = Traversing pointer
-        
-        //! This is the case to print root
-        if ( strlen(pathname) == 1) 
-        {       
-            printf("root contents = ");
-            while(p)
-            {
-                printf("[%c %s] ", p->type, p->name);
-                p = p->siblingPtr;
-            }
-            printf("\n");
-            memset(pathname,0,sizeof(pathname));
-            return 0;
-        }
-        
-        //TODO: If pathname is / + other str
-        //TODO: This will also be similar or the same for the case where
-        //TODO:     it is just a folder bad using cwd as the start point
-        dbname(pathname); //!separe dir path and base name
 
-
-        char *tempPath;
-        tempPath = strtok(dname, "/");
-        printf("%s", "Traversing through: ");
-        while (tempPath)
+        printf("root contents = ");
+        while(p)
         {
-            printf("%s", tempPath);
-            printf("%s", "/");
-
-            //TODO: Check if current tokenized dir exists using search_child
-            p = search_child(p, tempPath);
-            //! If at anytime during this traversal p=0, then the target path
-            //! does not exist
-            if (p == 0)
-            {
-                printf("%s of the given %s path does not exist", tempPath, 
-                        pathname);
-                memset(pathname,0,sizeof(pathname));
-                return -1;
-            }
-            if ( p->type != 'D' )
-            {
-                printf("%s of the given %s path is not a Directory", tempPath, 
-                pathname);
-                memset(pathname,0,sizeof(pathname));
-                return -1;
-            }
-            //TODO: Do we need to keep track how deep it goes?
-            //TODO: NEXT move up next dir with name of above
-            tempPath = strtok(0, "/");
-        }
-        //TODO: use basename
-        p = search_child(p, bname);
-        printf("Contents of dir %s: ", p->name);
-        while(p != 0)
-        {
-            while(p)
-            {
-                printf("[%c %s] ", p->type, p->name);
-                p = p->siblingPtr;
-            }
+            printf("[%c %s] ", p->type, p->name);
+            p = p->siblingPtr;
         }
         printf("\n");
         memset(pathname,0,sizeof(pathname));
-        return 0;
+        return;
     }
-    else //! Else... a string is passed
+    else
     {
-        //TODO: NEED TO WORK ON THIS PART
-        dbname(pathname);
-        //! use dname to search for the file pathsearch for
-        /* if 
-        {
-            
-        } */
+        /* *  
+         *  else traverse through the path checking if each is a directory
+         *  if it is a directory then assign tempCWD to it 
+         *  if it fails check then return failed check
+         *  else once we get to the actual path (bname)
+         *  check once more for directory, if it is use tempcwd as a base and print
+         * 
+         *  then print its contents
+         */
 
     }
-    
-    *bname='\0';
-    *dname='\0';
-    memset(pathname,0,sizeof(pathname));
 }
 
 // NOTE: You MUST improve ls() to ls(char *pathname)
