@@ -56,7 +56,6 @@ int delete_child(NODE *parent, NODE *q)
 {
     NODE *p = parent->childPtr;
     NODE *temp;
-    NODE *doubleDelete = NULL;
     printf("Delete NODE %s from parent child list\n", q->name);
 /*     if (p==0) //! Case when the parent has no chilidren
     {
@@ -68,11 +67,10 @@ int delete_child(NODE *parent, NODE *q)
     {
         //TODO: Must replace parent with a sibling
         temp = p;
-        p=p->siblingPtr;//! Parent->childPtr points to sibling
-        memset(temp,0,sizeof(temp));//!clear path buffer
+        p->childPtr=p->siblingPtr;//! Parent->childPtr points to sibling
+        //memset(temp,0,sizeof(temp));//!clear path buffer
         free(temp);
-        temp=doubleDelete;
-        temp=NULL;
+        return;
     }
     else
     {
@@ -97,4 +95,5 @@ int delete_child(NODE *parent, NODE *q)
             p->siblingPtr=0; //! Now points to null
         }
     }
+    return;
 }
