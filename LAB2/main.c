@@ -136,7 +136,7 @@ int mkdir(char *pathname)
 
     printf("mkdir: name=%s\n", pathname);
 
-    //TODO: Check pathname for the '/' at the end of the name
+    //TODO: 
     // ! Possibly use if pathname[strlen(line)-1] == "/" then
     //!  { localPathname[strlen(line)-1] = 0} /get rid of slash
     //TODO:     It is possible if I used dname
@@ -144,8 +144,8 @@ int mkdir(char *pathname)
     //TODO: deal with duplicates at root level
     //TODO: Fix mkdir  " " blank folder name
 
-
-    // ! Take care of any slash after the name of new dir
+    //! Check pathname for the '/' at the end of the name
+    // ! Remove after the name of new dir
     if (pathname[strlen(pathname)-1] == '/') 
     {
         localPathname[strlen(localPathname)-1] = 0;  //! /get rid of slash
@@ -285,7 +285,6 @@ int cd(char *pathname)
     //? 2. Check if it's a DIR
     //? 3. Change CWD to point at DIR
 
-    //TODO: Add functionality to use ../ and if you see . ignore it
     //TODO: Use mkdir to implement some of the full path
 
     char localPathname[64] = {'\0'};
@@ -293,10 +292,14 @@ int cd(char *pathname)
 
     //! Testing dname
     dbname(pathname);
-
-    
     NODE *tempCWD = cwd;
     char *tempPath = pathname;
+
+
+    //! TESTING - REMOVE
+    dbname(pathname); //! Split pathname in to dname for dirs, and bname for base
+    //! if next name is one of the sibling pointers && it's a dir
+    //! then tempCWD point to this sibling
 
     //! If pathname is '.' - Don't do anything
     if ( strcmp(pathname, "." ) == 0)
@@ -324,19 +327,37 @@ int cd(char *pathname)
         memset(pathname,0,sizeof(pathname)); //Clear pathname
         return 0; 
     }
+
+    //! Changing the starting point
+    if (pathname[0]=='/')
+    {
+        tempCWD = root;
+    }
+
+    printf("check whether %s already exists\n", pathname);
+
+    //! Need to fix this for the case of root "/"
+    //searchNode = start;
     
     dbname(pathname); //! Split pathname in to dname for dirs, and bname for base
     //! if next name is one of the sibling pointers && it's a dir
     //! then tempCWD point to this sibling
 
-    //TODO: If we see a ".." we go back to tempCWD = tempCWD->parentPtr;
     //TODO: else we used search to see if the tempPath
 
     //! We count the number of '/' in the path, we will use this to iterate
     //! through the path
+
+
+    //! IMPORTANT NOTES:
+    //! If i deal with dname and bname I am always dealing with the same cases
+    //! Don't need to deal with the last slash and then bname is my target
+    //! If i == pathcounter then we are at bname stage and its our final stop
+    //! If we find bname exists then swap there and return
+
     int i=0;
     int pathCounter = 0;
-    while(localPathname[i] != '\0')
+    while(localPathname[i] != '\0') //! I could potentially use dname
     {
         if(localPathname[i] == '/')
         { 
@@ -355,15 +376,16 @@ int cd(char *pathname)
 
     if (pathCounter > 0) //! Means there is at least one '/' in the path
     {
-        tempPath = strtok(dname, "/");
+        tempPath = strtok(localPathname, "/");
         printf("Traversing through: %s/ ", tempPath);
         
         i=0; //reset counter
-        while(i<(pathCounter-1))
+        while(i<pathCounter)
         {
             if ( strcmp(tempPath, "..") == 0)
             {
                 tempCWD = tempCWD->parentPtr;
+                tempPath = strtok(NULL, "/");
                 i++; //? NOT SURE
             }
             else
@@ -375,7 +397,7 @@ int cd(char *pathname)
                 {
                     if(tempCWD->type == 'D')
                     {
-                        printf("%s exists", tempPath);
+                        printf("%s exists\n", tempPath);
                     }
                     else
                     {
@@ -395,7 +417,8 @@ int cd(char *pathname)
                     printf("Path at %s does not exist", tempPath);
                     return -1; //! Move to the next child
                 }
-                tempPath = strtok(dname, "/");
+                //tempPath = strtok(dname, "/");
+                tempPath = strtok(NULL, "/");
                 i++;
             }
         }
@@ -445,8 +468,11 @@ int cd(char *pathname)
 
     //! Here we should be at the parent directory
     //! Check if basename matches one of the childrenPtr of the parentPtr
-    if (bname == "..")
+    if (strcmp(bname, "..") == 0)
     {
+        //TODO: Go back one directory
+        cwd = cwd->parentPtr;
+        printf("cd %s was succesful", pathname);
         memset(pathname,0,sizeof(pathname)); //Clear pathname
         return 0;
     }
@@ -454,7 +480,8 @@ int cd(char *pathname)
 
     if ( tempCWD == 0 )
     {
-        printf("The given %s path does not exist", pathname);
+        printf("==> %s does not exists\n", bname);
+        printf("cd %s FAILED", pathname);
         memset(pathname,0,sizeof(pathname));
         return -1;
     }
