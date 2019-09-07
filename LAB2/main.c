@@ -645,48 +645,7 @@ int cd(char *pathname)
             }
         }
     }
-/*     if ( (pathname+(strlen(pathname) -1)) == "/" )
-    {
-        char tempPath = strtok(dname, "/");
-        printf("%s", "Traversing through: ");
-    
-        while (tempPath)
-        {
-            printf("%s", tempPath);
-            printf("%s", "/");
 
-            if ( tempPath == ".." )
-            {
-                tempCWD = cwd->parentPtr;
-                
-                return 0;        
-            }
-            else
-            {
-                //TODO: Check if current tokenized dir exists using search_child
-                tempCWD = search_child(tempCWD, tempPath);
-                //! If at anytime during this traversal p=0, then the target path
-                //! does not exist
-                if (tempCWD == 0)
-                {
-                    printf("%s of the given %s path does not exist", tempPath, 
-                            pathname);
-                    memset(pathname,0,sizeof(pathname));
-                    return -1;
-                }
-                if ( tempCWD->type != 'D' )
-                {
-                    printf("%s of the given %s path is not a Directory", tempPath, 
-                    pathname);
-                    memset(pathname,0,sizeof(pathname));
-                    return -1;
-                }
-                //TODO: Do we need to keep track how deep it goes?
-                //TODO: NEXT move up next dir with name of above
-                tempPath = strtok(0, "/");
-            }
-        }
-    } */
 
     //! Here we should be at the parent directory
     //! Check if basename matches one of the childrenPtr of the parentPtr
@@ -764,7 +723,7 @@ int ls(char *pathname)
     }
     else
     {
-        /* *  
+        /* TODO:  
          *  else traverse through the path checking if each is a directory
          *  if it is a directory then assign tempCWD to it 
          *  if it fails check then return failed check
@@ -773,6 +732,127 @@ int ls(char *pathname)
          * 
          *  then print its contents
          */
+        int i=0;
+        int pathCounter = 0;
+        while(localPathname[i] != '\0') //! I could potentially use dname
+        {
+            if(localPathname[i] == '/')
+            { 
+                if(i == 0)
+                {
+
+                }
+                else
+                {
+                    pathCounter++;
+                }
+
+            }
+            i++;
+        }
+
+        if (pathCounter > 0) //! Means there is at least one '/' in the path
+        {
+            tempPath = strtok(localPathname, "/");
+            printf("Traversing through: %s/ ", tempPath);
+
+            i=0; //reset counter
+            while(i<pathCounter)
+            {
+                if ( strcmp(tempPath, "..") == 0)
+                {
+                    tempCWD = tempCWD->parentPtr;
+                    tempPath = strtok(NULL, "/");
+                    i++; //? NOT SURE
+                }
+                else
+                {
+                    tempCWD = search_child(tempCWD, tempPath);
+                    if (tempCWD) //* If the current part of the path exists then it fails
+                    {
+                        if(tempCWD->type == 'D')
+                        {
+                            printf("%s exists\n", tempPath);
+                        }
+                        else
+                        {
+                            printf("%s exists but it's not a directory\n", tempPath);
+                            printf("==+> ls %s FAIL\n", pathname);
+                        }
+
+/*                         if(searchNode->type == 'F')
+                        {
+                            printf("%s is a file, not a DIR\n");
+                        }
+                        printf("name %s already exists, mkdir FAILED\n", pathname);
+                        return -1; */
+                    }
+                    else
+                    {
+                        printf("Path at %s does not exist", tempPath);
+                        return -1; //! Move to the next child
+                    }
+                    //tempPath = strtok(dname, "/");
+                    tempPath = strtok(NULL, "/");
+                    i++;
+                }
+            }
+        }
+        //! Here we should be at the parent directory
+        //! Check if basename matches one of the childrenPtr of the parentPtr
+        if (strcmp(bname, "..") == 0)
+        {
+            //TODO: Go back one directory
+            //!cwd = cwd->parentPtr; !cd only
+            tempCWD = tempCWD->parentPtr;
+            printf("ls %s:\n", pathname);
+
+            printf("root contents = ");
+            while(tempCWD)
+            {
+                printf("[%c %s] ", tempCWD->type, tempCWD->name);
+                tempCWD = tempCWD->siblingPtr;
+            }
+            printf("\n");
+            
+            memset(pathname,0,sizeof(pathname)); //Clear pathname
+            return 0;
+        }
+        tempCWD = search_child(tempCWD, bname);
+
+        if ( tempCWD == 0 )
+        {
+            printf("==> %s does not exists\n", bname);
+            printf("==+> ls %s FAILED\n", pathname);
+            memset(pathname,0,sizeof(pathname));
+            return -1;
+        }
+        if ( tempCWD->type != 'D' )
+        {
+            printf("%s of the given %s path is not a Directory", tempCWD->name, 
+            pathname);
+            printf("==+> ls %s FAILED\n", pathname);
+            memset(pathname,0,sizeof(pathname));
+            return -1;
+        }
+        else
+        {
+            tempCWD = tempCWD->childPtr;
+            printf("ls %s:\n", pathname);
+
+            printf("root contents = ");
+            while(tempCWD)
+            {
+                printf("[%c %s] ", tempCWD->type, tempCWD->name);
+                tempCWD = tempCWD->siblingPtr;
+            }
+            printf("\n");
+
+            printf("==> ls: %s was succesful\n", pathname);
+            memset(pathname,0,sizeof(pathname));
+            return 0;
+        }
+
 
     }
 }
