@@ -243,7 +243,7 @@ int mkdir(char *pathname)
                 if(searchNode->type == 'D')
                 {
                     printf("-> %s already exists \n", bname);
-                    printf("mkdir %s FAIL", pathname);
+                    printf("mkdir %s FAIL\n", pathname);
                     memset(pathname,0,sizeof(pathname));//!clear path buffer
                     return -1;
 
@@ -272,12 +272,230 @@ int mkdir(char *pathname)
 }
 
 
-
-
 int rmdir(char *pathname)
 {
-    printf("rmdir: %s\n", pathname);
+    NODE *searchNode;
+    NODE *q;
+    char localPathname[64] = {'\0'};
+    strcat(localPathname, pathname);
+
+    //! dbname breaks directory path to dname and new dirName in bname
+    dbname(pathname); //This will separate the path and the basename
+
+    printf("rmdir: name=%s\n", pathname);
+
+    //! Check pathname for the '/' at the end of the name
+    // ! Remove after the name of new dir
+    if (pathname[strlen(pathname)-1] == '/') 
+    {
+        localPathname[strlen(localPathname)-1] = 0;  //! /get rid of slash
+    }
+    
+    if(pathname == '\0' || strcmp(pathname, "") == 0)
+    {
+        puts("==> FAIL: Can't rmdir with no pathname provided");
+        memset(pathname,0,sizeof(pathname));//!clear path buffer
+        return -1;
+    }
+    if(pathname)
+    if (strcmp(pathname, "/") == 0 || strcmp(pathname, ".") == 0 || strcmp(pathname, "..") == 0)
+    {
+        printf("can't rmdir with %s\n", pathname);
+        return -1;
+    }
+    if (pathname[0]=='/')
+    {
+        start = root;
+    }
+    else
+    {
+        start = cwd;
+    }
+    printf("==> Check whether %s already exists\n", pathname);
+
+    searchNode = start;
+
+
+    //! Check to see if there is any '/' in the pathname
+    int i=0;
+    int pathCounter = 0;
+    while(localPathname[i] != '\0')
+    {
+        if(localPathname[i] == '/')
+        { 
+            if(i == 0)
+            {
+
+            }
+            else
+            {
+                pathCounter++;
+            }
+            
+        }
+        i++;
+    }
+
+    if (pathCounter > 0) //! Means there is at least one '/' in the path
+    {
+        char *tempPath = strtok(localPathname, "/");
+        printf("Traversing through: %s/ ", tempPath);
+        
+        i=0; //reset counter
+        while(i < pathCounter)
+        {
+            //! Check the name is within the child & siblings
+            searchNode = search_child(searchNode, tempPath);
+            if (searchNode) //* If the current part of the path exists then it fails
+            {
+                if(searchNode->type == 'D')
+                {
+                    printf("-> %s exists in the path\n", tempPath);
+                }
+                else
+                {
+                    printf("==>FAIL rmdir %s \n", pathname);
+                    printf("%s exists but it's not a directory\n", tempPath);
+                }
+            }
+            else
+            {
+                printf("Path at %s does not exist", tempPath);
+                return -1; //! Move to the next child
+            }
+            tempPath = strtok(NULL, "/");
+            i++;
+            start = searchNode;
+        }
+    }
+/*     else if( strcmp(dname, ".") == 0) //! Trying to delete a directory in cwd
+    {
+        searchNode = search_child(searchNode, bname );
+        if(searchNode)
+        {
+                if(searchNode->type == 'D')
+                {
+                    printf("-> %s exists \n", bname);
+
+                    //TODO Check to see if we this else if block
+                    //! IF NOT DELETE
+
+
+                    printf("rmdir %s SUCCESS", pathname);
+                    memset(pathname,0,sizeof(pathname));//!clear path buffer
+                    return -1;
+
+                }
+        }
+    } */
+
+    //! I BELIEVE IF WE MAKE IT HERE the path is correct
+    //! If not we might have to do some rework...
+    
+    //? We might need to search for the directory we are trying to delete still
+    //? See if it exists...
+    //? We could possibly use the loop above to do it all..?
+    //? i counter must be at the top that way when we get to the bottom of
+    //? the statement we can check
+    //? If i == counter then search for bname
+
+
+    //TODO: MUST Check if it the folder has children, if it does, don't delete!!
+
+    printf("--------------------------------------\n");
+    printf("ready to rmdir %s\n", pathname);
+
+    //! Need to get rid of the node
+    //! it will be a child, thus we need to make sure the parent still points
+    //! to other children
+    //! if the child is an end node, then we can simply just cut if off
+    //! free the nodeand make sure the parent points to null
+
+    //TODO: start should be parent node??? or is start the node we are trying to delete?
+
+
+        //! Here we should be at the parent directory
+    
+    if (strcmp(bname, "..") == 0)
+    {
+        printf("==>FAIL rmdir %s\n", pathname);
+        memset(pathname,0,sizeof(pathname)); //Clear pathname
+        return 0;
+    }
+    //! Check if basename matches one of the childrenPtr of the parentPtr
+    searchNode = search_child(searchNode, bname); //TODO: This now searches for the current dir we are triyng to delete!
+
+    if ( searchNode == 0 )
+    {
+        printf("==> rmdir: %s FAILED\n", pathname);
+        printf("==+> %s does not exist\n", bname);
+        memset(pathname,0,sizeof(pathname));
+        return -1;
+    }
+    if ( searchNode->type != 'D' )
+    {
+        printf("==> rmdir: %s FAILED\n", pathname);        
+        printf("==+> %s of the given %s path is not a Directory\n", searchNode->name, 
+        pathname);
+        memset(pathname,0,sizeof(pathname));
+        return -1;
+    }
+    else
+    {
+        //TODO: HERE WE DELETE
+        //TODO: MUST Check if it the folder has children, if it does, don't delete!!
+        
+        //! Here searchnode is the directory we are trying to delete
+        //? Here we assign q as our temp node
+        //? We check if the node we are trying to delete has children
+        q=searchNode->childPtr;
+        //! if i>0 then the node has children, we cannot delete
+/*         i=0;
+        while(q != 0)
+        {
+            q=q->childPtr;
+            i++;
+        } */
+        //! Or just check if the childptr is not null
+        if(q != 0)
+        {
+            printf("==> FAIL: Cannot delete%s\n", bname);
+            printf("==+> %s is not empty!", bname);
+            memset(pathname,0,sizeof(pathname));
+            return -1;
+        }
+        else //!delete the node
+        {
+            q = searchNode->parentPtr; //! assign q to be the temp parent pointer of node to delete
+            q->childPtr = 0; //!NULL the child off the parent node
+            free(searchNode); //! delete searchnode from memory
+        }
+        
+
+
+
+        printf("==> rmdir: %s was succesful\n", pathname);
+        printf("==>> %s removed\n", bname);
+        memset(pathname,0,sizeof(pathname));
+        return 0;
+    }
+
+
+    //q = (NODE *)malloc(sizeof(NODE));
+    //q->type = 'D';
+    strcpy(q->name, bname);
+    insert_child(start, q);
+
+
+    printf("==> rmdir %s SUCCESFUL\n", pathname);
+    printf("--------------------------------------\n");
+    
+    //! Set pathname to null
+    memset(pathname,0,sizeof(pathname));
+
+    return 0;
 }
+
 
 int cd(char *pathname)
 {
