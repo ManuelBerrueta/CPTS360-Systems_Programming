@@ -54,19 +54,47 @@ int insert_child(NODE *parent, NODE *q)
 
 int delete_child(NODE *parent, NODE *q)
 {
-    NODE *p = parent->childPtr  ;
+    NODE *p = parent->childPtr;
+    NODE *temp;
+    NODE *doubleDelete = NULL;
     printf("Delete NODE %s from parent child list\n", q->name);
 /*     if (p==0) //! Case when the parent has no chilidren
     {
         parent->childPtr = q; 
     } */
 
-    //! Iterate until p children pointer name is the node we are trying to delete
-    while( strcmp(p->siblingPtr->name, q->name) )
+    //TODO: Theory if the parent is the node we are trying to delete
+    if( strcmp(p->name, q->name) == 0)
     {
-        p = p->siblingPtr;
+        //TODO: Must replace parent with a sibling
+        temp = p;
+        p=p->siblingPtr;//! Parent->childPtr points to sibling
+        memset(temp,0,sizeof(temp));//!clear path buffer
+        free(temp);
+        temp=doubleDelete;
+        temp=NULL;
     }
+    else
+    {
+        //! Iterate until p children pointer name is the node we are trying to delete
+        while( strcmp(p->siblingPtr->name, q->name) )
+        {
+            p = p->siblingPtr;
+        }
+        temp = p->siblingPtr;
 
-    free(p->siblingPtr); //! Frees the memory
-    p->siblingPtr=0; //! Now points to null
+        //TODO: Check to see if the node we are going to delete has other siblings
+        if(temp->siblingPtr != 0)
+        {
+            //! if it does have a sibling, attach it to the "parent sibling"
+            p->siblingPtr = temp->siblingPtr;
+            free(temp);
+            temp=0;
+        }
+        else
+        {
+            free(p->siblingPtr); //! Frees the memory
+            p->siblingPtr=0; //! Now points to null
+        }
+    }
 }

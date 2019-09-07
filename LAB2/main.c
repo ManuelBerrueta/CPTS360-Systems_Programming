@@ -460,7 +460,7 @@ int rmdir(char *pathname)
         //! Or just check if the childptr is not null
         if(q != 0)
         {
-            printf("==> FAIL: Cannot delete%s\n", bname);
+            printf("==> FAIL: Cannot delete %s\n", bname);
             printf("==+> %s is not empty!", bname);
             memset(pathname,0,sizeof(pathname));
             return -1;
