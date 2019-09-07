@@ -467,9 +467,12 @@ int rmdir(char *pathname)
         }
         else //!delete the node
         {
-            q = searchNode->parentPtr; //! assign q to be the temp parent pointer of node to delete
-            q->childPtr = 0; //!NULL the child off the parent node
-            free(searchNode); //! delete searchnode from memory
+            delete_child(searchNode->parentPtr, searchNode);
+            
+            //TODO: Must delete from parents child list
+            //q = searchNode->parentPtr; //! assign q to be the temp parent pointer of node to delete
+            //q->childPtr = 0; //!NULL the child off the parent node
+            //free(searchNode); //! delete searchnode from memory
         }
         
 
