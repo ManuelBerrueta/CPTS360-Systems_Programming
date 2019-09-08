@@ -109,7 +109,10 @@ void initialize()
     strcpy(root->name,"/");
     //strcpy(root->type, "D"); //! Using '' passes as int, using "" passes char
     cwd = root;
-    //*pwd_traverse = *cwd;                                                       //TODO: Changed from pwd_traverse = cwd to  *pwd_traverse = *cwd
+    pwd_traverse = (NODE *)malloc(sizeof(NODE));
+    *pwd_traverse = *cwd;
+    //*pwd_traverse = *cwd;
+                                                           //TODO: Changed from pwd_traverse = cwd to  *pwd_traverse = *cwd
 }
 
 int dbname(char *pathname)
@@ -620,7 +623,7 @@ int cd(char *pathname)
     else
     {
         cwd = tempCWD;
-        //*pwd_traverse = *cwd; //! Makes a copy of cwd
+        *pwd_traverse = *cwd; //! Makes a copy of cwd                         //TODO: Watch here for issues
         printf("cd: %s was succesful\n", pathname);
         memset(pathname,0,sizeof(pathname));
         return 0;
@@ -811,14 +814,16 @@ int pwd()
     //! Then we copy pwd_traverse->name to a string and concat the prior string
     //! including a "/" in between
     //! Do this until pwd_traverse == "/"
+    //! Issues with pwd, may have to use cwd instead
+
 
     if (strcmp(pwd_traverse->name, "/") == 0)
     {
-        printf("pwd: %s%s",pwd_traverse->name, pathname);
+        printf("pwd: %s\n", temp_buffer);
         memset(pathname,0,sizeof(pathname));
         memset(temp_buffer,0,sizeof(temp_buffer));
         //! Recopy current working directory to pwd_traverse
-        *pwd_traverse = *cwd;
+        //*pwd_traverse = *cwd;                                                     //TODO: Fix this line changes root
         return 0;
     }
     // TODO: When we enter the function again we need a placeholder for
@@ -965,7 +970,7 @@ int creat(char *pathname)
 
 int rm(char *pathname)
 {
-        NODE *searchNode;
+    NODE *searchNode;
     NODE *q;
     char localPathname[64] = {'\0'};
     strcat(localPathname, pathname);
