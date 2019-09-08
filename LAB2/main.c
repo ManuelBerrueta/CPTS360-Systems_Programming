@@ -26,8 +26,8 @@ char command[16];       //? Command string
 char pathname[64];      //? Pathname string
 char dname[64];         //? Directory string holder
 char bname[64];         //? Basename string holder
-char *cmd[] = {"mkdir", "rmdir", "ls", "cd", "pwd", "creat", "rm", "reload", 
-               "save", "menu", "quit", NULL};
+char *cmd[] = {"mkdir", "rmdir", "ls", "cd", "pwd", "creat", "rm", "save", 
+               "reload", "menu", "quit", NULL};
 
 int findCmd(char *command);
 void initialize();
@@ -1157,15 +1157,33 @@ int rm(char *pathname)
 int save()
 {
     puts("==> Saving File System");
-    FILE *fp = fopen("mySavedFileSystem", "w+");
-    fprintf(fp, "%c %s", 'D', "string\n");
+    FILE *fp = fopen("mySavedFileSystem.txt", "w+");
+    //fprintf(fp, "%c %s", 'D', "string\n");
+    Print_InOrder_Traversal(root, fp);
     fclose(fp);
     puts("==> File System Saved Succesfuklly\n");
 }
 
 int reload(char *filename)
 {
-    initialize();
+    char buff[255];
+    //initialize();
+    puts("==> Loading File System");
+    FILE *fp = fopen("myTestSavedFileSystem.txt", "r");
+    //fprintf(fp, "%c %s", 'D', "string\n");
+    //while(get)
+    //fscanf(fp, "%s", buff);
+
+    //! Scan the first root but not mkdir
+    fscanf(fp, "%s", buff);
+    while(!feof(fp))
+    {
+        fscanf(fp, "%s", buff);
+        mkdir(buff);
+        printf("%s\n", buff);
+    }
+    fclose(fp);
+    puts("==> File System LOADED Succesfully\n");
 }
 
 int menu(char *pathname)
