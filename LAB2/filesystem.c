@@ -54,25 +54,20 @@ int insert_child(NODE *parent, NODE *q)
 
 int Print_InOrder_Traversal(NODE* tree, FILE *outFile)
 {
-    
-    if(tree->parentPtr)
-    {
-        Print_InOrder_Traversal(tree->parentPtr, outFile);
-    }
-    printf("%c %s", tree->type, tree->name);
-
-    
-/*     if (tree == NULL)
+    if (tree == NULL)
     {
         return;
     }
     else
     {
+        printf("%c %s\n", tree->type, tree->name);
         Print_InOrder_Traversal(tree->childPtr, outFile);
-        //fprintf(outFile, "%c %s", tree->type, tree->name);
-        printf("%c %s", tree->type, tree->name);
         Print_InOrder_Traversal(tree->siblingPtr, outFile);
-    } */
+        if(strcmp(tree->name, "/") == 0)
+        {
+            return 0;
+        }
+    }
 }
 
 //TODO: insert_sibling?

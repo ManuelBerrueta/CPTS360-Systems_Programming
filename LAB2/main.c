@@ -70,7 +70,7 @@ int main()
         //! Parsing: Seperating command from pathname
         sscanf(line, "%s %s", command, pathname);
         index = findCmd(command);
-        int r = fptr[index](pathname); //TODO: Break this down
+            int r = fptr[index](pathname); //TODO: Break this down
         memset(pathname,0,sizeof(pathname));//!clear path buffer
         if( r < 0)
         {
@@ -104,7 +104,8 @@ void initialize()
     //! (NODE *) casts the newly allocated memory as a NODE type.
     root = (NODE *)malloc(sizeof(NODE));
     root->parentPtr = root;
-    root->siblingPtr = root;
+    root->siblingPtr = 0;
+    //root->siblingPtr = root;
     root->type = 'D';
     strcpy(root->name,"/");
     //strcpy(root->type, "D"); //! Using '' passes as int, using "" passes char
