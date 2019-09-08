@@ -121,8 +121,6 @@ int dbname(char *pathname)
     strcpy(bname, basename(temp));
 }
 
-
-
 //?============================== COMMANDS ====================================
 
 int mkdir(char *pathname)
@@ -176,8 +174,6 @@ int mkdir(char *pathname)
     printf("check whether %s already exists\n", pathname);
 
     searchNode = start;
-
-
 
     //! Now we have dname and bname, we will iterate through dname
     //! Issue: What if it doesn't have a / TODO: FIX THIS
@@ -251,11 +247,6 @@ int mkdir(char *pathname)
                 }
         }
     }
-
-    //! If we made it to here, then we are good
-
-    //! - TESTING    start = searchNode;
-    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     printf("--------------------------------------\n");
     printf("ready to mkdir %s\n", pathname);
@@ -369,29 +360,6 @@ int rmdir(char *pathname)
             start = searchNode;
         }
     }
-/*     else if( strcmp(dname, ".") == 0) //! Trying to delete a directory in cwd
-    {
-        searchNode = search_child(searchNode, bname );
-        if(searchNode)
-        {
-                if(searchNode->type == 'D')
-                {
-                    printf("-> %s exists \n", bname);
-
-                    //TODO Check to see if we this else if block
-                    //! IF NOT DELETE
-
-
-                    printf("rmdir %s SUCCESS", pathname);
-                    memset(pathname,0,sizeof(pathname));//!clear path buffer
-                    return -1;
-
-                }
-        }
-    } */
-
-    //! I BELIEVE IF WE MAKE IT HERE the path is correct
-    //! If not we might have to do some rework...
     
     //? We might need to search for the directory we are trying to delete still
     //? See if it exists...
@@ -474,26 +442,12 @@ int rmdir(char *pathname)
             //q->childPtr = 0; //!NULL the child off the parent node
             //free(searchNode); //! delete searchnode from memory
         }
-        
-
-
-
-        printf("==> rmdir: %s was succesful\n", pathname);
+        printf("==> rmdir: %s SUCCESFUL\n", pathname);
         printf("==>> %s removed\n", bname);
+        printf("--------------------------------------\n");
         memset(pathname,0,sizeof(pathname));
         return 0;
     }
-
-
-    //q = (NODE *)malloc(sizeof(NODE));
-    //q->type = 'D';
-    strcpy(q->name, bname);
-    insert_child(start, q);
-
-
-    printf("==> rmdir %s SUCCESFUL\n", pathname);
-    printf("--------------------------------------\n");
-    
     //! Set pathname to null
     memset(pathname,0,sizeof(pathname));
 
@@ -512,14 +466,13 @@ int cd(char *pathname)
     char localPathname[64] = {'\0'};
     strcat(localPathname, pathname);
 
-    //! Testing dname
+    //! Split pathname in to dname for dirs, and bname for base
     dbname(pathname);
     NODE *tempCWD = cwd;
     char *tempPath = pathname;
 
-
     //! TESTING - REMOVE
-    dbname(pathname); //! Split pathname in to dname for dirs, and bname for base
+    dbname(pathname); 
     //! if next name is one of the sibling pointers && it's a dir
     //! then tempCWD point to this sibling
 
@@ -613,7 +566,6 @@ int cd(char *pathname)
             else
             {
                 //!Search for name
-                //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! HERE WE ARE
                 tempCWD = search_child(tempCWD, tempPath);
                 if (tempCWD) //* If the current part of the path exists then it fails
                 {
@@ -626,13 +578,6 @@ int cd(char *pathname)
                         printf("%s exists but it's not a directory\n", tempPath);
                         printf("cd %s FAIL", pathname);
                     }
-                    
-/*                     if(searchNode->type == 'F')
-                    {
-                        printf("%s is a file, not a DIR\n");
-                    }
-                    printf("name %s already exists, mkdir FAILED\n", pathname);
-                    return -1; */
                 }
                 else
                 {
@@ -645,8 +590,6 @@ int cd(char *pathname)
             }
         }
     }
-
-
     //! Here we should be at the parent directory
     //! Check if basename matches one of the childrenPtr of the parentPtr
     if (strcmp(bname, "..") == 0)
@@ -785,13 +728,6 @@ int ls(char *pathname)
                             printf("%s exists but it's not a directory\n", tempPath);
                             printf("==+> ls %s FAIL\n", pathname);
                         }
-
-/*                         if(searchNode->type == 'F')
-                        {
-                            printf("%s is a file, not a DIR\n");
-                        }
-                        printf("name %s already exists, mkdir FAILED\n", pathname);
-                        return -1; */
                     }
                     else
                     {
@@ -846,7 +782,7 @@ int ls(char *pathname)
             tempCWD = tempCWD->childPtr;
             printf("ls %s:\n", pathname);
 
-            printf("root contents = ");
+            printf("== Contents = ");
             while(tempCWD)
             {
                 printf("[%c %s] ", tempCWD->type, tempCWD->name);
@@ -863,7 +799,6 @@ int ls(char *pathname)
     }
 }
 
-// NOTE: You MUST improve ls() to ls(char *pathname)
 
 int pwd()
 {
