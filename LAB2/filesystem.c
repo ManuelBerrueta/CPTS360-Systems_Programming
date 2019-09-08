@@ -60,13 +60,21 @@ int Print_InOrder_Traversal(NODE* tree, FILE *outFile)
     }
     else
     {
-        printf("%c %s\n", tree->type, tree->name);
-        Print_InOrder_Traversal(tree->childPtr, outFile);
-        Print_InOrder_Traversal(tree->siblingPtr, outFile);
         if(strcmp(tree->name, "/") == 0)
         {
-            return 0;
+            printf("%c %s\n", tree->type, tree->name);
         }
+        else
+        {
+            printf("%c /%s\n", tree->type, tree->name);
+        }
+        
+        Print_InOrder_Traversal(tree->childPtr, outFile);
+        Print_InOrder_Traversal(tree->siblingPtr, outFile);
+/*         if(strcmp(tree->name, "/") == 0)
+        {
+            return 0;
+        } */
     }
 }
 

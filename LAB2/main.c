@@ -490,12 +490,14 @@ int cd(char *pathname)
     if ( strcmp(pathname, ".." ) == 0 ) 
     {
         cwd = cwd->parentPtr;
+        *pwd_traverse = *cwd; //! Makes a copy of cwd 
         memset(pathname,0,sizeof(pathname)); //Clear pathname
         return 0;        
     }
     if ( strcmp(pathname, "../" ) == 0 )
     {
         cwd = cwd->parentPtr;
+        *pwd_traverse = *cwd; //! Makes a copy of cwd 
         memset(pathname,0,sizeof(pathname)); //Clear pathname
         return 0;        
     }
@@ -504,6 +506,7 @@ int cd(char *pathname)
     {
         //tempCWD = root->childPtr;
         cwd = root;
+        *pwd_traverse = *cwd; //! Makes a copy of cwd                           TODO: NEWCHANGE
         memset(pathname,0,sizeof(pathname)); //Clear pathname
         return 0; 
     }
