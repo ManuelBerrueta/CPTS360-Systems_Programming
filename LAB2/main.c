@@ -838,7 +838,129 @@ int pwd()
 
 int creat(char *pathname)
 {
-    printf("creat: %s\n", pathname);
+    NODE *searchNode;
+    NODE *q;
+    char localPathname[64] = {'\0'};
+    strcat(localPathname, pathname);
+
+    //! dbname breaks directory path to dname and new dirName in bname
+    dbname(pathname); //This will separate the path and the basename
+
+    printf("creat: name=%s\n", pathname);
+
+    //! Check pathname for the '/' at the end of the name
+    // ! Remove after the name of new dir
+    if (pathname[strlen(pathname)-1] == '/') 
+    {
+        localPathname[strlen(localPathname)-1] = 0;  //! /get rid of slash       TODO:LI MIGHT NEED THIS IN CD
+    }
+
+    
+    if(pathname == '\0' || strcmp(pathname, "") == 0)
+    {
+        puts("can't creat with no pathname provided");
+        memset(pathname,0,sizeof(pathname));//!clear path buffer
+        return -1;
+    }
+    if(pathname)
+    if (strcmp(pathname, "/") == 0 || strcmp(pathname, ".") == 0 || strcmp(pathname, "..") == 0)
+    {
+        printf("can't creat with %s\n", pathname);
+        return -1;
+    }
+    if (pathname[0]=='/')
+    {
+        start = root;
+    }
+    else
+    {
+        start = cwd;
+    }
+    printf("check whether %s already exists\n", pathname);
+
+    searchNode = start;
+
+    //! Check to see if there is any '/' in the pathname
+    int i=0;
+    int pathCounter = 0;
+    while(localPathname[i] != '\0')
+    {
+        if(localPathname[i] == '/')
+        { 
+            if(i == 0)
+            {
+
+            }
+            else
+            {
+                pathCounter++;
+            }
+            
+        }
+        i++;
+    }
+
+    if (pathCounter > 0) //! Means there is at least one '/' in the path
+    {
+        char *tempPath = strtok(localPathname, "/");
+        printf("Traversing through: %s/ ", tempPath);
+        
+        i=0; //reset counter
+        while(i < pathCounter)
+        {
+            //! Check the name is within the child & siblings
+            searchNode = search_child(searchNode, tempPath);
+            if (searchNode) //* If the current part of the path exists then it fails
+            {
+                if(searchNode->type == 'D')
+                {
+                    printf("-> %s exists in the path\n", tempPath);
+                }
+                else
+                {
+                    printf("%s exists but it's not a directory\n", tempPath);
+                    printf("creat %s FAIL", pathname);
+                }
+            }
+            else
+            {
+                printf("Path at %s does not exist", tempPath);
+                return -1; //! Move to the next child
+            }
+            tempPath = strtok(NULL, "/");
+            i++;
+            start = searchNode;
+        }
+    }
+    else if( strcmp(dname, ".") == 0)
+    {
+        searchNode = search_child(searchNode, bname );
+        if(searchNode)
+        {
+                if(searchNode->type == 'D')
+                {
+                    printf("-> %s already exists \n", bname);
+                    printf("creat %s FAIL\n", pathname);
+                    memset(pathname,0,sizeof(pathname));//!clear path buffer
+                    return -1;
+
+                }
+        }
+    }
+
+    printf("--------------------------------------\n");
+    printf("ready to creat %s\n", pathname);
+    q = (NODE *)malloc(sizeof(NODE));
+    q->type = 'F'; //! File type
+    strcpy(q->name, bname);
+    insert_child(start, q);
+    printf("creat %s OK\n", pathname);
+    printf("--------------------------------------\n");
+    
+    //! Set pathname to null
+    memset(pathname,0,sizeof(pathname));
+
+    return 0;
 }
 
 int rm(char *pathname)
