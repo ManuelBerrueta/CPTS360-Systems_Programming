@@ -52,6 +52,9 @@ int insert_child(NODE *parent, NODE *q)
     q->siblingPtr = 0;
 }
 
+//TODO: insert_sibling?
+
+
 int delete_child(NODE *parent, NODE *q)
 {
     NODE *p = parent->childPtr;
