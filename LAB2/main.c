@@ -20,6 +20,7 @@ NODE *root;
 NODE *cwd;
 NODE *start;
 NODE *pwd_traverse;
+char temp_buffer[64];
 char line[128];         //? User command line input
 char command[16];       //? Command string
 char pathname[64];      //? Pathname string
@@ -619,7 +620,7 @@ int cd(char *pathname)
     else
     {
         cwd = tempCWD;
-        pwd_traverse = cwd;
+        *pwd_traverse = *cwd; //! Makes a copy of cwd
         printf("cd: %s was succesful\n", pathname);
         memset(pathname,0,sizeof(pathname));
         return 0;
@@ -794,8 +795,6 @@ int ls(char *pathname)
             memset(pathname,0,sizeof(pathname));
             return 0;
         }
-
-
     }
 }
 
@@ -803,17 +802,38 @@ int ls(char *pathname)
 int pwd()
 {
     //TODO: while temp->name != "/"
-    char temp[128];
-    if (pwd_traverse->name == "/")
+    //! Logic:
+    //! cwd is tracking of where we are in the file system at any momemnt in time
+    //! pwd_traverse == global variable at current working directory
+    //! We can use cwd->name as our starting point and save in a string
+    //! Then we traverse backwards withe *temp_cwd or pwd_traverse
+    //! i.e. pwd_traverse = cwd->parent
+    //! Then we copy pwd_traverse->name to a string and concat the prior string
+    //! including a "/" in between
+    //! Do this until pwd_traverse == "/"
+
+    if (strcmp(pwd_traverse->name, "/") == 0)
     {
-        printf("pwd: %s", pathname);
+        printf("pwd: %s%s",pwd_traverse->name, pathname);
         memset(pathname,0,sizeof(pathname));
+        memset(temp_buffer,0,sizeof(temp_buffer));
+        //! Recopy current working directory to pwd_traverse
+        *pwd_traverse = *cwd;
+        return 0;
     }
-    strcat(temp, "/"); //TODO: Possible issue with null characters
-    strcat(temp, pwd_traverse->name);
-    strcat(temp, pathname);
-    strcpy(pathname, temp);
+    // TODO: When we enter the function again we need a placeholder for
+    //TODO:  the last cwd 
+    memset(pathname,0,sizeof(pathname));
+    strcat(pathname, temp_buffer);
+    memset(temp_buffer,0,sizeof(temp_buffer));
+    strcpy(temp_buffer, "/"); //TODO: Possible issue with null characters
+    strcat(temp_buffer, pwd_traverse->name); //? Copy name of cwd 
+                                             //? should be "/cwd_name"
+    strcat(temp_buffer, pathname);
+   // strcpy(pathname, temp_buffer);
     pwd_traverse = pwd_traverse->parentPtr;    
+
+    pwd();
 }
 
 int creat(char *pathname)
