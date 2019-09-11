@@ -86,8 +86,7 @@ int Print_InOrder_Traversal(NODE* tree, FILE *outFile)
         }
         else
         {
-            printf("%c /%s", tree->type, tree->name);
-
+            //printf("%c /%s", tree->type, tree->name);
             //! Testing
             // while( the parent is not null traverse) on the way back print
             // strcpy(pathname, tree->name)

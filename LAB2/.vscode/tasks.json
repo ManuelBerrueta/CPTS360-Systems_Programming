@@ -12,7 +12,7 @@
                 "-m32",
                 //"${file}",
                 "${workspaceFolder}/main.c",
-                "${workspaceFolder}/filesystem.c",
+                //"${workspaceFolder}/filesystem.c",
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}"
             ],

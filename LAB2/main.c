@@ -29,6 +29,12 @@ char bname[64];         //? Basename string holder
 char *cmd[] = {"mkdir", "rmdir", "ls", "cd", "pwd", "creat", "rm", "save", 
                "reload", "menu", "quit", NULL};
 
+NODE *new_node(char *name);
+NODE *search_child(NODE *parent, char *name);
+int insert_child(NODE *parent, NODE *q);
+int delete_child(NODE *parent, NODE *q);
+int Print_InOrder_Traversal(NODE* tree, FILE *outFile, char *currpath);
+
 int findCmd(char *command);
 void initialize();
 int dbname(char *pathname);
@@ -36,6 +42,7 @@ int tokenize(char *pathname);
 
 int mkdir(char *pathname);
 int rmdir(char *pathname);
+
 int cd(char *pathname);
 int ls(char *pathname);
 int pwd();
@@ -81,6 +88,173 @@ int main()
     }
     return 0;
 }
+
+//!!!!!!!!!!!!!!!!!!!!!! NODE Structs !!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+NODE *new_node(char *name)
+{
+    NODE *node = (NODE *)malloc(sizeof(NODE));
+    strcpy(node->name, name); //strcpy copies the str including the null char
+    node->childPtr = node->parentPtr = node->siblingPtr = 0;
+    return node;
+}
+
+NODE *search_child(NODE *parent, char *name)
+{
+    //! Here you start with the child and then look at the siblings
+    //! for a possible match
+    
+    NODE *p;
+    printf("search for %s in parent DIR\n", name);
+    p = parent->childPtr;
+    if (p==0)
+    {
+        return 0;
+    }
+    while(p)
+    {
+        if (strcmp(p->name, name)==0)
+        {
+            return p;
+        }
+        
+        p = p->siblingPtr;
+    }
+    return 0;
+}
+
+int insert_child(NODE *parent, NODE *q)
+{
+    NODE *p = parent->childPtr  ;
+    printf("insert NODE %s into parent child list\n", q->name);
+    if (p==0) //! Case when the parent has no chilidren
+    {
+        parent->childPtr = q; 
+    }
+    else //! Case where parent already had at least one child
+    {
+        while(p->siblingPtr) //! Iterate until p children pointer is null
+        {
+            p = p->siblingPtr;
+        }
+        p->siblingPtr = q;
+    }
+    q->parentPtr = parent;
+    q->siblingPtr = 0;
+}
+
+
+/* int Print_NODE_Path(NODE* tree, FILE *outFile)
+{
+    if (tree->name != "/")
+    {
+        Print_NODE_Path(tree->parentPtr, outFile);
+        if (tree->name == "/")
+        {
+            printf("/");
+        }
+        else
+        {
+            printf("%s", tree->name);
+            return 0;
+        }
+    }
+} */
+
+
+int Print_InOrder_Traversal(NODE* tree, FILE *outFile, char *currpath)
+{
+    memset(pathname,0,sizeof(currpath));//!clear path buffer
+
+    if (tree == NULL)
+    {
+        // printf("\n");
+        return;
+    }
+    else
+    {
+        if(strcmp(tree->name, "/") == 0)
+        {
+            printf("%c %s\n", tree->type, tree->name);
+        }
+        else
+        {
+            //strcat(currpath, tree);
+            printf("%c %s/%s\n", tree->type, currpath, tree->name);
+            strcat(currpath, "/");
+            strcat(currpath, tree);
+            //memset(pathname,0,sizeof(currpath));//!clear path buffer
+            //! Testing
+            // while( the parent is not null traverse) on the way back print
+            // strcpy(pathname, tree->name)
+            // print backwards let tempSize = strlen(pathname)
+            // 
+            // while (i => 0 ){ printf}
+
+            //TODO: do a possible recursive call until nullptr
+            //TODO: to circulate the path
+            //TODO: Possibly use pwd
+        }
+        
+        Print_InOrder_Traversal(tree->childPtr, outFile, currpath);
+        Print_InOrder_Traversal(tree->siblingPtr, outFile, currpath);
+/*         if(strcmp(tree->name, "/") == 0)
+        {
+            return 0;
+        } */
+    }
+}
+
+//TODO: insert_sibling?
+
+
+int delete_child(NODE *parent, NODE *q)
+{
+    NODE *p = parent->childPtr;
+    NODE *temp;
+    printf("Delete NODE %s from parent child list\n", q->name);
+/*     if (p==0) //! Case when the parent has no chilidren
+    {
+        parent->childPtr = q; 
+    } */
+
+    //TODO: Theory if the parent is the node we are trying to delete
+    if( strcmp(p->name, q->name) == 0)
+    {
+        //TODO: Must replace parent with a sibling
+        temp = p;
+        p->childPtr=p->siblingPtr;//! Parent->childPtr points to sibling
+        //memset(temp,0,sizeof(temp));//!clear path buffer
+        free(temp);
+        return;
+    }
+    else
+    {
+        //! Iterate until p children pointer name is the node we are trying to delete
+        while( strcmp(p->siblingPtr->name, q->name) )
+        {
+            p = p->siblingPtr;
+        }
+        temp = p->siblingPtr;
+
+        //TODO: Check to see if the node we are going to delete has other siblings
+        if(temp->siblingPtr != 0)
+        {
+            //! if it does have a sibling, attach it to the "parent sibling"
+            p->siblingPtr = temp->siblingPtr;
+            free(temp);
+            temp=0;
+        }
+        else
+        {
+            free(p->siblingPtr); //! Frees the memory
+            p->siblingPtr=0; //! Now points to null
+        }
+    }
+    return;
+}
+
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 int findCmd(char *command)
 {
@@ -1163,7 +1337,9 @@ int save()
     puts("==> Saving File System");
     FILE *fp = fopen("mySavedFileSystem.txt", "w+");
     //fprintf(fp, "%c %s", 'D', "string\n");
-    Print_InOrder_Traversal(root, fp);
+    char tempPath[64] = "\0";
+    //strcpy(tempPath, "/");
+    Print_InOrder_Traversal(root, fp, tempPath);
     fclose(fp);
     puts("==> File System Saved Succesfuklly\n");
 }

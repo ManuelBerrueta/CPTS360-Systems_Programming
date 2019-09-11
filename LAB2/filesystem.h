@@ -32,10 +32,10 @@ typedef struct node
     struct node *siblingPtr; //! Points to the oldest sibling
 }NODE;
 
-NODE *new_node(char *name);
+/* NODE *new_node(char *name);
 NODE *search_child(NODE *parent, char *name);
 int insert_child(NODE *parent, NODE *q);
 int delete_child(NODE *parent, NODE *q);
-int Print_InOrder_Traversal(NODE* tree, FILE *outFile);
+int Print_InOrder_Traversal(NODE* tree, FILE *outFile); */
 
 #endif
