@@ -1171,6 +1171,59 @@ int save()
 int reload(char *filename)
 {
     char buff[255];
+    char fileType[3];
+    char tempPath[64];
+    //initialize();
+    puts("==> Loading File System");
+    FILE *fp = fopen("pathSavedFileSystem.txt", "r");
+    //fprintf(fp, "%c %s", 'D', "string\n");
+    //while(get)
+    //fscanf(fp, "%s", buff);
+
+    //! Scan the first root but not mkdir
+    // fscanf(fp, "%s", buff); //! Only gets until first white space
+    fgets(buff, 64, fp);
+    while(!feof(fp))
+    {
+        //fscanf(fp, "%s", buff); //! Only gets until first white space
+        fgets(buff, 64, fp);
+        //char *fileType = strtok(buff, "");
+        //char *tempPath = strtok(NULL, "/");
+        sscanf(buff, "%s %s", fileType, tempPath);
+        if (strcmp(fileType, "D") == 0)
+        {
+            mkdir(tempPath);
+        }
+        else
+        {
+            creat(tempPath);
+        }
+        printf("%s\n", buff);
+    }
+    fclose(fp);
+    puts("==> File System LOADED Succesfully\n");
+}
+
+int menu(char *pathname)
+{
+    puts("Terminal menu - Select a Command from the following:\n");
+    puts("mkdir, rmdir, ls, cd, pwd, creat, rm, save,reload, menu, quit\n\n");
+}
+
+int quit(char *pathname)
+{
+    puts("Goodbye\n\n");
+    puts("==> Saving file system . . . \n");
+    //save();
+    puts("===> File System Saved\n");
+    exit(0);
+    return 0;
+}
+
+
+/* int reload(char *filename)
+{
+    char buff[255];
     //initialize();
     puts("==> Loading File System");
     FILE *fp = fopen("myTestSavedFileSystem.txt", "r");
@@ -1188,17 +1241,4 @@ int reload(char *filename)
     }
     fclose(fp);
     puts("==> File System LOADED Succesfully\n");
-}
-
-int menu(char *pathname)
-{
-    puts("Terminal menu - Select a Command from the following:\n");
-}
-
-int quit(char *pathname)
-{
-    puts("Goodbye\n\n");
-    //save();
-    exit(0);
-    return 0;
-}
+} */
