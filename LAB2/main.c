@@ -1,7 +1,8 @@
 /******************************************************************************
  **                                                                          **
  **     Unix/Linux File System Tree Simulator Programming Project - 2.13     **
- **                                                                          **
+ **                                 by                                       **
+ **                           Manuel Berrueta                                **
  ******************************************************************************/
 
 //!                 Project Specification and Requirements
@@ -144,31 +145,11 @@ int insert_child(NODE *parent, NODE *q)
 }
 
 
-/* int Print_NODE_Path(NODE* tree, FILE *outFile)
-{
-    if (tree->name != "/")
-    {
-        Print_NODE_Path(tree->parentPtr, outFile);
-        if (tree->name == "/")
-        {
-            printf("/");
-        }
-        else
-        {
-            printf("%s", tree->name);
-            return 0;
-        }
-    }
-} */
-
-
 int Print_InOrder_Traversal(NODE* tree, FILE *outFile, char *currpath)
 {
-    memset(pathname,0,sizeof(currpath));//!clear path buffer
-
     if (tree == NULL)
     {
-        // printf("\n");
+        memset(currpath,0,sizeof(currpath));//!clear path buffer
         return;
     }
     else
@@ -179,33 +160,15 @@ int Print_InOrder_Traversal(NODE* tree, FILE *outFile, char *currpath)
         }
         else
         {
-            //strcat(currpath, tree);
             printf("%c %s/%s\n", tree->type, currpath, tree->name);
             strcat(currpath, "/");
             strcat(currpath, tree);
-            //memset(pathname,0,sizeof(currpath));//!clear path buffer
-            //! Testing
-            // while( the parent is not null traverse) on the way back print
-            // strcpy(pathname, tree->name)
-            // print backwards let tempSize = strlen(pathname)
-            // 
-            // while (i => 0 ){ printf}
-
-            //TODO: do a possible recursive call until nullptr
-            //TODO: to circulate the path
-            //TODO: Possibly use pwd
         }
         
         Print_InOrder_Traversal(tree->childPtr, outFile, currpath);
         Print_InOrder_Traversal(tree->siblingPtr, outFile, currpath);
-/*         if(strcmp(tree->name, "/") == 0)
-        {
-            return 0;
-        } */
     }
 }
-
-//TODO: insert_sibling?
 
 
 int delete_child(NODE *parent, NODE *q)
