@@ -1308,7 +1308,7 @@ int save()
     //strcpy(tempPath, "/");
     Print_InOrder_Traversal(root, fp, tempPath);
     fclose(fp);
-    puts("==> File System Saved Succesfuklly\n");
+    puts("==> File System Saved Succesfully\n");
 }
 
 int reload(char *filename)
@@ -1318,7 +1318,8 @@ int reload(char *filename)
     char tempPath[64];
     //initialize();
     puts("==> Loading File System");
-    FILE *fp = fopen("pathSavedFileSystem.txt", "r");
+    FILE *fp = fopen("mySavedFileSystem.txt", "r");
+    //FILE *fp = fopen("pathSavedFileSystem.txt", "r");
     //fprintf(fp, "%c %s", 'D', "string\n");
     //while(get)
     //fscanf(fp, "%s", buff);
@@ -1342,6 +1343,7 @@ int reload(char *filename)
             creat(tempPath);
         }
         printf("%s\n", buff);
+        memset(buff,0,sizeof(buff));//!clear path buffer
     }
     fclose(fp);
     puts("==> File System LOADED Succesfully\n");
@@ -1357,7 +1359,7 @@ int quit(char *pathname)
 {
     puts("Goodbye\n\n");
     puts("==> Saving file system . . . \n");
-    //save();
+    save();
     puts("===> File System Saved\n");
     exit(0);
     return 0;
