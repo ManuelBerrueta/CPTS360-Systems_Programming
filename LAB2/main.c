@@ -156,11 +156,11 @@ int Print_InOrder_Traversal(NODE* tree, FILE *outFile, char *currpath)
     {
         if(strcmp(tree->name, "/") == 0)
         {
-            printf("%c %s\n", tree->type, tree->name);
+            fprintf(outFile, "%c %s\n", tree->type, tree->name);
         }
         else
         {
-            printf("%c %s/%s\n", tree->type, currpath, tree->name);
+            fprintf(outFile, "%c %s/%s\n", tree->type, currpath, tree->name);
             strcat(currpath, "/");
             strcat(currpath, tree);
         }
@@ -1299,6 +1299,10 @@ int save()
 {
     puts("==> Saving File System");
     FILE *fp = fopen("mySavedFileSystem.txt", "w+");
+    if (fp == 0)
+    {
+        puts("Error opening file for saving\n\n");
+    }
     //fprintf(fp, "%c %s", 'D', "string\n");
     char tempPath[64] = "\0";
     //strcpy(tempPath, "/");
