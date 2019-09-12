@@ -395,14 +395,10 @@ int mkdir(char *pathname)
         searchNode = search_child(searchNode, bname );
         if(searchNode)
         {
-                if(searchNode->type == 'D')
-                {
-                    printf("-> %s already exists \n", bname);
-                    printf("mkdir %s FAIL\n", pathname);
-                    memset(pathname,0,sizeof(pathname));//!clear path buffer
-                    return -1;
-
-                }
+            printf("-> %s already exists \n", bname);
+            printf("mkdir %s FAIL\n", pathname);
+            memset(pathname,0,sizeof(pathname));//!clear path buffer
+            return -1;
         }
     }
 
@@ -1127,6 +1123,22 @@ int creat(char *pathname)
                 }
         }
     }
+
+        //! EDGE CASES
+
+    if(searchNode != 0)
+    {
+        searchNode = search_child(searchNode, bname );
+        if(searchNode)
+        {
+            printf("-> %s already exists \n", bname);
+            printf("mkdir %s FAIL\n", pathname);
+            memset(pathname,0,sizeof(pathname));//!clear path buffer
+            return -1;
+        }
+    }
+
+    //! END NEW GOODIES
 
     printf("--------------------------------------\n");
     printf("ready to creat %s\n", pathname);
