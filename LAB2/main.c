@@ -835,7 +835,7 @@ int ls(char *pathname)
         }
         printf("\n");
         memset(pathname,0,sizeof(pathname));
-        return;
+        return 0;
     }
     else
     {
