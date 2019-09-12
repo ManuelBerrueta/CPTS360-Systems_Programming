@@ -249,8 +249,6 @@ void initialize()
     cwd = root;
     pwd_traverse = (NODE *)malloc(sizeof(NODE));
     *pwd_traverse = *cwd;
-    //*pwd_traverse = *cwd;
-                                                           //TODO: Changed from pwd_traverse = cwd to  *pwd_traverse = *cwd
 }
 
 int dbname(char *pathname)
@@ -597,7 +595,7 @@ int rmdir(char *pathname)
 }
 
 
-int cd(char *pathname)
+int cd(char *pathname)  
 {
     //? 1. Find pathname node;
     //? 2. Check if it's a DIR
@@ -608,9 +606,14 @@ int cd(char *pathname)
     char localPathname[64] = {'\0'};
     strcat(localPathname, pathname);
 
+    if (pathname[strlen(pathname)-1] == '/') 
+    {
+        localPathname[strlen(localPathname)-1] = 0;  //! /get rid of slash       TODO:LI MIGHT NEED THIS IN CD
+    }
+
     //! Split pathname in to dname for dirs, and bname for base
     dbname(pathname);
-    NODE *tempCWD = cwd;
+    NODE *tempCWD = cwd;                                                        //TODO:
     char *tempPath = pathname;
 
     //! TESTING - REMOVE
@@ -782,7 +785,9 @@ int ls(char *pathname)
     }
 
     dbname(pathname);
-    NODE *tempCWD = cwd;
+    NODE *tempCWD = (NODE *)malloc(sizeof(NODE));
+    *tempCWD = *cwd;
+    //! NODE *tempCWD  = cwd;  --Changed this due to bug
     char *tempPath = pathname;
 
     //! If no string is passed after ls, then just list the CWD
@@ -964,16 +969,18 @@ int pwd()
         printf("pwd: %s\n", temp_buffer);
         memset(pathname,0,sizeof(pathname));
         memset(temp_buffer,0,sizeof(temp_buffer));
+        puts("==>PWD SUCCESS\n");
         //! Recopy current working directory to pwd_traverse
-        //*pwd_traverse = *cwd;                                                     //TODO: Fix this line changes root
+        pwd_traverse = 0;
+        pwd_traverse = (NODE *)malloc(sizeof(NODE)); 
+        *pwd_traverse = *cwd;
+        // *pwd_traverse = *cwd changed to root, had to reallocate memory
         return 0;
     }
-    // TODO: When we enter the function again we need a placeholder for
-    //TODO:  the last cwd 
     memset(pathname,0,sizeof(pathname));
     strcat(pathname, temp_buffer);
     memset(temp_buffer,0,sizeof(temp_buffer));
-    strcpy(temp_buffer, "/"); //TODO: Possible issue with null characters
+    strcpy(temp_buffer, "/"); 
     strcat(temp_buffer, pwd_traverse->name); //? Copy name of cwd 
                                              //? should be "/cwd_name"
     strcat(temp_buffer, pathname);
