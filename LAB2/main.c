@@ -210,8 +210,8 @@ int delete_child(NODE *parent, NODE *q)
         }
         else
         {
-            free(p->siblingPtr); //! Frees the memory
-            p->siblingPtr=0; //! Now points to null
+            free(p->siblingPtr); 
+            p->siblingPtr=0; 
         }
     }
     return;
@@ -1049,7 +1049,6 @@ int creat(char *pathname)
             {
                 pathCounter++;
             }
-            
         }
         i++;
     }
@@ -1372,26 +1371,3 @@ int quit(char *pathname)
     exit(0);
     return 0;
 }
-
-
-/* int reload(char *filename)
-{
-    char buff[255];
-    //initialize();
-    puts("==> Loading File System");
-    FILE *fp = fopen("myTestSavedFileSystem.txt", "r");
-    //fprintf(fp, "%c %s", 'D', "string\n");
-    //while(get)
-    //fscanf(fp, "%s", buff);
-
-    //! Scan the first root but not mkdir
-    fscanf(fp, "%s", buff);
-    while(!feof(fp))
-    {
-        fscanf(fp, "%s", buff);
-        mkdir(buff);
-        printf("%s\n", buff);
-    }
-    fclose(fp);
-    puts("==> File System LOADED Succesfully\n");
-} */
