@@ -186,7 +186,7 @@ int delete_child(NODE *parent, NODE *q)
     {
         //TODO: Must replace parent with a sibling
         temp = p;
-        p->childPtr=p->siblingPtr;//! Parent->childPtr points to sibling
+        p->parentPtr->childPtr=p->siblingPtr;//! Parent->childPtr points to sibling
         //memset(temp,0,sizeof(temp));//!clear path buffer
         free(temp);
         return;
@@ -210,8 +210,8 @@ int delete_child(NODE *parent, NODE *q)
         }
         else
         {
-            free(p->siblingPtr); 
-            p->siblingPtr=0; 
+            free(p->siblingPtr); //! Frees the memory
+            p->siblingPtr=0; //! Now points to null
         }
     }
     return;
@@ -387,6 +387,12 @@ int mkdir(char *pathname)
                 }
         }
     }
+
+    //! EDGE CASES
+
+    
+
+    //! END NEW GOODIES
 
     printf("--------------------------------------\n");
     printf("ready to mkdir %s\n", pathname);
@@ -966,7 +972,14 @@ int pwd()
 
     if (strcmp(pwd_traverse->name, "/") == 0)
     {
-        printf("pwd: %s\n", temp_buffer);
+        if (strcmp(temp_buffer, "\0") == 0)
+        {
+            printf("pwd: /\n");
+        }
+        else
+        {
+            printf("pwd: %s\n", temp_buffer);
+        }
         memset(pathname,0,sizeof(pathname));
         memset(temp_buffer,0,sizeof(temp_buffer));
         puts("==>PWD SUCCESS\n");
