@@ -759,8 +759,10 @@ int cd(char *pathname)
     if (strcmp(bname, "..") == 0)
     {
         //TODO: Go back one directory
-        cwd = cwd->parentPtr;
-        printf("cd %s was succesful", pathname);
+        //cwd = cwd->parentPtr;
+        cwd = tempCWD->parentPtr;
+        *pwd_traverse = *cwd; //! Makes a copy of cwd 
+        printf("cd %s was succesful\n", pathname);
         memset(pathname,0,sizeof(pathname)); //Clear pathname
         return 0;
     }
