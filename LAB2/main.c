@@ -801,7 +801,8 @@ int ls(char *pathname)
         return 0;
     }
     //! Else if pathname ==  '/', then we start at root
-    else if( *pathname == '/')
+    //else if( *pathname == '/')
+    else if( strcmp(pathname, "/") == 0 )
     {
         NODE *p = root->childPtr; //! *p = Traversing pointer
 
