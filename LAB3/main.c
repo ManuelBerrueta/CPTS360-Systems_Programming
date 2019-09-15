@@ -16,6 +16,8 @@ char dname[64];         //? Directory string holder
 char bname[64];         //? Basename string holder
 char cwd[256];
 char buff[256] = "\0";
+char myargv[246] = "\0";
+int myargc = 0;
 
 int main(int argc, char *argv[], char *env[])
 {
@@ -29,18 +31,36 @@ int main(int argc, char *argv[], char *env[])
     }
 
     int i=0;
+    int argcounter=0;
+    char tempArgc[64] = "\0";
     
     while(i <= 2)
     {
         printf("[ %04d/%02d/%02d ] BERR Shell [ %s ]\n|-$ ", tm.tm_year+1900, tm.tm_mon, tm.tm_mday, cwd);
         scanf("%s", buff);
 
+        //! (2) Handle simple commands
+        strcpy(command, strtok(buff, " "));
+        while(buff)
+        {
+            tempArgc[i] = strtok(NULL, " ");
+            i++;
+        }
+        
+        //TODO: Parse buff strok " "
+        //TODO: First arg will be the command
+        //TODO: The rest will be parameters
+        //TODO: Last paramemter will be the target
+        //TODO: Count number of arguments
+        //TODO: Uset getopt(myargc, myargv.)
+        
+        
+        
+        
         i++;
     }
 
-    //! (2) Handle simple commands
 
-    //TODO: Maybe start a new process and pass on argv
     
     
     
