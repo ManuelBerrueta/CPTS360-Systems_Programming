@@ -16,7 +16,7 @@ char dname[64];         //? Directory string holder
 char bname[64];         //? Basename string holder
 char cwd[256];
 char buff[256] = "\0";
-char myargv[246] = "\0";
+char *myargv[246] = "\0";
 int myargc = 0;
 
 int main(int argc, char *argv[], char *env[])
@@ -28,11 +28,12 @@ int main(int argc, char *argv[], char *env[])
     struct tm tm = *localtime(&T);
     if (getcwd(cwd, sizeof(cwd)) != 0)
     {
+
     }
 
     int i=0;
     int argcounter=0;
-    char tempArgc[64] = "\0";
+    char tempArg[64] = "\0";
     
     while(i <= 2)
     {
@@ -43,7 +44,7 @@ int main(int argc, char *argv[], char *env[])
         strcpy(command, strtok(buff, " "));
         while(buff)
         {
-            tempArgc[i] = strtok(NULL, " ");
+            *tempArg = strtok(NULL, " ");
             i++;
         }
         
