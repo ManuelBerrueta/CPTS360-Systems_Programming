@@ -17,6 +17,12 @@ char cwd[256];
 char buff[256] = { 0 };
 char *myargv[246] = { 0 };
 int myargc = 0;
+//! Print env vars
+/*     while (env[i] != '\0')
+    {
+        printf("%s\n", env[i]);
+        i++;
+    } */
 
 int main(int argc, char *argv[], char *env[])
 {
@@ -25,21 +31,14 @@ int main(int argc, char *argv[], char *env[])
     //! (1) Prompt user for input
     time_t T = time(NULL);
     struct tm tm = *localtime(&T);
-    if (getcwd(cwd, sizeof(cwd)) != 0)
-    {
-
-    }
 
     int i=0;
     int argcounter=0;
     char tempArg[64] = "\0";
+    char * pathNames[36] = { 0 };
 
-    //! Print env vars
-/*     while (env[i] != '\0')
-    {
-        printf("%s\n", env[i]);
-        i++;
-    } */
+
+
 
     //! get the path
     const char *path = getenv("PATH");
@@ -48,6 +47,10 @@ int main(int argc, char *argv[], char *env[])
     
     while(1)
     {
+        if (getcwd(cwd, sizeof(cwd)) != 0)
+        {
+
+        }
         printf("[ %04d/%02d/%02d ] BERR Shell [ %s ]\n|-$ ", tm.tm_year+1900, tm.tm_mon, tm.tm_mday, cwd);
         fgets(buff, sizeof(buff), stdin);
         buff[strlen(buff)-1] = 0;
@@ -91,7 +94,6 @@ int main(int argc, char *argv[], char *env[])
             }
         }
 
-
         argcounter=0;
         //! Count Number Of Paths
         while(path[i] != '\0')
@@ -102,7 +104,28 @@ int main(int argc, char *argv[], char *env[])
             }
             i++;
         }
+        argcounter++; //! for the last path without ":"
         i=0;
+
+        //! Tokenize paths
+        char commpath[64];
+        pathNames[i] = strtok(path, ":");
+        while (++i < argcounter)
+        {
+            pathNames[i] = strtok(NULL, ":");
+        }
+
+        //! Code to append path to command:
+        /* strcpy(commpath, tempPath);
+        strcat(commpath, "/");
+        strcat(commpath, command);
+        int r = execve(commpath, myargv, *env);
+        memset(tempPath,0,sizeof(tempPath));
+        tempPath =strtok(NULL, ":");
+        i++; */
+
+        
+
 
         //! PATH FIX
         //TODO: use chdir of each execve in a loop until it works?
@@ -125,21 +148,11 @@ int main(int argc, char *argv[], char *env[])
             }
             i++;
         } */
-        char commpath[64];
-        char *tempPath = strtok(path, ":");
-        while (i < argcounter)
-        {
-            strcpy(commpath, tempPath);
-            strcat(commpath, "/");
-            strcat(commpath, command);
-            int r = execve(commpath, myargv, *env);
-            memset(tempPath,0,sizeof(tempPath));
-            tempPath =strtok(NULL, ":");
-            i++;
-        }
+
 
 
         //! Working forking child process!
+        int r = -1;
         int status;
         int pid = fork();
         if (pid)
@@ -152,7 +165,7 @@ int main(int argc, char *argv[], char *env[])
             {
                 char *tempPath = strtok(path, ":");
                 strcat(tempPath, command);
-                int r = execve(tempPath, myargv, *env);
+                r = execve(tempPath, myargv, *env);
                 i++;
             }
             
