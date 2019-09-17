@@ -78,8 +78,22 @@ int main(int argc, char *argv[], char *env[])
         }
 
 
+        //! Check if command == cd
+        if (strcmp(command, "cd") == 0)
+        {
+            if (argcounter != 0)
+            {
+                chdir(myargv[1]);
+            }
+            else
+            {
+                //chdir(HOME);
+            }
+        }
+
+
         argcounter=0;
-        //! Tokenize Paths
+        //! Count Number Of Paths
         while(path[i] != '\0')
         {
             if(path[i] == ':')
@@ -89,6 +103,40 @@ int main(int argc, char *argv[], char *env[])
             i++;
         }
         i=0;
+
+        //! PATH FIX
+        //TODO: use chdir of each execve in a loop until it works?
+
+/*         while (i < argcounter)
+        {
+            char *tempPath = strtok(path, ":");
+            strcat(tempPath, command);
+
+            int status;
+            int pid = fork();
+            if (pid)
+            {
+                pid=wait(&status);
+            }
+            else
+            {
+                chdir(tempPath);
+                int r = execve(command, myargv, env);
+            }
+            i++;
+        } */
+        char commpath[64];
+        char *tempPath = strtok(path, ":");
+        while (i < argcounter)
+        {
+            strcpy(commpath, tempPath);
+            strcat(commpath, "/");
+            strcat(commpath, command);
+            int r = execve(commpath, myargv, *env);
+            memset(tempPath,0,sizeof(tempPath));
+            tempPath =strtok(NULL, ":");
+            i++;
+        }
 
 
         //! Working forking child process!
@@ -100,16 +148,19 @@ int main(int argc, char *argv[], char *env[])
         }
         else
         {
-            //int r = execve(command, myargv, env);
-            char *tempPath = strtok(path, ":");
-            strcat(tempPath, command);
-            while (execve(command, myargv, env) == -1)
+            while (i < argcounter)
             {
-                tempPath = strtok(NULL, ":");
+                char *tempPath = strtok(path, ":");
                 strcat(tempPath, command);
+                int r = execve(tempPath, myargv, *env);
+                i++;
             }
-            //int r = execlp(command, myargv);
-            sleep(2);
+            
+            
+            //chdir(tempPath);
+            //int r = execve(command, myargv, *env);
+            //int r = execvp(command, myargv);
+            //sleep(2);
         }
         
 
