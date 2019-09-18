@@ -72,7 +72,7 @@ int main(int argc, char *argv[], char *env[])
         i++;
         if(argcounter > 0)
         {
-            while(i < argcounter)
+            while(i <= argcounter)
             {
                 myargv[i] = strtok(NULL, " ");
                 i++;
@@ -127,15 +127,60 @@ int main(int argc, char *argv[], char *env[])
         //! Attempt running execve with appending each name
         //TODO: use chdir of each execve in a loop until it works?
 
-        char* tempPath = 0;
+        char tempPath[64] = { 0 };
         strcpy(tempPath, pathNames[i]);
-        printf("%s", command);
+        i++;
+        strcat(tempPath, "/");
+        printf("command: %s   tempPath to command: %s\n", command,tempPath);
+        //getchar();
         int r = -1;
-        while (i < argcounter && r == -1)
-        {
-            strcat(tempPath, command);
+        int status;
 
-            int status;
+        //! Modified using a loop inside the child process area
+
+        strcat(tempPath, command); //! concat tempPath and command
+        printf("command with Path: %s\n", tempPath);
+        //getchar();
+
+        
+        int pid = fork();
+        if (pid)
+        {
+            pid=wait(&status);
+        }
+        else
+        {
+            printf("%s\n", tempPath);
+            // getchar();
+            
+            while (r == -1)
+            {
+                strcat(tempPath, command); //! concat tempPath and command
+                printf("Prior to execve tempPath %s\n", tempPath);
+                r = execve(tempPath, myargv, env);
+                strcpy(tempPath, pathNames[i]);
+                strcat(tempPath, "/");
+                i++;    
+            }
+        }
+        i=0; //* Reset counter
+
+
+
+
+
+
+
+
+        //! This kind of works but doesn't stop, it also it doesn't look like it passes the args?
+        //! Also y
+/*         while (i < argcounter && r == -1)
+        {
+            strcat(tempPath, command); //! concat tempPath and command
+            printf("command with Path: %s\n", tempPath);
+            //getchar();
+
+            
             int pid = fork();
             if (pid)
             {
@@ -146,16 +191,22 @@ int main(int argc, char *argv[], char *env[])
                 printf("%s", tempPath);
                 getchar();
                 r = execve(tempPath, myargv, env);
+                if (r != -1)
+                {
+                    return;
+                }
             }
             i++;
             strcpy(tempPath, pathNames[i]);
-        }
+
+            strcat(tempPath, "/");
+        } */
 
 
 
         //! Working forking child process!
 //        int r = -1;
-        int status;
+/*         int status;
         int pid = fork();
         if (pid)
         {
@@ -165,7 +216,8 @@ int main(int argc, char *argv[], char *env[])
         {
             while (i < argcounter)
             {
-                char *tempPath = strtok(path, ":");
+                strcpy(tempPath, pathNames[i]);
+                strcat(tempPath, "/");
                 strcat(tempPath, command);
                 r = execve(tempPath, myargv, *env);
                 i++;
@@ -176,7 +228,7 @@ int main(int argc, char *argv[], char *env[])
             //int r = execve(command, myargv, *env);
             //int r = execvp(command, myargv);
             //sleep(2);
-        }
+        } */
         
 
         
