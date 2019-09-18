@@ -133,8 +133,7 @@ int main(int argc, char *argv[], char *env[])
         strcat(tempPath, "/");
         printf("command: %s   tempPath to command: %s\n", command,tempPath);
         //getchar();
-        int r = -1;
-        int status;
+
 
         //! Modified using a loop inside the child process area
 
@@ -142,26 +141,35 @@ int main(int argc, char *argv[], char *env[])
         printf("command with Path: %s\n", tempPath);
         //getchar();
 
-        
+        int r = -1;
+        int status;
         int pid = fork();
         if (pid)
         {
+            printf("\n======> PARENT=%d WAITS for CHILD=%d to DIE <======\n", getpid(),pid);
             pid=wait(&status);
+            printf("======> DEAD CHILD=%d, STATUS=0x%04x <======\n\n", pid, status);
         }
         else
         {
             printf("%s\n", tempPath);
             // getchar();
-            
+            printf("CHILD=%d STARTED | My PARENT=%d\n", getpid(), getppid());
+
             while (r == -1)
             {
                 strcat(tempPath, command); //! concat tempPath and command
                 printf("Prior to execve tempPath %s\n", tempPath);
+
                 r = execve(tempPath, myargv, env);
+
+                //printf("CHILD=%d EXIT my PARENT=%d\n", getpid(), getppid());
+
                 strcpy(tempPath, pathNames[i]);
                 strcat(tempPath, "/");
                 i++;    
             }
+            
         }
         i=0; //* Reset counter
 
