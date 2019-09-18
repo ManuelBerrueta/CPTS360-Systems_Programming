@@ -114,7 +114,7 @@ int main(int argc, char *argv[], char *env[])
         {
             pathNames[i] = strtok(NULL, ":");
         }
-
+        i=0; //* Reset counter
         //! Code to append path to command:
         /* strcpy(commpath, tempPath);
         strcat(commpath, "/");
@@ -124,15 +124,15 @@ int main(int argc, char *argv[], char *env[])
         tempPath =strtok(NULL, ":");
         i++; */
 
-        
-
-
-        //! PATH FIX
+        //! Attempt running execve with appending each name
         //TODO: use chdir of each execve in a loop until it works?
 
-/*         while (i < argcounter)
+        char* tempPath = 0;
+        strcpy(tempPath, pathNames[i]);
+        printf("%s", command);
+        int r = -1;
+        while (i < argcounter && r == -1)
         {
-            char *tempPath = strtok(path, ":");
             strcat(tempPath, command);
 
             int status;
@@ -143,16 +143,18 @@ int main(int argc, char *argv[], char *env[])
             }
             else
             {
-                chdir(tempPath);
-                int r = execve(command, myargv, env);
+                printf("%s", tempPath);
+                getchar();
+                r = execve(tempPath, myargv, env);
             }
             i++;
-        } */
+            strcpy(tempPath, pathNames[i]);
+        }
 
 
 
         //! Working forking child process!
-        int r = -1;
+//        int r = -1;
         int status;
         int pid = fork();
         if (pid)
