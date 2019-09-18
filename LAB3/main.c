@@ -90,8 +90,14 @@ int main(int argc, char *argv[], char *env[])
             }
             else
             {
-                //chdir(HOME);
+                chdir(getenv("HOME"));
             }
+        }
+
+        //! Check if command == exit
+        if (strcmp(command, "exit") == 0)
+        {
+            exit(0);
         }
 
         argcounter=0;
