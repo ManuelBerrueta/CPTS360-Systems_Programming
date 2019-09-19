@@ -37,9 +37,9 @@ int main(int argc, char *argv[], char *env[])
     int stdoutFlag = 0;
     int stdoutAppen = 0;
     int pipeFlag = 0;
-    int pd[2] = { 0 };
     char redirectName[64] = { 0 };
     char pipeName[64] = { 0 };
+    int pipepid = 0;
 
     //! get the path
     const char *path = getenv("PATH");
@@ -188,26 +188,17 @@ int main(int argc, char *argv[], char *env[])
         //getchar();
 
         //! TODO: PIPING
-        if (pipeFlag > 0)
+/*         if (pipeFlag > 0)
         {
             pipe(pd);
         }
-
+ */
 
         int r = -1;
         int status;
         int pid = fork();
         if (pid)
-        {
-            //! PIPE WORK
-            if (pipeFlag > 0)
-            {
-                close(pd[0]);
-                close(1);
-                dup(pd[1]);
-                execvp(command, myargv);
-            }
-            
+        {          
             printf("\n======> PARENT=%d WAITS for CHILD=%d to DIE <======\n", getpid(),pid);
             pid=wait(&status);
             printf("\n======> DEAD CHILD=%d, STATUS=0x%04x <======\n\n", pid, status);
@@ -220,11 +211,25 @@ int main(int argc, char *argv[], char *env[])
 
             if (pipeFlag > 0)
             {
-                close(pd[1]);
-                close(0);
-                dup(pd[0]);
-                close(pd[0]);
-                execvp(pipeName, myargv);
+                int pd[2] = { 0 };
+                pipe(pd); //! Pipe creation
+
+                pipepid=fork();
+                
+                if(pipepid)
+                {
+                    close(pd[1]); 
+                    close(0);
+                    dup(pd[0]);
+                    close(pd[0]);
+                    execvp(pipeName, myargv);
+                }
+                else
+                {
+                    /* Pipe Code */
+                }
+                
+
             }
             else
             {    
@@ -245,8 +250,9 @@ int main(int argc, char *argv[], char *env[])
                     {
                         //TODO: Split command from i forward
                         fd = open("stdout_redirect.txt", O_CREAT);
-                        close(1); //! Close file descriptor 1, stdout
-                        dup(fd); //! Rplaces first NULL descriptor, 1 in this case
+                        //close(1); //! Close file descriptor 1, stdout
+                        //dup(fd); //! Rplaces first NULL descriptor, 1 in this case
+                        dup2(fd,1);
                         close(fd);
                         fflush(stdout);
                         //memset(myargv,0,sizeof(myargv));
