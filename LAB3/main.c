@@ -197,8 +197,8 @@ int main(int argc, char *argv[], char *env[])
         strcat(tempPath, "/");
         printf("command: %s   tempPath to command: %s\n", command,tempPath);
         //getchar();
-        strcat(tempPath, command); //! concat tempPath and command
-        printf("command with Path: %s\n", tempPath);
+        //strcat(tempPath, command); //! concat tempPath and command
+        //printf("command with Path: %s\n", tempPath);
         //getchar();
 
         int r = -1;
@@ -249,14 +249,14 @@ int main(int argc, char *argv[], char *env[])
                     if (stdinFlag > 0)
                     {
                         //TODO: Split command from i forward
-                        fd = open("append_stdout_test.txt", O_RDONLY);
+                        fd = open(redirectName, O_RDONLY);
                         close(0); //! Close file descriptor 1, stdin
                         dup(fd); //! Rplaces first NULL descriptor, 0 in this case  
                     }
                     else if (stdoutFlag > 0)
                     {
                         //TODO: Split command from i forward
-                        fd = open(redirectName, O_CREAT);
+                        fd = open(redirectName, O_CREAT, 0644);
                         //close(1); //! Close file descriptor 1, stdout
                         //dup(fd); //! Rplaces first NULL descriptor, 1 in this case
                         dup2(fd,1);
@@ -267,7 +267,7 @@ int main(int argc, char *argv[], char *env[])
                     else if (stdoutAppen > 0)
                     {
                         //TODO: Split command from i forward
-                        fd = open("append_stdout_redirect.txt", O_APPEND);
+                        fd = open(redirectName, O_APPEND, 0644);
                         close(1); //! Close file descriptor 1, stdout
                         dup(fd); //! Rplaces first NULL descriptor, 1 in this case
                         close(fd);
@@ -280,7 +280,7 @@ int main(int argc, char *argv[], char *env[])
                     strcat(tempPath, command); //! concat tempPath and command
                     printf("Prior to execve tempPath %s\n", tempPath);
                     r = execve(tempPath, myargv, env);
-                    //close(1);
+                    //exit(1);
                     strcpy(tempPath, pathNames[i]);
                     strcat(tempPath, "/");
 
