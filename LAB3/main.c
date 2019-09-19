@@ -17,12 +17,7 @@ char cwd[256];
 char buff[256] = { 0 };
 char *myargv[246] = { 0 };
 int myargc = 0;
-//! Print env vars
-/*     while (env[i] != '\0')
-    {
-        printf("%s\n", env[i]);
-        i++;
-    } */
+
 
 int main(int argc, char *argv[], char *env[])
 {
@@ -64,10 +59,7 @@ int main(int argc, char *argv[], char *env[])
             {
                 if ( i != 0)
                 {
-                    stdoutAppen = i;
-                    int fd = open("append_stdout_redirect.txt", O_APPEND);
-                    close(1); //! Close file descriptor 1, stdout
-                    dup(fd); //! Rplaces first NULL descriptor, 1 in this case                     
+                    stdoutAppen = i;                    
                 }
             }
             else if( buff[i] == '>') //! > redirection check
@@ -75,9 +67,6 @@ int main(int argc, char *argv[], char *env[])
                 if ( i != 0)
                 {
                     stdoutFlag = i;
-                    int fd = open("stdout_redirect.txt", O_CREAT);
-                    close(1); //! Close file descriptor 1, stdout
-                    dup(fd); //! Rplaces first NULL descriptor, 1 in this case 
                 }
                 
             }
@@ -86,39 +75,10 @@ int main(int argc, char *argv[], char *env[])
                 if ( i != 0)
                 {
                     stdinFlag = i; //! Can use i to know where to split the str
-                    int fd = open("append_stdout_test.txt", O_RDONLY);
-                    close(0); //! Close file descriptor 1, stdin
-                    dup(fd); //! Rplaces first NULL descriptor, 0 in this case                     
                 }                
             }
             i++;
         }
-
-        char redirection[64] = { 0 };
-        char tempred[32] = { 0 };
-        char redinout[32] = { 0 };
-
-        //TODO: Split the command after <, >, or >>
-        if (stdinFlag > 0)
-        {
-            //TODO: Split command from i forward
-            strcpy(redirection, buff); //! Copy buffer
-            *tempred = strtok(redirection, "<");
-
-            strcpy(buff, tempred); //! new buff without redirection
-
-            *redinout = strtok(NULL, " "); //! May need another one of this
-            
-        }
-        else if (stdoutFlag > 0)
-        {
-
-        }
-        else if (stdoutAppen > 0)
-        {
-
-        }
-
 
 
         i=0;
@@ -210,13 +170,42 @@ int main(int argc, char *argv[], char *env[])
 
             while (r == -1)
             {
+                //!=========== IO REDIRECTION ==================================
+                int fd=0;
+
+                //TODO: Split the command after <, >, or >>
+                if (stdinFlag > 0)
+                {
+                    //TODO: Split command from i forward
+                    fd = open("append_stdout_test.txt", O_RDONLY);
+                    close(0); //! Close file descriptor 1, stdin
+                    dup(fd); //! Rplaces first NULL descriptor, 0 in this case  
+                }
+                else if (stdoutFlag > 0)
+                {
+                    //TODO: Split command from i forward
+                    fd = open("stdout_redirect.txt", O_CREAT);
+                    close(1); //! Close file descriptor 1, stdout
+                    dup(fd); //! Rplaces first NULL descriptor, 1 in this case
+                    //memset(myargv,0,sizeof(myargv));
+                }
+                else if (stdoutAppen > 0)
+                {
+                    //TODO: Split command from i forward
+                    fd = open("append_stdout_redirect.txt", O_APPEND);
+                    close(1); //! Close file descriptor 1, stdout
+                    dup(fd); //! Rplaces first NULL descriptor, 1 in this case  
+                }
+                //!=============== END IO REDIRECTION ==========================
+
+                
+                
+                
+                
+                
                 strcat(tempPath, command); //! concat tempPath and command
                 printf("Prior to execve tempPath %s\n", tempPath);
-
                 r = execve(tempPath, myargv, env);
-
-                //printf("CHILD=%d EXIT my PARENT=%d\n", getpid(), getppid());
-
                 strcpy(tempPath, pathNames[i]);
                 strcat(tempPath, "/");
                 i++;    
