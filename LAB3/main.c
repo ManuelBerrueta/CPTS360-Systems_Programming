@@ -36,7 +36,10 @@ int main(int argc, char *argv[], char *env[])
     int stdinFlag = 0;
     int stdoutFlag = 0;
     int stdoutAppen = 0;
+    int pipeFlag = 0;
+    int pd[2] = { 0 };
     char redirectName[64] = { 0 };
+    char pipeName[64] = { 0 };
 
     //! get the path
     const char *path = getenv("PATH");
@@ -70,7 +73,7 @@ int main(int argc, char *argv[], char *env[])
                 if ( i != 0)
                 {
                     stdoutFlag = i;
-                                        //!Clear buff of the redirect
+                    //!Clear buff of the redirect
                     buff[i] = 0; //! Gets rid of '>'
                     buff[i+1] = 0; //!Gets rid of the space ' '
                     j=i+2;
@@ -91,6 +94,22 @@ int main(int argc, char *argv[], char *env[])
                 {
                     stdinFlag = i; //! Can use i to know where to split the str
                 }                
+            }
+            else if(buff[i] == '|') //TODO: HERE I AM
+            {
+                pipeFlag = 1;
+                //!Clear buff of the pipe
+                buff[i] = 0; //! Gets rid of '|'
+                buff[i+1] = 0; //!Gets rid of the space ' '
+                j=i+2;
+                k=0;
+                //TODO: Do the string copy here & clean buff string
+                while (buff[j] != '\0')
+                {
+                    pipeName[k] = buff[j];
+                    buff[j++] = 0; //!delete the rest of none command chars
+                    k++;
+                }
             }
             i++;
         }
@@ -175,7 +194,7 @@ int main(int argc, char *argv[], char *env[])
         {
             printf("\n======> PARENT=%d WAITS for CHILD=%d to DIE <======\n", getpid(),pid);
             pid=wait(&status);
-            printf("======> DEAD CHILD=%d, STATUS=0x%04x <======\n\n", pid, status);
+            printf("\n======> DEAD CHILD=%d, STATUS=0x%04x <======\n\n", pid, status);
         }
         else
         {
@@ -230,7 +249,10 @@ int main(int argc, char *argv[], char *env[])
 
         //TODO: RESET Redirection
         //fd =0;
-
+        pipeFlag = 0;
+        stdinFlag = 0;
+        stdoutAppen = 0;
+        stdoutFlag = 0;
 
 
         //int r = execvp(command, myargv);
