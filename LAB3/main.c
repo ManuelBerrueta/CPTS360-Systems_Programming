@@ -36,6 +36,9 @@ int main(int argc, char *argv[], char *env[])
     int argcounter=0;
     char tempArg[64] = "\0";
     char * pathNames[36] = { 0 };
+    int stdinFlag = 0;
+    int stdoutFlag = 0;
+    int stdoutAppen = 0;
 
     //! get the path
     const char *path = getenv("PATH");
@@ -57,8 +60,66 @@ int main(int argc, char *argv[], char *env[])
             { 
                 argcounter++;
             }
+            else if(buff[i] == '>' && buff[i+1] == '>') //! >> redirection check
+            {
+                if ( i != 0)
+                {
+                    stdoutAppen = i;
+                    int fd = open("append_stdout_redirect.txt", O_APPEND);
+                    close(1); //! Close file descriptor 1, stdout
+                    dup(fd); //! Rplaces first NULL descriptor, 1 in this case                     
+                }
+            }
+            else if( buff[i] == '>') //! > redirection check
+            {
+                if ( i != 0)
+                {
+                    stdoutFlag = i;
+                    int fd = open("stdout_redirect.txt", O_CREAT);
+                    close(1); //! Close file descriptor 1, stdout
+                    dup(fd); //! Rplaces first NULL descriptor, 1 in this case 
+                }
+                
+            }
+            else if( buff[i] == '<') //! < redirection check
+            {
+                if ( i != 0)
+                {
+                    stdinFlag = i; //! Can use i to know where to split the str
+                    int fd = open("append_stdout_test.txt", O_RDONLY);
+                    close(0); //! Close file descriptor 1, stdin
+                    dup(fd); //! Rplaces first NULL descriptor, 0 in this case                     
+                }                
+            }
             i++;
         }
+
+        char redirection[64] = { 0 };
+        char tempred[32] = { 0 };
+        char redinout[32] = { 0 };
+
+        //TODO: Split the command after <, >, or >>
+        if (stdinFlag > 0)
+        {
+            //TODO: Split command from i forward
+            strcpy(redirection, buff); //! Copy buffer
+            *tempred = strtok(redirection, "<");
+
+            strcpy(buff, tempred); //! new buff without redirection
+
+            *redinout = strtok(NULL, " "); //! May need another one of this
+            
+        }
+        else if (stdoutFlag > 0)
+        {
+
+        }
+        else if (stdoutAppen > 0)
+        {
+
+        }
+
+
 
         i=0;
         //! Tokenize command and parameters
@@ -162,6 +223,11 @@ int main(int argc, char *argv[], char *env[])
             }
         }
         i=0; //* Reset counter
+
+        //TODO: RESET Redirection
+        //fd =0;
+
+
 
         //int r = execvp(command, myargv);
         //memset(myargv,0,sizeof(myargv));
