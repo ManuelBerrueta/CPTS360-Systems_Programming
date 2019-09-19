@@ -311,10 +311,10 @@ int executeCommand(char buff[], char *env[])
             printf("Prior to execve tempPath %s\n", tempPath);
             r = execve(tempPath, myargv, env);
             //exit(1);
-            strcpy(tempPath, pathNames[i]);
+            strcpy(tempPath, pathNames[++i]);
             strcat(tempPath, "/");
 
-            i++;    
+            //i++;    
         }                
     }
     i=0; //* Reset counter
@@ -408,7 +408,7 @@ int pipeCheck(char buff[], char *env[])
 
             executeCommand(nextBuff, env);
 
-            //exit(0);
+            //exit(1);
         }
     }
     else
