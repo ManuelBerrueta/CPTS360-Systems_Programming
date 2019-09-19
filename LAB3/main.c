@@ -11,8 +11,6 @@
 #include <time.h>
 
 char command[16];       //? Command string
-char dname[64];         //? Directory string holder
-char bname[64];         //? Basename string holder
 char cwd[256];
 char buff[256] = { 0 };
 char *myargv[246] = { 0 };
@@ -21,9 +19,7 @@ int myargc = 0;
 
 int main(int argc, char *argv[], char *env[])
 {
-    //! 3.11.1
-
-    //! (1) Prompt user for input
+    //! For date in shell
     time_t T = time(NULL);
     struct tm tm = *localtime(&T);
 
@@ -38,12 +34,14 @@ int main(int argc, char *argv[], char *env[])
     int stdoutAppen = 0;
     int pipeFlag = 0;
     char redirectName[64] = { 0 };
-    char pipeName[64] = { 0 };
+    char pipeBuff[128] = { 0 };
     int pipepid = 0;
 
     //! get the path
     const char *path = getenv("PATH");
-    printf("PATH: %s\n", path);
+    printf("PATH: %s\n\n", path);
+
+    //! Get user input
     while(1)
     {
         if (getcwd(cwd, sizeof(cwd)) != 0)
@@ -54,7 +52,7 @@ int main(int argc, char *argv[], char *env[])
         fgets(buff, sizeof(buff), stdin);
         buff[strlen(buff)-1] = 0;
 
-        //! (2) Handle simple commands
+        //! (Count number of spaces, check for redirection and pipes
         while(buff[i] != '\0')
         {
             if(buff[i] == ' ')
@@ -65,7 +63,20 @@ int main(int argc, char *argv[], char *env[])
             {
                 if ( i != 0)
                 {
-                    stdoutAppen = i;                    
+                    stdoutAppen = i;
+                    //!Clear buff of the redirect
+                    buff[i] = 0;
+                    buff[i+1] = 0;
+                    buff[i+2] = 0;
+
+                    j=i+3;
+                    int k=0;
+                    //TODO: Do the string copy here & clean buff string
+                    while (buff[j] != '\0')
+                    {
+                        redirectName[k] = buff[j];
+                        buff[j++] = 0; //!delete the rest of none command chars
+                    }
                 }
             }
             else if( buff[i] == '>') //! > redirection check
@@ -93,6 +104,17 @@ int main(int argc, char *argv[], char *env[])
                 if ( i != 0)
                 {
                     stdinFlag = i; //! Can use i to know where to split the str
+                    //!Clear buff of the redirect
+                    buff[i] = 0; //! Gets rid of '>'
+                    buff[i+1] = 0; //!Gets rid of the space ' '
+                    j=i+2;
+                    int k=0;
+                    //TODO: Do the string copy here & clean buff string
+                    while (buff[j] != '\0')
+                    {
+                        redirectName[k] = buff[j];
+                        buff[j++] = 0; //!delete the rest of none command chars
+                    }    
                 }                
             }
             else if(buff[i] == '|') //TODO: HERE I AM
@@ -106,14 +128,14 @@ int main(int argc, char *argv[], char *env[])
                 //TODO: Do the string copy here & clean buff string
                 while (buff[j] != '\0')
                 {
-                    pipeName[k] = buff[j];
+                    pipeBuff[k] = buff[j];
                     buff[j++] = 0; //!delete the rest of none command chars
                     k++;
                 }
+                //TODO: We could strtok until | for the buff until then
             }
             i++;
         }
-
 
         i=0;
         //! Tokenize command and parameters
@@ -129,8 +151,6 @@ int main(int argc, char *argv[], char *env[])
             }
             i=0;
         }
-
-
         //! Check if command == cd
         if (strcmp(command, "cd") == 0)
         {
@@ -143,7 +163,6 @@ int main(int argc, char *argv[], char *env[])
                 chdir(getenv("HOME"));
             }
         }
-
         //! Check if command == exit
         if (strcmp(command, "exit") == 0)
         {
@@ -162,7 +181,6 @@ int main(int argc, char *argv[], char *env[])
         }
         argcounter++; //! for the last path without ":"
         i=0;
-
         //! Tokenize paths
         char commpath[64];
         pathNames[i] = strtok(path, ":");
@@ -173,26 +191,15 @@ int main(int argc, char *argv[], char *env[])
         i=0; //* Reset counter
 
         //! Attempt running execve with appending a path each name
-
         char tempPath[64] = { 0 };
-        strcpy(tempPath, pathNames[i]);
+        strcpy(tempPath, pathNames[i]); //? First path dir
         i++;
         strcat(tempPath, "/");
         printf("command: %s   tempPath to command: %s\n", command,tempPath);
         //getchar();
-
-        //! Modified using a loop inside the child process area
-
         strcat(tempPath, command); //! concat tempPath and command
         printf("command with Path: %s\n", tempPath);
         //getchar();
-
-        //! TODO: PIPING
-/*         if (pipeFlag > 0)
-        {
-            pipe(pd);
-        }
- */
 
         int r = -1;
         int status;
@@ -222,7 +229,7 @@ int main(int argc, char *argv[], char *env[])
                     close(0);
                     dup(pd[0]);
                     close(pd[0]);
-                    execvp(pipeName, myargv);
+                    execvp(pipeBuff, myargv);
                 }
                 else
                 {
@@ -249,7 +256,7 @@ int main(int argc, char *argv[], char *env[])
                     else if (stdoutFlag > 0)
                     {
                         //TODO: Split command from i forward
-                        fd = open("stdout_redirect.txt", O_CREAT);
+                        fd = open(redirectName, O_CREAT);
                         //close(1); //! Close file descriptor 1, stdout
                         //dup(fd); //! Rplaces first NULL descriptor, 1 in this case
                         dup2(fd,1);
