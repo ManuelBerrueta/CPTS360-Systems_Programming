@@ -187,11 +187,27 @@ int main(int argc, char *argv[], char *env[])
         printf("command with Path: %s\n", tempPath);
         //getchar();
 
+        //! TODO: PIPING
+        if (pipeFlag > 0)
+        {
+            pipe(pd);
+        }
+
+
         int r = -1;
         int status;
         int pid = fork();
         if (pid)
         {
+            //! PIPE WORK
+            if (pipeFlag > 0)
+            {
+                close(pd[0]);
+                close(1);
+                dup(pd[1]);
+                execvp(command, myargv);
+            }
+            
             printf("\n======> PARENT=%d WAITS for CHILD=%d to DIE <======\n", getpid(),pid);
             pid=wait(&status);
             printf("\n======> DEAD CHILD=%d, STATUS=0x%04x <======\n\n", pid, status);
@@ -202,47 +218,61 @@ int main(int argc, char *argv[], char *env[])
             // getchar();
             printf("CHILD=%d STARTED | My PARENT=%d\n", getpid(), getppid());
 
-            while (r == -1)
+            if (pipeFlag > 0)
             {
-                //!=========== IO REDIRECTION ==================================
-                int fd=0;
+                close(pd[1]);
+                close(0);
+                dup(pd[0]);
+                close(pd[0]);
+                execvp(pipeName, myargv);
+            }
+            else
+            {    
+                while (r == -1)
+                {
+                    //!=========== IO REDIRECTION ==================================
+                    int fd=0;
 
-                //TODO: Split the command after <, >, or >>
-                if (stdinFlag > 0)
-                {
-                    //TODO: Split command from i forward
-                    fd = open("append_stdout_test.txt", O_RDONLY);
-                    close(0); //! Close file descriptor 1, stdin
-                    dup(fd); //! Rplaces first NULL descriptor, 0 in this case  
-                }
-                else if (stdoutFlag > 0)
-                {
-                    //TODO: Split command from i forward
-                    fd = open("stdout_redirect.txt", O_CREAT);
-                    close(1); //! Close file descriptor 1, stdout
-                    dup(fd); //! Rplaces first NULL descriptor, 1 in this case
-                    //memset(myargv,0,sizeof(myargv));
-                }
-                else if (stdoutAppen > 0)
-                {
-                    //TODO: Split command from i forward
-                    fd = open("append_stdout_redirect.txt", O_APPEND);
-                    close(1); //! Close file descriptor 1, stdout
-                    dup(fd); //! Rplaces first NULL descriptor, 1 in this case  
-                }
-                //!=============== END IO REDIRECTION ==========================
+                    //TODO: Split the command after <, >, or >>
+                    if (stdinFlag > 0)
+                    {
+                        //TODO: Split command from i forward
+                        fd = open("append_stdout_test.txt", O_RDONLY);
+                        close(0); //! Close file descriptor 1, stdin
+                        dup(fd); //! Rplaces first NULL descriptor, 0 in this case  
+                    }
+                    else if (stdoutFlag > 0)
+                    {
+                        //TODO: Split command from i forward
+                        fd = open("stdout_redirect.txt", O_CREAT);
+                        close(1); //! Close file descriptor 1, stdout
+                        dup(fd); //! Rplaces first NULL descriptor, 1 in this case
+                        close(fd);
+                        fflush(stdout);
+                        //memset(myargv,0,sizeof(myargv));
+                    }
+                    else if (stdoutAppen > 0)
+                    {
+                        //TODO: Split command from i forward
+                        fd = open("append_stdout_redirect.txt", O_APPEND);
+                        close(1); //! Close file descriptor 1, stdout
+                        dup(fd); //! Rplaces first NULL descriptor, 1 in this case
+                        close(fd);
+                    }
+                    //!=============== END IO REDIRECTION ==========================
 
-                
-                
-                
-                
-                
-                strcat(tempPath, command); //! concat tempPath and command
-                printf("Prior to execve tempPath %s\n", tempPath);
-                r = execve(tempPath, myargv, env);
-                strcpy(tempPath, pathNames[i]);
-                strcat(tempPath, "/");
-                i++;    
+
+                    fflush(stdout);
+
+                    strcat(tempPath, command); //! concat tempPath and command
+                    printf("Prior to execve tempPath %s\n", tempPath);
+                    r = execve(tempPath, myargv, env);
+                    //close(1);
+                    strcpy(tempPath, pathNames[i]);
+                    strcat(tempPath, "/");
+
+                    i++;    
+                }                
             }
         }
         i=0; //* Reset counter
