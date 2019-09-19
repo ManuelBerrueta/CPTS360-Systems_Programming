@@ -28,12 +28,15 @@ int main(int argc, char *argv[], char *env[])
     struct tm tm = *localtime(&T);
 
     int i=0;
+    int j=0;
+    int k=0;
     int argcounter=0;
     char tempArg[64] = "\0";
     char * pathNames[36] = { 0 };
     int stdinFlag = 0;
     int stdoutFlag = 0;
     int stdoutAppen = 0;
+    char redirectName[64] = { 0 };
 
     //! get the path
     const char *path = getenv("PATH");
@@ -67,6 +70,18 @@ int main(int argc, char *argv[], char *env[])
                 if ( i != 0)
                 {
                     stdoutFlag = i;
+                                        //!Clear buff of the redirect
+                    buff[i] = 0; //! Gets rid of '>'
+                    buff[i+1] = 0; //!Gets rid of the space ' '
+                    j=i+2;
+                    k=0;
+                    //TODO: Do the string copy here & clean buff string
+                    while (buff[j] != '\0')
+                    {
+                        redirectName[k] = buff[j];
+                        buff[j++] = 0; //!delete the rest of none command chars
+                        k++;
+                    }
                 }
                 
             }
