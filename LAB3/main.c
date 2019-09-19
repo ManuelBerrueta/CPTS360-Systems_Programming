@@ -280,6 +280,7 @@ int main(int argc, char *argv[], char *env[])
                     strcat(tempPath, command); //! concat tempPath and command
                     printf("Prior to execve tempPath %s\n", tempPath);
                     r = execve(tempPath, myargv, env);
+                    exit(1);
                     //close(1);
                     strcpy(tempPath, pathNames[i]);
                     strcat(tempPath, "/");
