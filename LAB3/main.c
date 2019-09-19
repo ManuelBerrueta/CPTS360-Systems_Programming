@@ -16,6 +16,8 @@ char buff[256] = { 0 };
 char *myargv[246] = { 0 };
 int myargc = 0;
 
+int executeCommand();
+int pipeCheck();
 
 int main(int argc, char *argv[], char *env[])
 {
@@ -50,7 +52,25 @@ int main(int argc, char *argv[], char *env[])
         }
         printf("[ %04d/%02d/%02d ] BERR Shell [ %s ]\n|-$ ", tm.tm_year+1900, tm.tm_mon, tm.tm_mday, cwd);
         fgets(buff, sizeof(buff), stdin);
-        buff[strlen(buff)-1] = 0;
+        buff[strlen(buff)-1] = 0; // *Get rid of '\n'
+
+        //! Check if command == cd
+        if (strcmp(command, "cd") == 0)
+        {
+            if (argcounter != 0)
+            {
+                chdir(myargv[1]);
+            }
+            else
+            {
+                chdir(getenv("HOME"));
+            }
+        }
+        //! Check if command == exit
+        if (strcmp(command, "exit") == 0)
+        {
+            exit(0);
+        }
 
         //! (Count number of spaces, check for redirection and pipes
         while(buff[i] != '\0')
@@ -151,23 +171,7 @@ int main(int argc, char *argv[], char *env[])
             }
             i=0;
         }
-        //! Check if command == cd
-        if (strcmp(command, "cd") == 0)
-        {
-            if (argcounter != 0)
-            {
-                chdir(myargv[1]);
-            }
-            else
-            {
-                chdir(getenv("HOME"));
-            }
-        }
-        //! Check if command == exit
-        if (strcmp(command, "exit") == 0)
-        {
-            exit(0);
-        }
+
 
         argcounter=0;
         //! Count Number Of Paths
@@ -306,4 +310,14 @@ int main(int argc, char *argv[], char *env[])
         //TODO: Uset getopt(myargc, myargv.)
     }
     return 0;
+}
+
+int executeCommand()
+{
+
+}
+
+int pipeCheck()
+{
+    
 }
