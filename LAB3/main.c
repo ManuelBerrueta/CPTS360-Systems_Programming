@@ -44,9 +44,9 @@ int main(int argc, char *argv[], char *env[])
     //! Get user input
     while(1)
     {
-        if (getcwd(cwd, sizeof(cwd)) != 0)
+        if (getcwd(cwd, sizeof(cwd)) == 0)
         {
-
+            printf("getcwd Failed!\n\n");
         }
         printf("[ %04d/%02d/%02d ] BERR Shell [ %s ]\n|-$ ", tm.tm_year+1900, tm.tm_mon, tm.tm_mday, cwd);
         fgets(buff, sizeof(buff), stdin);
@@ -74,7 +74,7 @@ int main(int argc, char *argv[], char *env[])
                     //TODO: Do the string copy here & clean buff string
                     while (buff[j] != '\0')
                     {
-                        redirectName[k] = buff[j];
+                        redirectName[k++] = buff[j];
                         buff[j++] = 0; //!delete the rest of none command chars
                     }
                 }
@@ -256,21 +256,24 @@ int main(int argc, char *argv[], char *env[])
                     else if (stdoutFlag > 0)
                     {
                         //TODO: Split command from i forward
-                        fd = open(redirectName, O_CREAT, 0644);
+                        close(1);
+                        open(redirectName, O_WRONLY | O_CREAT, 0644);
+                        //fd = open(redirectName, O_CREAT, 0644);
                         //close(1); //! Close file descriptor 1, stdout
                         //dup(fd); //! Rplaces first NULL descriptor, 1 in this case
-                        dup2(fd,1);
-                        close(fd);
-                        fflush(stdout);
+                        //dup2(fd,1);
+                        //close(fd);
+                        //fflush(stdout);
                         //memset(myargv,0,sizeof(myargv));
                     }
                     else if (stdoutAppen > 0)
                     {
                         //TODO: Split command from i forward
-                        fd = open(redirectName, O_APPEND, 0644);
                         close(1); //! Close file descriptor 1, stdout
-                        dup(fd); //! Rplaces first NULL descriptor, 1 in this case
-                        close(fd);
+                        open(redirectName, O_RDWR | O_APPEND, 0644);
+                        
+                        //dup(fd); //! Rplaces first NULL descriptor, 1 in this case
+                        //close(fd);
                     }
                     //!=============== END IO REDIRECTION ==========================
 
