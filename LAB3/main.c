@@ -252,6 +252,7 @@ int executeCommand(char buff[], char *env[])
 
     int r = -1;
     int status = 0;
+
     int pid = fork();
     if (pid)
     {          
@@ -403,6 +404,8 @@ int pipeCheck(char buff[], char *env[])
             //!Execute using current cleaned up buff / "command"
             executeCommand(buff, env);
 
+            close(1);
+
             //TODO: wait??
             //pid=wait(&status);
 
@@ -420,12 +423,13 @@ int pipeCheck(char buff[], char *env[])
             //TODO: Pipecheck instead?
             //executeCommand(nextBuff, env);
             pipeCheck(nextBuff, env);
+            close(0);
 
 
             exit(100);
         }
-        close(pd[0]);
-        close(pd[1]);
+        //close(pd[0]);
+        //close(pd[1]);
     }
     else
     {
