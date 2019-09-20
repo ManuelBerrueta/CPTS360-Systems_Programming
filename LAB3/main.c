@@ -202,23 +202,6 @@ int executeCommand(char buff[], char *env[])
                 }    
             }                
         }
-/*         else if(buff[i] == '|') //TODO: HERE I AM
-        {
-            pipeFlag = 1;
-            //!Clear buff of the pipe
-            buff[i] = 0; //! Gets rid of '|'
-            buff[i+1] = 0; //!Gets rid of the space ' '
-            j=i+2;
-            k=0;
-            //TODO: Do the string copy here & clean buff string
-            while (buff[j] != '\0')
-            {
-                pipeBuff[k] = buff[j];
-                buff[j++] = 0; //!delete the rest of none command chars
-                k++;
-            }
-            //TODO: We could strtok until | for the buff until then
-        } */
         i++;
     }
 
@@ -262,10 +245,10 @@ int executeCommand(char buff[], char *env[])
 
     //! Attempt running execve with appending a path each name
     char tempPath[64] = { 0 };
-    strcpy(tempPath, pathNames[i]); //? First path dir
+    //strcpy(tempPath, pathNames[i]); //? First path dir
     i++;
-    strcat(tempPath, "/");
-    printf("command: %s   tempPath to command: %s\n", command,tempPath);
+    //strcat(tempPath, "/");
+    //printf("command: %s   tempPath to command: %s\n", command,tempPath);
     
 
     int r = -1;
@@ -314,7 +297,28 @@ int executeCommand(char buff[], char *env[])
 
             //strcat(tempPath, command); //! concat tempPath and command
             printf("Prior to execve tempPath %s\n", tempPath);
-            r = execve(tempPath, myargv, env);
+
+            //! Check for shell file, otherwise try to run command
+            char fileCheckBuff[8];
+            FILE *fp = fopen(tempPath, "r");
+            if (fp != NULL)
+            {
+                fread(fileCheckBuff,sizeof(char),4,fp);
+/*                 if (strncmp(fileCheckBuff, "!#/b", 4) == 0)
+                {
+                    printf("command: %s in a shell file!\nRun Shell File\n\n", tempPath);
+                    execve("/bin/sh",myargv, env);
+                }
+ */                
+                if (memcmp(fileCheckBuff, "!#/b", 4) == 0)
+                {
+                    execve("/bin/sh",myargv, env);
+                }
+                else
+                {
+                    r = execve(tempPath, myargv, env);
+                }
+            }
             printf("After execve tempPath %s\n", tempPath);
             memset(tempPath,0,sizeof(tempPath)); // *RESET command
             strcpy(tempPath, pathNames[++i]);
