@@ -421,8 +421,11 @@ int pipeCheck(char buff[], char *env[])
             //executeCommand(nextBuff, env);
             pipeCheck(nextBuff, env);
 
-            //exit(1);
+
+            exit(100);
         }
+        close(pd[0]);
+        close(pd[1]);
     }
     else
     {
