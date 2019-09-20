@@ -177,9 +177,8 @@ int executeCommand(char buff[], char *env[])
                 //TODO: Do the string copy here & clean buff string
                 while (buff[j] != '\0')
                 {
-                    redirectName[k] = buff[j];
+                    redirectName[k++] = buff[j];
                     buff[j++] = 0; //!delete the rest of none command chars
-                    k++;
                 }
             }
             
@@ -197,7 +196,7 @@ int executeCommand(char buff[], char *env[])
                 //TODO: Do the string copy here & clean buff string
                 while (buff[j] != '\0')
                 {
-                    redirectName[k] = buff[j];
+                    redirectName[k++] = buff[j];
                     buff[j++] = 0; //!delete the rest of none command chars
                 }    
             }                
