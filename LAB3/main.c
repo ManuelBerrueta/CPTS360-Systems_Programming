@@ -261,9 +261,10 @@ int executeCommand(char buff[], char *env[])
     i++;
     strcat(tempPath, "/");
     printf("command: %s   tempPath to command: %s\n", command,tempPath);
+    
 
     int r = -1;
-    int status;
+    int status = 0;
     int pid = fork();
     if (pid)
     {          
@@ -277,7 +278,7 @@ int executeCommand(char buff[], char *env[])
         // getchar();
         printf("CHILD=%d STARTED | My PARENT=%d\n", getpid(), getppid());
 
-
+        strcat(tempPath, command); //! concat tempPath and command
         while (r == -1)
         {
             //!=========== IO REDIRECTION ==================================
@@ -305,17 +306,18 @@ int executeCommand(char buff[], char *env[])
             //!=============== END IO REDIRECTION ==========================
 
 
-            fflush(stdout);
-
-            strcat(tempPath, command); //! concat tempPath and command
+            //strcat(tempPath, command); //! concat tempPath and command
             printf("Prior to execve tempPath %s\n", tempPath);
             r = execve(tempPath, myargv, env);
-            //exit(1);
+            printf("After execve tempPath %s\n", tempPath);
+            memset(tempPath,0,sizeof(tempPath)); // *RESET command
             strcpy(tempPath, pathNames[++i]);
             strcat(tempPath, "/");
-
+            strcat(tempPath, command); //! concat tempPath and command
+            printf("After new tempPath: %s\n", tempPath);
             //i++;    
-        }                
+        }
+        exit(1);
     }
     i=0; //* Reset counter
     //TODO: RESET Redirection
@@ -393,7 +395,7 @@ int pipeCheck(char buff[], char *env[])
             executeCommand(buff, env);
 
             //TODO: wait??
-            pid=wait(&status);
+            //pid=wait(&status);
 
             printf("parent %d exit\n", getpid());
         }
