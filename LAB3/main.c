@@ -57,6 +57,8 @@ int main(int argc, char *argv[], char *env[])
         {
             printf("getcwd Failed!\n\n");
         }
+
+
         printf("[ %04d/%02d/%02d ] BERR Shell [ %s ]\n|-$ ", tm.tm_year+1900, tm.tm_mon, tm.tm_mday, cwd);
         fgets(buff, sizeof(buff), stdin);
         buff[strlen(buff)-1] = 0; // *Get rid of '\n'
@@ -129,7 +131,9 @@ int executeCommand(char buff[], char *env[])
     char redirectName[64] = { 0 };
     char pipeBuff[128] = { 0 };
     int pipepid = 0;
-    const char *path = getenv("PATH");
+    const char path[512]= {0};
+    // = getenv("PATH");
+    strcpy(path, getenv("PATH"));
     char *myargv[246] = { 0 }; //! TODO: MAY NEED TO REPLACE this with one passed in?
     char command[16];       //? Command string
 
@@ -198,7 +202,7 @@ int executeCommand(char buff[], char *env[])
                 }    
             }                
         }
-        else if(buff[i] == '|') //TODO: HERE I AM
+/*         else if(buff[i] == '|') //TODO: HERE I AM
         {
             pipeFlag = 1;
             //!Clear buff of the pipe
@@ -214,12 +218,13 @@ int executeCommand(char buff[], char *env[])
                 k++;
             }
             //TODO: We could strtok until | for the buff until then
-        }
+        } */
         i++;
     }
 
     i=0;
     //! Tokenize command and parameters
+    memset(command,0, sizeof(command));
     strcpy(command, strtok(buff, " "));
     myargv[i] = command;
     i++;
@@ -279,7 +284,8 @@ int executeCommand(char buff[], char *env[])
         printf("CHILD=%d STARTED | My PARENT=%d\n", getpid(), getppid());
 
         strcat(tempPath, command); //! concat tempPath and command
-        while (r == -1)
+        //while (r == -1)
+        while(1)
         {
             //!=========== IO REDIRECTION ==================================
             int fd=0;
@@ -317,7 +323,7 @@ int executeCommand(char buff[], char *env[])
             printf("After new tempPath: %s\n", tempPath);
             //i++;    
         }
-        exit(1);
+        exit(100);
     }
     i=0; //* Reset counter
     //TODO: RESET Redirection
@@ -391,7 +397,7 @@ int pipeCheck(char buff[], char *env[])
             dup(pd[1]);
             close(pd[1]);
 
-            //TODO: Execute using current cleaned up buff / "command"
+            //!Execute using current cleaned up buff / "command"
             executeCommand(buff, env);
 
             //TODO: wait??
@@ -408,7 +414,9 @@ int pipeCheck(char buff[], char *env[])
             dup(pd[0]);
             close(pd[0]);
 
-            executeCommand(nextBuff, env);
+            //TODO: Pipecheck instead?
+            //executeCommand(nextBuff, env);
+            pipeCheck(nextBuff, env);
 
             //exit(1);
         }
