@@ -393,37 +393,47 @@ int pipeCheck(char buff[], char *env[])
 
         if (pid)
         {
+            int saved_stdout = dup(1); //!Saved stdout file descriptor
+            
             // fork a child to share the pipe
             printf("parent %d close pd[0]\n", getpid());
             close(pd[0]); //Writer close pd[]0
-            close(1);
+            //close(1);
             // parent is setup as pipe WRITER
-            dup(pd[1]);
+            fflush(stdout);
+            dup2(pd[1],1);
             close(pd[1]);
 
             //!Execute using current cleaned up buff / "command"
             executeCommand(buff, env);
-
-            close(1);
-
+            dup2(saved_stdout, 1);
+            //close(1);
+            close(saved_stdout);
+            fflush(stdout);
             //TODO: wait??
-            //pid=wait(&status);
+            pid=wait(&status);
 
             printf("parent %d exit\n", getpid());
         }
         else
         {
             printf("child %d close pd[1]\n", getpid());
+            
+            int saved_stdin = dup(0);
             close(pd[1]);
             // child as pipe READER
             close(0);
-            dup(pd[0]);
+            fflush(stdout);
+            dup2(pd[0],0);
             close(pd[0]);
 
             //TODO: Pipecheck instead?
             //executeCommand(nextBuff, env);
             pipeCheck(nextBuff, env);
-            close(0);
+            dup2(saved_stdin, 0);
+            close(saved_stdin);
+            //close(0);
+            fflush(stdout);
 
 
             exit(100);
