@@ -10,12 +10,6 @@
 #include <unistd.h>
 #include <time.h>
 
-//char command[16];       //? Command string
-//char cwd[256];
-//char buff[256] = { 0 };
-//char *myargv[246] = { 0 };
-//int myargc = 0;
-
 int executeCommand(char buff[], char *env[]);
 int pipeCheck(char buff[], char *env[]);
 
@@ -31,20 +25,8 @@ int main(int argc, char *argv[], char *env[])
     char command[16] = { 0 };       //? Command string
     char cwd[256];
     int myargc = 0;
-
     int i=0;
-    int j=0;
-    int k=0;
     int argcounter=0;
-    char tempArg[64] = "\0";
-    char * pathNames[36] = { 0 };
-    int stdinFlag = 0;
-    int stdoutFlag = 0;
-    int stdoutAppen = 0;
-    int pipeFlag = 0;
-    char redirectName[64] = { 0 };
-    char pipeBuff[128] = { 0 };
-    int pipepid = 0;
 
     //! get the path
     const char *path = getenv("PATH");
@@ -127,10 +109,7 @@ int executeCommand(char buff[], char *env[])
     int stdinFlag = 0;
     int stdoutFlag = 0;
     int stdoutAppen = 0;
-    int pipeFlag = 0;
     char redirectName[64] = { 0 };
-    char pipeBuff[128] = { 0 };
-    int pipepid = 0;
     const char path[512]= {0};
     // = getenv("PATH");
     strcpy(path, getenv("PATH"));
@@ -220,7 +199,6 @@ int executeCommand(char buff[], char *env[])
         i=0;
     }
 
-
     argcounter=0;
     //! Count Number Of Paths
     while(path[i] != '\0')
@@ -244,11 +222,7 @@ int executeCommand(char buff[], char *env[])
 
     //! Attempt running execve with appending a path each name
     char tempPath[64] = { 0 };
-    //strcpy(tempPath, pathNames[i]); //? First path dir
     i++;
-    //strcat(tempPath, "/");
-    //printf("command: %s   tempPath to command: %s\n", command,tempPath);
-    
 
     int r = -1;
     int status = 0;
@@ -296,20 +270,15 @@ int executeCommand(char buff[], char *env[])
 
 
             //strcat(tempPath, command); //! concat tempPath and command
-            printf("Prior to execve tempPath %s\n", tempPath);
+            printf("Prior to execve tempPath %s\n", tempPath);    int j=0;
+    int k=0;
 
             //! Check for shell file, otherwise try to run command
             char fileCheckBuff[8];
             FILE *fp = fopen(tempPath, "r");
             if (fp != NULL)
             {
-                fread(fileCheckBuff,sizeof(char),4,fp);
-/*                 if (strncmp(fileCheckBuff, "!#/b", 4) == 0)
-                {
-                    printf("command: %s in a shell file!\nRun Shell File\n\n", tempPath);
-                    execve("/bin/sh",myargv, env);
-                }
- */                
+                fread(fileCheckBuff,sizeof(char),4,fp);               
                 if (memcmp(fileCheckBuff, "!#/b", 4) == 0)
                 {
                     execve("/bin/sh",myargv, env);
@@ -325,13 +294,11 @@ int executeCommand(char buff[], char *env[])
             strcat(tempPath, "/");
             strcat(tempPath, command); //! concat tempPath and command
             printf("After new tempPath: %s\n", tempPath);
-            //i++;    
         }
         exit(100);
     }
     i=0; //* Reset counter
     //TODO: RESET Redirection
-    pipeFlag = 0;
     stdinFlag = 0;
     stdoutAppen = 0;
     stdoutFlag = 0;
@@ -372,7 +339,6 @@ int pipeCheck(char buff[], char *env[])
                 buff[j++] = 0; //!delete the rest of none command chars
                 k++;
             }
-            //break;
             //TODO: We could strtok until | for the buff until then
         }
         i++;
