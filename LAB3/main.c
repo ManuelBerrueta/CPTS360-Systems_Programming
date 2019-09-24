@@ -307,10 +307,12 @@ int executeCommand(char buff[], char *env[])
 int pipeCheck(char buff[], char *env[])
 {
     int pipeFlag = 0;
+    int stacked = 0;
     int i = 0;
     int j = 0;
     int k = 0;
     char nextBuff[256] = { 0 };
+    char stackedBuff[256] = { 0 };
 
     //TODO: If pipe is found:
         //! Parse the first buff
@@ -340,6 +342,24 @@ int pipeCheck(char buff[], char *env[])
                 k++;
             }
             //TODO: We could strtok until | for the buff until then
+        }
+        if(buff[i] == ';')
+        {
+            //TODO: Stacked command
+            stacked++;
+            //TODO: Split command
+                        //!Clear buff of the pipe
+            buff[i] = 0; //! Gets rid of '|'
+            buff[i+1] = 0; //!Gets rid of the space ' '
+            j=i+2;
+            k=0;
+            //TODO: Do the string copy here & clean buff string
+            while (buff[j] != '\0')
+            {
+                stackedBuff[k] = buff[j];
+                buff[j++] = 0; //!delete the rest of none command chars
+                k++;
+            }
         }
         i++;
     }
@@ -406,6 +426,11 @@ int pipeCheck(char buff[], char *env[])
         }
         //close(pd[0]);
         //close(pd[1]);
+    }
+    else if(stacked > 0)
+    {
+        executeCommand(buff, env);
+        pipeCheck(stackedBuff, env);
     }
     else
     {
