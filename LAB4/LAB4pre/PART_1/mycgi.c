@@ -16,14 +16,26 @@ ENTRY entry[MAX];
 main(int argc, char *argv[])
 {
     int i, m, r;
-    char cwd[128];      
+    char cwd[128];
+
     m = getinputs();  // get user inputs name=value into entry[ ]
-    getcwd(cwd, 128); // get CWD pathname   
+    getcwd(cwd, 128); // get CWD pathname
+
     printf("Content-type: text/html\n\n");
-    printf("<p>pid=%d uid=%d cwd=%s\n", getpid(), getuid(), cwd);   
+    printf("<p>pid=%d uid=%d cwd=%s\n", getpid(), getuid(), cwd);
+
     printf("<H1>Echo Your Inputs</H1>");
-    printf("You submitted the following name/value pairs:<p>");     
+    printf("You submitted the following name/value pairs:<p>");
+
     for (i = 0; i <= m; i++)
+    {
+        printf("%s = %s<p>", entry[i].name, entry[i].value);
+        if( strcmp(entry[i].name, "mkdir") == 0)
+        {
+            char *dirname = entry[i].value;
+            r = mkdir(dirname, 0755);
+        }
+    }
     printf("%s = %s<p>", entry[i].name, entry[i].value);
     printf("<p>");      
     
@@ -36,7 +48,7 @@ main(int argc, char *argv[])
             cp    file1 file2
             ls    [dirname] <== ls CWD if no dirname
     *****************************************************************/ 
-    if( strcmp(entry[i].name, "mkdir") == 0)
+/*    if( strcmp(entry[i].name, "mkdir") == 0)
     {
         char *dirname = entry[i].value;
         r = mkdir(dirname, 0755);
@@ -50,11 +62,8 @@ main(int argc, char *argv[])
     {
         char *dir_or_file_name = entry[i].value;
         r = unlink(dir_or_file_name);
-    }
-    
+    } */
 
-    
-    
     // create a FORM webpage for user to submit again
     printf("</title>");
     printf("</head>");
