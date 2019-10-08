@@ -94,19 +94,27 @@ int main()
             //if (line == "SUM")
             {
                 int tempSUM = 0;
-
-                n = write(connfd, "Send first num: ", MAX);
+                int leftNum, rightNum;
+                n = write(connfd, "Send 2 integers separated by a space", MAX);
+                n = read(connfd, line, MAX);
+/*                 n = write(connfd, "Send first num: ", MAX);
                 n = read(connfd, line, MAX);
                 tempSUM = atoi(line);
                 n = write(connfd, "Send second num: ", MAX);
-                n = read(connfd, line, MAX);
-                tempSUM += atoi(line);
+                n = read(connfd, line, MAX); */
+                sscanf(line,"%d %d", &leftNum, &rightNum);
+                tempSUM = leftNum;
+                tempSUM += rightNum;
+                //tempSUM += atoi(line);
                 char requestSum[256]= "SUM=";
-                char numOfSum = tempSUM + '0';
+                char tempStr[256] = "";
                 //strcpy(line, numOfSum);
-                //strcat(requestSum, numOfSum);
-                printf("SUM=%c\n", numOfSum);
-                n = write(connfd, numOfSum, MAX);
+                sprintf(requestSum,"SUM=%d", tempSUM);
+                printf("%s\n", requestSum);
+                n = write(connfd, requestSum, MAX);
+                //n = write(connfd, " ", MAX);
+                close(connfd);
+                bzero(line, MAX);
             } 
             else
             {
@@ -120,6 +128,8 @@ int main()
 
                 printf("server: wrote n=%d bytes; ECHO=[%s]\n", n, line);
                 printf("server: ready for next request\n");
+                bzero(line, MAX);
+                close(connfd);
             }
         }
     }

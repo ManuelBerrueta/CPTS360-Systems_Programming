@@ -27,14 +27,11 @@ main(int argc, char *argv[])
     printf("<H1>Echo Your Inputs</H1>");
     printf("You submitted the following name/value pairs:<p>");
 
+    //! Note: you must use the value for each portion of the input
+    //! The name is just a place holder
     for (i = 0; i <= m; i++)
     {
         printf("%s = %s<p>", entry[i].name, entry[i].value);
-        if( strcmp(entry[i].name, "mkdir") == 0)
-        {
-            char *dirname = entry[i].value;
-            r = mkdir(dirname, 0755);
-        }
     }
     printf("%s = %s<p>", entry[i].name, entry[i].value);
     printf("<p>");      
@@ -47,22 +44,23 @@ main(int argc, char *argv[])
             cat   filename
             cp    file1 file2
             ls    [dirname] <== ls CWD if no dirname
-    *****************************************************************/ 
-/*    if( strcmp(entry[i].name, "mkdir") == 0)
+    *****************************************************************/
+    i=0;
+    if( strcmp(entry[i].value, "mkdir") == 0)
     {
-        char *dirname = entry[i].value;
+        char *dirname = entry[i+1].value;
         r = mkdir(dirname, 0755);
-    }
-    else if( strcmp(entry[i].name, "rmdir") == 0)
+    } 
+    else if( strcmp(entry[i].value, "rmdir") == 0)
     {
-        char *dirname = entry[i].value;
+        char *dirname = entry[i+1].value;
         r = rmdir(dirname);
     }
-    else if( strcmp(entry[i].name, "rmdir") == 0)
+   else if( strcmp(entry[i].value, "rm") == 0)
     {
-        char *dir_or_file_name = entry[i].value;
-        r = unlink(dir_or_file_name);
-    } */
+        char *file_name = entry[i+1].value;
+        r = unlink(file_name);
+    } 
 
     // create a FORM webpage for user to submit again
     printf("</title>");
