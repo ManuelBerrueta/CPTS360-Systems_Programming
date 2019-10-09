@@ -4,6 +4,7 @@
 #include <string.h>
 #include <sys/stat.h>
 
+#define BLKSIZE 4096
 #define MAX 10000
 typedef struct
 {
@@ -56,11 +57,99 @@ main(int argc, char *argv[])
         char *dirname = entry[i+1].value;
         r = rmdir(dirname);
     }
-   else if( strcmp(entry[i].value, "rm") == 0)
+    else if( strcmp(entry[i].value, "rm") == 0)
     {
         char *file_name = entry[i+1].value;
         r = unlink(file_name);
     } 
+    else if( strcmp(entry[i].value, "cat") == 0)
+    {
+        char *file_name = entry[i+1].value;
+        
+        if(file_name == 0)
+        {
+            puts("===> Did not pass in a file to cat!");
+        }
+        else
+        {
+            FILE *fp;
+            int c;
+            fp = fopen(file_name, "r");
+
+            if (fp==0)
+            {
+                puts("===> FILE DNE or Not a file");
+            }
+            else
+            {
+                while((c = fgetc(fp)) != EOF)
+                {
+                    putchar(c);
+                }
+            }
+        }
+        
+    }
+    else if( strcmp(entry[i].value, "cp") == 0)
+    {
+        char *file_name_1 = entry[i+1].value;
+        char *file_name_2 = entry[i+1].value;
+        
+        if ((file_name_1 == 0) || (file_name_2 == 0))
+        {
+            puts("Missing paramaters to copy files");
+        }
+        else
+        {
+            int fd, gd;
+            char buff[4096];
+            int n, total =0;
+            fd = open(file_name_1, O_RDONLY);
+            if(fd < 0)
+            {
+                printf("Could not open file %s\n", file_name_1);
+            }
+            else
+            {
+                gd = open(file_name_2, O_WRONLY | O_CREAT);
+                if(gd < 0)
+                {
+                    printf("Could not open file %s\n", file_name_2;
+                }
+                else
+                {
+                    while(n=read(fd, buff, BLKSIZE))
+                    {
+                        write(gd, buff, n);
+                        total+=n;
+                    }
+                    printf("total=%d\n", total);
+                    close(fd);
+                    close(gd);
+                }
+                
+
+            }
+            
+        }
+        
+
+    }        
+    else if( strcmp(entry[i].value, "ls") == 0)
+    {
+        char *file_name = entry[i+1].value;
+        if(file_name == 0)
+        {
+            //TODO: ls cwd    
+        }
+        else
+        {
+            //TODO: ls with file_name
+        }
+    }
+
+
+
 
     // create a FORM webpage for user to submit again
     printf("</title>");
