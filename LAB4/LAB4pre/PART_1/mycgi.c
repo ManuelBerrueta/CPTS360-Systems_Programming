@@ -112,7 +112,7 @@ main(int argc, char *argv[])
             }
             else
             {
-                gd = open(file_name_2, O_WRONLY | O_CREAT);
+                gd = open(file_name_2, O_WRONLY | O_CREAT, 0644);
                 if(gd < 0)
                 {
                     printf("Could not open file %s\n", file_name_2);
@@ -144,7 +144,7 @@ main(int argc, char *argv[])
             //TODO: ls with file_name
         }
     }
-    
+
 
     // create a FORM webpage for user to submit again
     printf("</title>");
