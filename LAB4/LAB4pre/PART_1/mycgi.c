@@ -86,6 +86,7 @@ main(int argc, char *argv[])
                 {
                     putchar(c);
                 }
+                printf("\n");
             }
         }
         
@@ -93,7 +94,7 @@ main(int argc, char *argv[])
     else if( strcmp(entry[i].value, "cp") == 0)
     {
         char *file_name_1 = entry[i+1].value;
-        char *file_name_2 = entry[i+1].value;
+        char *file_name_2 = entry[i+2].value;
         
         if ((file_name_1 == 0) || (file_name_2 == 0))
         {
@@ -114,7 +115,7 @@ main(int argc, char *argv[])
                 gd = open(file_name_2, O_WRONLY | O_CREAT);
                 if(gd < 0)
                 {
-                    printf("Could not open file %s\n", file_name_2;
+                    printf("Could not open file %s\n", file_name_2);
                 }
                 else
                 {
@@ -127,13 +128,9 @@ main(int argc, char *argv[])
                     close(fd);
                     close(gd);
                 }
-                
-
             }
             
         }
-        
-
     }        
     else if( strcmp(entry[i].value, "ls") == 0)
     {
@@ -147,9 +144,7 @@ main(int argc, char *argv[])
             //TODO: ls with file_name
         }
     }
-
-
-
+    
 
     // create a FORM webpage for user to submit again
     printf("</title>");
