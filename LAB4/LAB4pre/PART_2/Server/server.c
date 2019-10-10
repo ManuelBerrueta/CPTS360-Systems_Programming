@@ -114,7 +114,9 @@ int main()
                 n = write(connfd, requestSum, MAX);
                 //n = write(connfd, " ", MAX);
                 close(connfd);
+                shutdown(connfd, SHUT_RDWR);
                 bzero(line, MAX);
+                break;
             } 
             else
             {
@@ -130,6 +132,7 @@ int main()
                 printf("server: ready for next request\n");
                 bzero(line, MAX);
                 close(connfd);
+                shutdown(connfd, SHUT_RDWR);
             }
         }
     }
