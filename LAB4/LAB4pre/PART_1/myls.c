@@ -36,9 +36,13 @@ int ls_file(char *fname)
     for (i = 8; i >= 0; i--)
     {
         if (sp->st_mode & (1 << i)) // print r|w|x
+        {
             printf("%c", t1[i]);
+        }
         else
+        {
             printf("%c", t2[i]);
+        }
         // or print -
     }
 
@@ -46,18 +50,22 @@ int ls_file(char *fname)
     printf("%4d ", sp->st_gid);     // gid
     printf("%4d ", sp->st_uid);     // uid
     printf("%8d ", sp->st_size);    // file size
-    
+    fflush(stdout);
+
     // print time
     strcpy(ftime, ctime(&sp->st_ctime)); // print time in calendar form
     ftime[strlen(ftime) - 1] = 0;   // kill \n at end
     printf("%s ", ftime);
     // print name
+    char tempBasename[64]= "";
+    strcpy(tempBasename, fname);
     printf("%s", basename(fname)); // print file basename
     // print -> linkname if symbolic file
     if ((sp->st_mode & 0xF000) == 0xA000)
     {
-        // use readlink() to read linkname
-        readlink(sp, buff, 40); //TODO: This may be going wrong
+       //TODO: Added this code, was not provided. Needs checking.
+       // use readlink() to read linkname
+        readlink(sp, buff, 40); 
         printf(" -> %s", buff); // print linked name
     }
     printf("\n");
@@ -67,13 +75,22 @@ int ls_file(char *fname)
 int ls_dir(char *dname) //! From 8.6.5
 {
     // use opendir(), readdir(); then call ls_file(name); man 3 opendir/readdir
+    //* Added below code, was not provided as part of function
+
     struct dirent *ep;
     DIR *dp = opendir(dname);
     while (ep = readdir(dp))
     {
-        printf("name=%s ", ep->d_name);
+        //printf("name=%s ", ep->d_name);
+        //TODO: if the path is just / don't come here!
+        ls_file(dname);
+        printf("%s\n", ep->d_name);
+        fflush(stdout);
     }
-    ls_file(ep->d_name); //TODO: This may be going wrong
+    if(ep != 0)
+    {
+        
+    }
 }
 
 
