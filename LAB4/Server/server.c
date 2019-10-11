@@ -1,13 +1,17 @@
 /** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **
- **  LAB 4                                                                         **
- ** 
+ **               LAB 4 - TCP Programming Project                           **
+ **                              Server                                     **
+ **                                by                                       **
+ **                          Manuel Berrueta                                **
  ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **/
 
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <fcntl.h>
 #include <string.h>
 #include <time.h>
+#include <dirent.h>
 
 #include <unistd.h>
 #include <netdb.h> 
@@ -20,48 +24,49 @@
 #define MAX   256
 #define PORT 1234
 
-char line[MAX];
+char buff[MAX];
 int n;
 
 int main(int argc, char *argv[]) 
 { 
-    int sfd, cfd, len; 
-    struct sockaddr_in saddr, caddr; 
+    int server_fd, client_fd, len, r; 
+    struct sockaddr_in server_address, client_address;
+    char command[64], pathname[192];
 
     printf("1. create a TCP socket\n");
-    sfd = socket(AF_INET, SOCK_STREAM, 0); 
-    if (sfd < 0)
+    server_fd = socket(AF_INET, SOCK_STREAM, 0); 
+    if (server_fd < 0)
     { 
         printf("socket creation failed\n"); 
         exit(1); 
     }
 
     printf("2. fill in [localhost IP port=1234] as server address\n");
-    bzero(&saddr, sizeof(saddr)); 
-    saddr.sin_family = AF_INET; 
-    saddr.sin_addr.s_addr = htonl(INADDR_ANY); 
-    saddr.sin_port = htons(PORT); 
+    bzero(&server_address, sizeof(server_address)); 
+    server_address.sin_family = AF_INET; 
+    server_address.sin_addr.s_addr = htonl(INADDR_ANY); 
+    server_address.sin_port = htons(PORT); 
 
     printf("3. bind socket with server address\n");
-    if ((bind(sfd, (struct sockaddr *)&saddr, sizeof(saddr))) != 0)
+    if ((bind(server_fd, (struct sockaddr *)&server_address, sizeof(server_address))) != 0)
     { 
         printf("socket bind failed\n"); 
         exit(2); 
     }
 
     printf("4. server listens\n");
-    if ((listen(sfd, 5)) != 0)
+    if ((listen(server_fd, 5)) != 0)
     { 
         printf("Listen failed\n"); 
         exit(3); 
     }
 
-    len = sizeof(caddr);
+    len = sizeof(client_address);
     while(1)
     {
         printf("server accepting connection\n");
-        cfd = accept(sfd, (struct sockaddr *)&caddr, &len); 
-        if (cfd < 0)
+        client_fd = accept(server_fd, (struct sockaddr *)&client_address, &len); 
+        if (client_fd < 0)
         { 
             printf("server acccept failed\n"); 
             exit(4); 
@@ -72,21 +77,96 @@ int main(int argc, char *argv[])
         while(1)
         {
             printf("server: ready for next request\n");
-            n = read(cfd, line, MAX);
+            n = read(client_fd, buff, MAX);
             if (n==0)
             {
                 printf("server: client died, server loops\n");
-                close(cfd);
+                close(client_fd);
                 break;
             }
 
-            // show the line contents
-            printf("server: read  n=%d bytes; line=[%s]\n", n, line);
-            strcat(line, " ECHO");
+            //* show the buff contents received from client
+            printf("server: read  n=%d bytes; buff=[%s]\n", n, buff);
+            //strcat(buff, " ECHO");
 
-            // send the echo line to client 
-            n = write(cfd, line, MAX);
-            printf("server: wrote n=%d bytes; ECHO=[%s]\n", n, line);
+            //!!!!!!!!!!!!!!!!! Command Handling Code !!!!!!!!!!!!!!!!!!!!!!!!!!
+
+            //TODO: sscanf to separate command from filename
+
+            sscanf(buff, "%s %s", command, pathname);
+            
+            if( strcmp(command, "mkdir") == 0 )
+            {
+                char *dirname = pathname;
+                r = mkdir(dirname, 0755);
+                if (r == 0) //* mkdir returns 0 if successful
+                {
+                    strcat(buff, " = successful!");
+                    n = write(client_fd, buff, MAX);
+                    printf("server: wrote n=%d bytes; ECHO=[%s]\n", n, buff);
+                }
+                else
+                {
+                    strcat(buff, " = NOT successful!");
+                    n = write(client_fd, buff, MAX);
+                    printf("server: wrote n=%d bytes; ECHO=[%s]\n", n, buff);
+                }
+            }
+            else if( strcmp(command, "rmdir") == 0 )
+            {
+                char *dirname = pathname;
+                r = rmdir(dirname);
+                if (r == 0) //* rmdir returns 0 if successful
+                {
+                    strcat(buff, " = successful!");
+                    n = write(client_fd, buff, MAX);
+                    printf("server: wrote n=%d bytes; ECHO=[%s]\n", n, buff);
+                }
+                else
+                {
+                    strcat(buff, " = NOT successful!");
+                    n = write(client_fd, buff, MAX);
+                    printf("server: wrote n=%d bytes; ECHO=[%s]\n", n, buff);
+                }
+            }
+            else if( strcmp(command, "rm") == 0 )
+            {
+                char *file_name = pathname;
+                r = unlink(file_name);
+                if (r == 0) //* rmdir returns 0 if successful
+                {
+                    strcat(buff, " = successful!");
+                    n = write(client_fd, buff, MAX);
+                    printf("server: wrote n=%d bytes; ECHO=[%s]\n", n, buff);
+                }
+                else
+                {
+                    strcat(buff, " = NOT successful!");
+                    n = write(client_fd, buff, MAX);
+                    printf("server: wrote n=%d bytes; ECHO=[%s]\n", n, buff);
+                }
+            }
+            else if( strcmp(command, "pwd") == 0 )
+            {
+                getcwd(pathname, 256);
+                strcat(buff," = ");
+                strcat(buff, pathname);
+                n = write(client_fd, buff, MAX);
+                printf("server: wrote n=%d bytes; ECHO=[%s]\n", n, buff);
+            }
+            else
+            {
+                //* send the echo buff to client 
+                n = write(client_fd, buff, MAX);
+                printf("server: wrote n=%d bytes; ECHO=[%s]\n", n, buff);
+            }
+            
+
+            
+            //!!!!!!!!!!!!!!! End Command Handling Code !!!!!!!!!!!!!!!!!!!!!!!!
+
+
+
         }
     }
-} 
+}

@@ -86,12 +86,17 @@ int ls_dir(char *dname) //! From 8.6.5
 
     struct dirent *ep;
     DIR *dp = opendir(dname);
+    char filename[128];
+
     while (ep = readdir(dp))
     {
         //printf("name=%s ", ep->d_name);
-        //TODO: if the path is just / don't come here!
-        //ls_file(dname);
+        //TODO: 
         printf("%s ", ep->d_name);
+        //memset(filename,0,128);
+        //strcat(filename, "./");
+        //strcat(filename, ep->d_name);
+        //ls_file(dname);
         ls_file(dname);
         printf("<p>\n");
         fflush(stdout);
