@@ -10,6 +10,7 @@
             "args": [
                 "-g",
                 "${file}",
+                "${fileDirname}/helper.c",
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}"
             ],

@@ -24,6 +24,8 @@
 char buff[MAX], ans[MAX];
 int n;
 
+void *printMenu();
+
 int main(int argc, char *argv[ ]) 
 { 
     int client_fd; 
@@ -53,6 +55,7 @@ int main(int argc, char *argv[ ])
     printf("********  processing loop  *********\n");
     while(1)
     {
+        printMenu();
         printf("input a buff : ");
         bzero(buff, MAX);                // zero out buff[ ]
         fgets(buff, MAX, stdin);         // get a buff (end with \n) from stdin
@@ -65,10 +68,20 @@ int main(int argc, char *argv[ ])
 
         // Send ENTIRE buff to server
         n = write(client_fd, buff, MAX);
-        printf("client: wrote n=%d bytes; buff=(%s)\n", n, buff);
+        //printf("client: wrote n=%d bytes; buff=(%s)\n", n, buff);
 
         // Read a buff from sock and show it
         n = read(client_fd, ans, MAX);
-        printf("client: read  n=%d bytes; echo=(%s)\n",n, ans);
+        printf("\ncmd=%s\n%s\n\n",buff, ans);
+        //printf("client: read  n=%d bytes; echo=(%s)\n",n, ans);
+
     }
 } 
+
+void *printMenu()
+{
+    puts("** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **");
+    puts("**  get  put   ls   cd   pwd   mkdir   rmdir   rm  **");
+    puts("**      lcat  lls  lcd  lpwd  lmkdir  lrmdir  lrm  **");
+    puts("** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **");
+}
