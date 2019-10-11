@@ -170,10 +170,16 @@ int main(int argc, char *argv[])
                 {
                     //strcpy(filename, ".");
                     getcwd(cwd, 256);
-                    strcpy(filename, cwd);
+                    ls_dir(cwd);
+                    //strcpy(filename, cwd);
                     //TODO: Might need to branch here using an else for the rest
 
                 }
+                else
+                {
+                    //TODO: Rest of the code
+                }
+                
                 if (r = lstat(filename, sp) < 0)
                 {
                     printf("no such file %s\n", filename);
