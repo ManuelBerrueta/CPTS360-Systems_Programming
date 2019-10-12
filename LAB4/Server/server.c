@@ -158,6 +158,78 @@ int main(int argc, char *argv[])
                 n = write(client_fd, buff, MAX);
                 printf("server: wrote n=%d bytes; ECHO=[%s]\n", n, buff);
             }
+            else if( strcmp(command, "get") == 0 )
+            {
+                int outFile = open(pathname, O_RDONLY);
+                int i = 0;
+                if (outFile < 0)
+                {
+                    puts("%s = Failed to open\n");
+                    n = write(client_fd,0,MAX);
+                }
+                else
+                {
+                    struct stat fileInfo;
+                    fstat(outFile, &fileInfo);//!Note use stat for filename
+                    int filesize = fileInfo.st_size;
+                    bzero(buff, MAX); 
+                    sprintf(buff, "%d",filesize);
+                    //lseek(outFile, 0, SEEK_END);
+
+                    //lseek(outFile, 0L, SEEK_SET);
+                    n = write(client_fd,buff, MAX); //*Send filesize
+
+                    n = read(client_fd, buff, MAX); //* Receive confirmation of filesize
+                    while ( n = read(outFile, buff, MAX) )
+                    {
+                        n = write(client_fd, buff, n);
+                    }
+                    //{
+                    //}
+                    printf("FILE=%s | SIZE=%d  Sent succesfully", pathname, filesize);
+                    close(outFile);
+                }
+                
+            }
+            else if( strcmp(command, "put") == 0 )
+            {
+                //TODO: Get Size of file
+                bzero(buff, MAX); 
+                n = read(client_fd, buff, MAX);
+
+                if ( n == 0)
+                {
+                    //? FILE FAIL
+                    puts("FILE TRANSFER FAIL");
+                }
+                else
+                {
+                    int i = 0;
+                    int fileSize = atoi(buff);
+
+                    strcpy(buff, "Verified incoming filesize = ");
+                    strcat(buff, buff);
+                    n = write(client_fd, buff, MAX);
+
+
+                    int inFile = open(pathname, O_WRONLY | O_CREAT, 0755);
+                    while (i < fileSize)
+                    {
+                        n = read(client_fd, buff, MAX);
+                        i += n; //i = nunmber of bites received
+                        write(inFile, buff,n);
+                    }
+                    //* While received bytes less than filesize
+                    //while( i < n)
+                    //{
+
+                    //i = read(fd, buff, fileSize); //!reading from buf, writing to file
+                    //}
+                    puts("SUCCESSFUL FILE TRANSER");
+                    printf("FILE=%S  |  SIZE=%d\n\n", pathname, i);
+                    close(inFile);
+                }
+            }
             else if( strcmp(command, "ls") == 0)
             {
                 char *file_name = pathname;
