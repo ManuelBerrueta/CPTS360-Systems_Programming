@@ -5,24 +5,7 @@
  **                          Manuel Berrueta                                **
  ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <fcntl.h>
-#include <string.h>
-#include <time.h>
-#include <dirent.h>
-
-#include <unistd.h>
-#include <netdb.h> 
-#include <netinet/in.h> 
-#include <sys/socket.h> 
-#include <sys/stat.h>
-#include <sys/types.h> 
-#include <arpa/inet.h>
-
-
-#define MAX   256
-#define PORT 1234
+#include "helper.h"
 
 char buff[MAX], ans[MAX];
 int n;
@@ -81,6 +64,7 @@ int main(int argc, char *argv[ ])
         //!!!!!!!!!!!! Interactive commands !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
         char command[64], pathname[256];
+        bzero(pathname, MAX);
         sscanf(buff, "%s %s", command, pathname);
         int fileSize, i;
         fileSize = i = 0;
@@ -237,6 +221,48 @@ int main(int argc, char *argv[ ])
         else if ( strcmp(command, "ls")==0 )
         {
 
+        }
+        else if ( strcmp(command, "lls")==0 )
+        {
+            //char *file_name = pathname;
+            struct stat mystat, *sp = &mystat;
+            int r;
+            char filename[64], path[1024], cwd[256];
+            strcpy(filename, "./");
+
+            if(strcmp(pathname, "") != 0) //TODO: THIS LINE IS THE KILLER
+            {
+                strcpy(filename, pathname);
+                //strcat(filename, "/./");
+                //TODO: Might need to branch here using an else for the rest
+            }
+
+
+            if (r = lstat(filename, sp) < 0)
+            {
+                printf("no such file %s\n", filename);
+                //exit(1);
+                //strcpy(filename, "./");
+            }
+            strcpy(path, filename);
+            if (path[0] != '/') // Then filename is relative : get CWD path
+            { 
+                getcwd(cwd, 256);
+                strcpy(path, cwd);
+                strcat(path, "/");
+                strcat(path, filename);
+                printf("file path before ls execution:\n %s\n", path);
+                fflush(stdout);
+            }
+            if (S_ISDIR(sp->st_mode))
+            {
+                ls_dir(path);
+            }
+            else
+            {
+                ls_file(path);
+            }
+            bzero(pathname, MAX);
         }
         else  //* ECHO
         {

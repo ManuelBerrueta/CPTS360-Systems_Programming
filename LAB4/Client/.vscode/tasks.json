@@ -8,8 +8,10 @@
             "args": [
                 "-g",
                 "${file}",
+                "${fileDirname}/helper.c",
                 "-o",
-                "${fileDirname}/${fileBasenameNoExtension}"
+                "${fileDirname}/${fileBasenameNoExtension}",
+                "-m32"
             ],
             "options": {
                 "cwd": "/usr/bin"
