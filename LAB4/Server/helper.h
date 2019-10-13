@@ -17,5 +17,5 @@
 #define MAX   256
 #define PORT 1234
 
-int ls_file(char *fname);
-int ls_dir(char *dname);
+int ls_file(char *fname, int sockbuff);
+int ls_dir(char *dname, int sockbuff);

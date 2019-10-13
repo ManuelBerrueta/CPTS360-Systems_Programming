@@ -1,7 +1,5 @@
 #include "helper.h"
 
-
-
 //************************************* ls *************************************
 struct stat mystat, *sp;
 char *t1 = "xwrxwrxwr-------";
@@ -49,8 +47,6 @@ int ls_file(char *fname)
     ftime[strlen(ftime) - 1] = 0;   // kill \n at end
     printf("%s ", ftime);
     // print name
-    //char tempBasename[64]= "";
-    //strcpy(tempBasename, fname);
     char* bname =  basename(fname);
     if(bname == 0)
     {
@@ -81,13 +77,11 @@ int ls_dir(char *dname) //! From 8.6.5
     while (ep = readdir(dp))
     {
         //printf("name=%s ", ep->d_name);
-        //TODO: 
-        //memset(filename,0,128);
+        //ls_file(ep->d_name);
         strcpy(filename, dname);
         strcat(filename, "/");
         strcat(filename, ep->d_name);
         ls_file(filename);
-        //ls_file(ep->d_name);
         fflush(stdout);
     }
     puts("");

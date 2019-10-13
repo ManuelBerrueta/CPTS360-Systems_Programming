@@ -232,26 +232,21 @@ int main(int argc, char *argv[])
             }
             else if( strcmp(command, "ls") == 0)
             {
-                char *file_name = pathname;
                 struct stat mystat, *sp = &mystat;
                 int r;
                 char filename[64], path[1024], cwd[256];
                 strcpy(filename, "./");
 
-                if(strcmp(file_name, "") == 0) //TODO: THIS LINE IS THE KILLER
-                {
-                    //strcpy(filename, ".");
-                    getcwd(cwd, 256);
-                    ls_dir(cwd);
-                    //strcpy(filename, cwd);
-                    //TODO: Might need to branch here using an else for the rest
+                //TODO: pesudo code is:
+                //!   write everything to a file, may be change file descriptor?
+                //! send contents file size to client
+                //! and pretty much like get, send file contents over
+                //! Instead of saving contents of the file print them in the client
 
-                }
-                else
+                if(strcmp(pathname, "") != 0) 
                 {
-                    //TODO: Rest of the code
+                    strcpy(filename, pathname);
                 }
-                
                 if (r = lstat(filename, sp) < 0)
                 {
                     printf("no such file %s\n", filename);
@@ -268,11 +263,11 @@ int main(int argc, char *argv[])
                 }
                 if (S_ISDIR(sp->st_mode))
                 {
-                    ls_dir(path);
+                    ls_dir(path, client_fd);
                 }
                 else
                 {
-                    ls_file(path);
+                    ls_file(path, client_fd);
                 }
             }
             else

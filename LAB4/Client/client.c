@@ -58,6 +58,10 @@ int main(int argc, char *argv[ ])
         {
             n = write(client_fd, buff, MAX);
         }
+        if(strcmp(buff, "ls") == 0)
+        {
+            n = write(client_fd, buff, MAX);
+        }
         
         //printf("client: wrote n=%d bytes; buff=(%s)\n", n, buff);
 
@@ -129,14 +133,30 @@ int main(int argc, char *argv[ ])
         else if( strcmp(command, "lcat") == 0 )
         {
             //TODO: IMPLEMENT LCAT
-            n = chdir(pathname);
-            if (n == 0) //* cd returns 0 if successful
+            FILE *fp;
+
+            if(pathname == 0)
             {
-                printf("%s = Succesful\n\n", buff);
+                puts("===> Did not pass in a file to cat!\n");
             }
             else
             {
-                printf("%s = NOT Succesful\n\n", buff);
+                FILE *fp;
+                int c;
+                fp = fopen(pathname, "r");
+
+                if (fp==0)
+                {
+                    puts("===> FILE DNE or Not a file\n\n");
+                }
+                else
+                {
+                    while((c = fgetc(fp)) != EOF)
+                    {
+                        putchar(c);
+                    }
+                    printf("\n");
+                }
             }
         }
         else if( strcmp(command, "lpwd") == 0 )
@@ -220,11 +240,18 @@ int main(int argc, char *argv[ ])
         }
         else if ( strcmp(command, "ls")==0 )
         {
+            //TODO: Treat like a get
+            //! Instead of saving the file, print to screen
 
+                //while (i < fileSize)
+                while ( n = read(client_fd, ans, MAX))
+                {
+                    printf("%s\n", ans);
+                }
+                puts("Succesful remote ls command\n\n");
         }
         else if ( strcmp(command, "lls")==0 )
         {
-            //char *file_name = pathname;
             struct stat mystat, *sp = &mystat;
             int r;
             char filename[64], path[1024], cwd[256];
@@ -233,11 +260,7 @@ int main(int argc, char *argv[ ])
             if(strcmp(pathname, "") != 0) //TODO: THIS LINE IS THE KILLER
             {
                 strcpy(filename, pathname);
-                //strcat(filename, "/./");
-                //TODO: Might need to branch here using an else for the rest
             }
-
-
             if (r = lstat(filename, sp) < 0)
             {
                 printf("no such file %s\n", filename);
