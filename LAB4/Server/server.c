@@ -79,7 +79,13 @@ int main(int argc, char *argv[])
 
             sscanf(buff, "%s %s", command, pathname);
             
-            if( strcmp(command, "mkdir") == 0 )
+            if( strcmp(command, "quit") == 0 )
+            {
+                printf("Quitting...\n");
+                sleep(3);
+                exit(1);
+            }
+            else if( strcmp(command, "mkdir") == 0 )
             {
                 char *dirname = pathname;
                 r = mkdir(dirname, 0755);
@@ -186,7 +192,7 @@ int main(int argc, char *argv[])
                     }
                     //{
                     //}
-                    printf("FILE=%s | SIZE=%d  Sent succesfully", pathname, filesize);
+                    printf("FILE=%s | SIZE=%d  Sent succesfully\n\n", pathname, filesize);
                     close(outFile);
                 }
                 
@@ -242,6 +248,10 @@ int main(int argc, char *argv[])
                 //! send contents file size to client
                 //! and pretty much like get, send file contents over
                 //! Instead of saving contents of the file print them in the client
+                unlink("templs");
+                sleep(1);
+
+                int tempFile = open("templs", O_WRONLY | O_CREAT, 0755);
 
                 if(strcmp(pathname, "") != 0) 
                 {
@@ -263,12 +273,52 @@ int main(int argc, char *argv[])
                 }
                 if (S_ISDIR(sp->st_mode))
                 {
-                    ls_dir(path, client_fd);
+                    ls_dir(path, tempFile);
                 }
                 else
                 {
-                    ls_file(path, client_fd);
+                    ls_file(path, tempFile);
                 }
+                close(tempFile);
+                //TODO: Send file over like you would get and then delete after
+
+                //!!!!!!!!!!!!!!! SEND temp ls OVER!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+                int outFile = open("templs", O_RDONLY);
+                int i = 0;
+                if (outFile < 0)
+                {
+                    puts("%s = Failed to open\n");
+                    n = write(client_fd,0,MAX);
+                }
+                else
+                {
+                    struct stat fileInfo;
+                    fstat(outFile, &fileInfo);//!Note use stat for filename
+                    int filesize = fileInfo.st_size;
+                    bzero(buff, MAX); 
+                    sprintf(buff, "%d",filesize);
+                    //lseek(outFile, 0, SEEK_END);
+
+                    //lseek(outFile, 0L, SEEK_SET);
+                    //n = write(client_fd,buff, MAX); //*Send filesize
+
+                    //n = read(client_fd, buff, MAX); //* Receive confirmation of filesize
+                    while ( n = read(outFile, buff, MAX) )
+                    {
+                        sleep(.5);
+                        n = write(client_fd, buff, n);
+                        bzero(buff,MAX);
+                    }
+                    n = write(client_fd,0,MAX);
+                    n = write(client_fd,"-=-=-=END=-=-=-",MAX);
+                    //{
+                    //}
+                    printf("FILE=%s | SIZE=%d  Sent succesfully\n", pathname, filesize);
+                    close(outFile);
+                }
+                //!!!!!!!!!!!!!!!! END send ls over !!!!!!!!!!!!!!!!!
             }
             else
             {

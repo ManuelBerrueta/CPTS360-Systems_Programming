@@ -14,7 +14,7 @@
 #include <arpa/inet.h>
 
 
-#define MAX   256
+#define MAX   512
 #define PORT 1234
 
 int ls_file(char *fname);

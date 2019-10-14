@@ -52,16 +52,7 @@ int main(int argc, char *argv[ ])
             exit(0);
         }
 
-        // Send ENTIRE buff to server
-        //TODO: Move this possibly inside if( local commands then don't do this)
-        if(buff[0] != 'l')
-        {
-            n = write(client_fd, buff, MAX);
-        }
-        if(strcmp(buff, "ls") == 0)
-        {
-            n = write(client_fd, buff, MAX);
-        }
+
         
         //printf("client: wrote n=%d bytes; buff=(%s)\n", n, buff);
 
@@ -73,9 +64,24 @@ int main(int argc, char *argv[ ])
         int fileSize, i;
         fileSize = i = 0;
 
+        // Send ENTIRE buff to server
+        //TODO: Move this possibly inside if( local commands then don't do this)
+        if(buff[0] != 'l')
+        {
+            n = write(client_fd, buff, MAX);
+        }
+        if(strcmp(command, "ls") == 0)
+        {
+            n = write(client_fd, buff, MAX);
+        }
 
-
-        if( strcmp(command, "lmkdir") == 0 )
+        if( strcmp(command, "quit") == 0 )
+        {
+            printf("Quitting...\n");
+            sleep(3);
+            exit(1);
+        }
+        else if( strcmp(command, "lmkdir") == 0 )
         {
             char *dirname = pathname;
             n = mkdir(dirname, 0755);
@@ -244,8 +250,12 @@ int main(int argc, char *argv[ ])
             //! Instead of saving the file, print to screen
 
                 //while (i < fileSize)
-                while ( n = read(client_fd, ans, MAX))
+                while ( n = read(client_fd, ans, MAX) )
                 {
+                    if( strcmp(ans, "-=-=-=END=-=-=-") == 0)
+                    {
+                        break;
+                    }
                     printf("%s\n", ans);
                 }
                 puts("Succesful remote ls command\n\n");
