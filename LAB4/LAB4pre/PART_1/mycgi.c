@@ -92,12 +92,12 @@ int ls_dir(char *dname) //! From 8.6.5
     {
         //printf("name=%s ", ep->d_name);
         //TODO: 
-        printf("%s ", ep->d_name);
-        //memset(filename,0,128);
-        //strcat(filename, "./");
-        //strcat(filename, ep->d_name);
+        //printf("%s ", ep->d_name);
+        strcpy(filename, dname);
+        strcat(filename, "/");
+        strcat(filename, ep->d_name);
+        ls_file(filename);
         //ls_file(dname);
-        ls_file(dname);
         printf("<p>\n");
         fflush(stdout);
     }
@@ -235,7 +235,8 @@ main(int argc, char *argv[])
         char filename[64], path[1024], cwd[256];
         strcpy(filename, "./");
 
-        if(file_name != 0)
+        //if(file_name != 0)
+        if(strcmp(file_name, "") != 0)
         {
             strcpy(filename, file_name);
             //printf("TEST %s", filename);
