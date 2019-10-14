@@ -302,19 +302,23 @@ int main(int argc, char *argv[])
                     //lseek(outFile, 0, SEEK_END);
 
                     //lseek(outFile, 0L, SEEK_SET);
-                    //n = write(client_fd,buff, MAX); //*Send filesize
+                    n = write(client_fd,buff, MAX); //*Send filesize
 
-                    //n = read(client_fd, buff, MAX); //* Receive confirmation of filesize
+                    n = read(client_fd, buff, MAX); //* Receive confirmation of filesize
                     while ( n = read(outFile, buff, MAX) )
                     {
-                        sleep(.5);
                         n = write(client_fd, buff, n);
-                        bzero(buff,MAX);
+                    }                    
+                    
+                    
+/*                     while ( n = read(outFile, buff, MAX) )
+                    {
+                        //sleep(1);
+                        n = write(client_fd, buff, n);
                     }
                     n = write(client_fd,0,MAX);
-                    n = write(client_fd,"-=-=-=END=-=-=-",MAX);
-                    //{
-                    //}
+                    n = write(client_fd,"-=-=-=END=-=-=-",MAX); */
+
                     printf("FILE=%s | SIZE=%d  Sent succesfully\n", pathname, filesize);
                     close(outFile);
                 }

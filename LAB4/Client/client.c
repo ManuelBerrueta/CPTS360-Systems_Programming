@@ -250,15 +250,71 @@ int main(int argc, char *argv[ ])
             //! Instead of saving the file, print to screen
 
                 //while (i < fileSize)
-                while ( n = read(client_fd, ans, MAX) )
+/*                 while ( n = read(client_fd, ans, MAX) )
                 {
                     if( strcmp(ans, "-=-=-=END=-=-=-") == 0)
                     {
                         break;
                     }
                     printf("%s\n", ans);
+                } */
+                //!Save incoming ls file
+            bzero(ans, MAX); 
+            n = read(client_fd, ans, MAX);
+            
+            if ( n == 0)
+            {
+                //? FILE FAIL
+                puts("FILE TRANSFER FAIL");
+            }
+            else
+            {
+                fileSize = atoi(ans);
+
+                strcpy(buff, "Verified incoming filesize = ");
+                strcat(buff, ans);
+                n = write(client_fd, buff, MAX);
+
+
+                int inFile = open("templs", O_WRONLY | O_CREAT, 0755);
+                while (i < fileSize)
+                {
+                    n = read(client_fd, ans, MAX);
+                    i += n; //i = nunmber of bites received
+                    write(inFile, ans,n);
                 }
+
+                //!cat file to screen
+
+                FILE *fp;
+
+                if(pathname == 0)
+                {
+                    puts("===> Did not pass in a file to cat!\n");
+                }
+                else
+                {
+                    FILE *fp;
+                    int c;
+                    fp = fopen("templs", "r");
+
+                    if (fp==0)
+                    {
+                        puts("===> FILE DNE or Not a file\n\n");
+                    }
+                    else
+                    {
+                        while((c = fgetc(fp)) != EOF)
+                        {
+                            putchar(c);
+                        }
+                        printf("\n");
+                    }
+                }
+
+                unlink("templs");
                 puts("Succesful remote ls command\n\n");
+            }
         }
         else if ( strcmp(command, "lls")==0 )
         {
