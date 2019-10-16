@@ -76,7 +76,8 @@ int main(int argc, char *argv[])
             //!!!!!!!!!!!!!!!!! Command Handling Code !!!!!!!!!!!!!!!!!!!!!!!!!!
 
             //TODO: sscanf to separate command from filename
-
+            bzero(pathname, 192);
+            bzero(command, 64);
             sscanf(buff, "%s %s", command, pathname);
             
             if( strcmp(command, "quit") == 0 )

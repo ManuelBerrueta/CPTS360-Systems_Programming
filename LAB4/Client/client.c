@@ -59,7 +59,8 @@ int main(int argc, char *argv[ ])
         //!!!!!!!!!!!! Interactive commands !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
         char command[64], pathname[256];
-        bzero(pathname, MAX);
+        bzero(pathname, 256);
+        bzero(command, 64);
         sscanf(buff, "%s %s", command, pathname);
         int fileSize, i;
         fileSize = i = 0;
