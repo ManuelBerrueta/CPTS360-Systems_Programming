@@ -1,3 +1,23 @@
+/** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **
+ **                  WSU CPTS 360-SYSTEMS PROGRAMMING                       **
+ **                         LAB 5 - ShownBlock                              **
+ **                                by                                       **
+ **                          Manuel Berrueta                                **
+ **                                                                         **
+ **     Summary: Program that displays the disk blocks of a file            **
+ **              in an EXT2 file system.The program runs as follows:        **
+ **                                                                         **
+ **         showblock    DEVICE    PATHNAME                                 **
+ **         ---------  ---------  -----------                               **
+ **  e.g.   showblock  diskimage  /a/b/c/d  (diskimage contains an EXT2 FS) **
+ **                                                                         **
+ **  It locates the file named PATHNAME and prints the disk blocks (direct, **
+ **  indirect, double-indirect) of the file.                                **
+ **                                                                         **
+ **     To build: cc main.c -o showdisk -m32                                **
+ **     Requires EXT2 File System libs: sudo apt install e2fslibs-dev       **
+ ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
