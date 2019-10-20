@@ -248,6 +248,14 @@ void *dir(char *devName, char pathName[])
         {
             //TODO: search indirect blocks
         }
+        if(ip->i_block[13] > 0)
+        {
+            //TODO: search double indirect blocks
+        }
+        if(ip->i_block[14] > 0)
+        {
+            //TODO: search Triple indirect blocks
+        }
         //printf("%s", ip->)
     }
     else
