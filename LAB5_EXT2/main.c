@@ -54,7 +54,8 @@ int get_block(int dev, int blk, char *buff);
 void *dir(char *devName, char pathName[]);
 int search(INODE *ip, char name[]);
 void *show_dir(INODE *ip);
-
+void *printIPinfo(char fileName[], INODE *ip);
+INODE *path2inode(INODE *ip, char pathName[], int inodes_start);
 
 int main(int argc, char const *argv[])
 {
@@ -197,7 +198,24 @@ void *dir(char *devName, char pathName[])
     ip++;
     //show_dir(ip);
 
-    //TODO: Tokenize path
+    ip = path2inode(ip, pathName, inodes_start);
+
+
+    if(ip->i_block[12] > 0)
+    {
+        //TODO: search indirect blocks
+        printf("TESTING\n");
+    }
+    if(ip->i_block[13] > 0)
+    {
+        //TODO: search double indirect blocks
+    }
+    if(ip->i_block[14] > 0)
+    {
+        //TODO: search Triple indirect blocks
+    }
+
+/*  
     char *tokenizedPath[64];
     int numOfComponents=0;
     
@@ -233,16 +251,9 @@ void *dir(char *devName, char pathName[])
             get_block(dev, blk, buf);
             ip = (INODE *)buf + offset;   // ip -> new INODE
         }
-        //TODO: Print information out of current ip
-        //! i_block[15] contains pointers to disck blocks of a file ref P305
-        printf("%s fileSize = %d\n", tokenizedPath[i],ip->i_size);
-        printf("**i_block information***\n");
-        i=0;
-        while(i < 15)
-        {
-            printf("i_block[%d] = %d\n", i, ip->i_block[i]);
-            i++;
-        }
+        
+        //*Print information out of current ip
+        printIPinfo(tokenizedPath[i-1], ip);
 
         if(ip->i_block[12] > 0)
         {
@@ -256,12 +267,14 @@ void *dir(char *devName, char pathName[])
         {
             //TODO: search Triple indirect blocks
         }
+
+        
         //printf("%s", ip->)
     }
     else
     {
         //show_dir(ip);
-    }
+    } */
 }
 
 
@@ -338,5 +351,72 @@ void *show_dir(INODE *ip)
             cp += dp->rec_len;
             dp = (DIR *)cp;
         }
+    }
+}
+
+
+void *printIPinfo(char fileName[], INODE *ip)
+{
+    int i = 0;
+    //TODO: Print information out of current ip
+    //! i_block[15] contains pointers to disck blocks of a file ref P305
+    printf("\n%s fileSize = %d\n", fileName,ip->i_size);
+    
+    printf("**i_block information***\n");
+    i=0;
+    while(i < 15)
+    {
+        printf("i_block[%d] = %d\n", i, ip->i_block[i]);
+        i++;
+    }
+}
+
+
+INODE *path2inode(INODE *ip, char pathName[], int inodes_start)
+{
+    int i = 0;
+    char *tokenizedPath[64];
+    int numOfComponents=0;
+    
+    if(pathName != 0) //* If a pathname was passed
+    {
+        //* Tokenize path
+        numOfComponents = tokenize(pathName, tokenizedPath);
+        int j=0;
+        
+        //TODO:For debugging only
+        printf("Tokenized path:> ");
+        while(j < numOfComponents)
+        {
+            printf("/%s", tokenizedPath[j++]);
+            fflush(stdout);
+        }
+        puts("");
+        //TODO: Search will go here --!NOTE: may need to do ip
+        int ino, blk, offset;
+        int n = numOfComponents; 
+    
+        for (i=0; i < n; i++)
+        {
+            ino = search(ip, tokenizedPath[i]);
+        
+            if (ino==0)
+            {
+                printf("can't find %s\n", tokenizedPath[i]); 
+                exit(1);
+            }
+                // Mailman's algorithm: Convert (dev, ino) to INODE pointer
+            blk    = (ino - 1) / 8 + inodes_start; 
+            offset = (ino - 1) % 8;        
+            get_block(dev, blk, buf);
+            ip = (INODE *)buf + offset;   // ip -> new INODE
+        }
+        //*Print information out of current ip
+        printIPinfo(tokenizedPath[i-1], ip);
+        return ip;
+    }
+    else
+    {
+        show_dir(ip);
     }
 }
