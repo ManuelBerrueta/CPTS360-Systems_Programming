@@ -233,8 +233,22 @@ void *dir(char *devName, char pathName[])
             get_block(dev, blk, buf);
             ip = (INODE *)buf + offset;   // ip -> new INODE
         }
-
         //TODO: Print information out of current ip
+        //! i_block[15] contains pointers to disck blocks of a file ref P305
+        printf("%s fileSize = %d\n", tokenizedPath[i],ip->i_size);
+        printf("**i_block information***\n");
+        i=0;
+        while(i < 15)
+        {
+            printf("i_block[%d] = %d\n", i, ip->i_block[i]);
+            i++;
+        }
+
+        if(ip->i_block[12] > 0)
+        {
+            //TODO: search indirect blocks
+        }
+        //printf("%s", ip->)
     }
     else
     {
