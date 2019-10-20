@@ -1,4 +1,4 @@
 #Shell script to mount disk "showdisk"
-sudo mount mydisk /mnt
+sudo mount diskimage /mnt
 ls -l /mnt
 sudo umount /mnt

@@ -49,25 +49,55 @@ int bmap, imap, iblock;
 int rootblock;
 
 // Functions
+int tokenize(char inStrToTok[], char *retCharArr[]);
 int get_block(int dev, int blk, char *buff);
-void *dir(char *devName);
+void *dir(char *devName, char pathName[]);
+int search(INODE *ip, char name[]);
 void *show_dir(INODE *ip);
 
 
 int main(int argc, char const *argv[])
 {
-    char ;
+    char pathName[256] = { 0 };
     if (argc > 1)
     {
         strcpy(devName, argv[1]);
+        if(argv[2] != 0)
+        {
+            strcpy(pathName, argv[2]);
+        }
     }
     else
     {
         strcpy(devName, "diskimage");
+        strcpy(pathName, "/Y/bigfile");
     }
-    dir(devName);
+    dir(devName, &pathName);
 
     return 0;
+}
+
+
+//TODO: Tokenize function, it will return a char *array[]
+int tokenize(char inStrToTok[], char *retCharArr[])
+{
+    int numOfComponents =0;
+    
+    if(inStrToTok == 0)
+    {
+        printf("NULL STRING - Can't Tokenize Empty String!\n\n");
+        return -1;
+    }
+
+    char* tempPath;
+    retCharArr[numOfComponents++] = strtok(inStrToTok, "/");
+
+    while((tempPath = strtok(NULL, "/")))
+    {
+        retCharArr[numOfComponents++] = tempPath;
+    }
+
+    return numOfComponents;
 }
 
 
@@ -89,7 +119,7 @@ int get_block(int dev, int blk, char *buff)
 }
 
 
-void *dir(char *devName)
+void *dir(char *devName, char pathName[])
 {
     int i = 0;
     char *cp;
@@ -138,8 +168,7 @@ void *dir(char *devName)
     imap = gp->bg_inode_bitmap;
     iblock = gp->bg_inode_table;
     printf("\tGD Summary: bmap = %d | imap = %d | iblock = %d\n\n", bmap, imap, iblock);
-
-    //TODO: @pic 20191017_100943.jpg
+    int inodes_start=iblock; //!Tentative got to double check this
 
     //* Read first INODE block to get root inode #2
     //?(4) let INODE *ip
@@ -154,44 +183,138 @@ void *dir(char *devName)
     printf("link=%d\n", ip->i_links_count);
     printf("i_block[0]=%d\n", ip->i_block[0]);
     rootblock=ip->i_block[0];
-    puts("*****************************************\n\n");
+    puts("*******************************************\n\n");
     
+
+    puts("************{ root directory contents }************");
+    show_dir(ip);
+    puts("***************************************************\n\n");
     //getchar(); //! breakpoint
 
-    show_dir(ip);
+    //!Reset back to root
+    get_block(dev, inodes_start, buf);
+    ip = (INODE *)buf;
+    ip++;
+    //show_dir(ip);
 
+    //TODO: Tokenize path
+    char *tokenizedPath[64];
+    int numOfComponents=0;
+    
+    if(pathName != 0) //* If a pathname was passed
+    {
+        numOfComponents = tokenize(pathName, tokenizedPath);
+        int j=0;
+        
+        //TODO:For debugging only
+        printf("Tokenized path:> ");
+        while(j < numOfComponents)
+        {
+            printf("/%s", tokenizedPath[j++]);
+            fflush(stdout);
+        }
+        puts("");
+        //TODO: Search will go here --!NOTE: may need to do ip
+        int ino, blk, offset;
+        int n = numOfComponents; 
+
+        for (i=0; i < n; i++)
+        {
+            ino = search(ip, tokenizedPath[i]);
+        
+            if (ino==0)
+            {
+                printf("can't find %s\n", tokenizedPath[i]); 
+                exit(1);
+            }
+             // Mailman's algorithm: Convert (dev, ino) to INODE pointer
+            blk    = (ino - 1) / 8 + inodes_start; 
+            offset = (ino - 1) % 8;        
+            get_block(dev, blk, buf);
+            ip = (INODE *)buf + offset;   // ip -> new INODE
+        }
+
+        //TODO: Print information out of current ip
+    }
+    else
+    {
+        //show_dir(ip);
+    }
+}
+
+
+//* Search directory's data blocks for a name string
+//* return its inode number if found, if not found return 0.
+int search(INODE *ip, char name[])
+{
+    char temp[256];
+    DIR *dp;
+    char *cp;
+    int ino, block, offset;
+    int i=0;
+
+
+    for(i=0; i < 12; i++)
+    {
+        if (ip->i_block[i] == 0)
+        {
+            break;
+        }
+        get_block(dev, ip->i_block[i], sbuf);
+        dp = (DIR *)sbuf;
+        cp = sbuf;
+
+        while(cp < sbuf + BLKSIZE)
+        {
+            strncpy(temp, dp->name, dp->name_len);
+            temp[dp->name_len] = 0; //add null char to the end off the dp->name
+
+            //TODO: strcmp to see if the given name exists
+            if (strcmp(&name[i], temp) == 0)
+            {
+                printf("*****={ inode %s found, inode# = %d }=*****\n", name, dp->inode);
+                printf("%4d       %4d      %4d        %s\n", 
+                dp->inode, dp->rec_len, dp->name_len, temp);
+                return dp->inode;
+            }
+            cp += dp->rec_len;
+            dp = (DIR *)cp;
+        }
+    }
+    printf("**inode %s, not found in data blocks\n\n", name);
+    return 0;
 }
 
 void *show_dir(INODE *ip)
-    {
-        //char sbuf[BLKSIZE], char temp[256];
-        char temp[256];
-        DIR *dp;
-        char *cp;
-        int i;
+{
+    //char sbuf[BLKSIZE], char temp[256];
+    char temp[256];
+    DIR *dp;
+    char *cp;
+    int i;
 
-        for (i=0; i < 12; i++) //* assume DIR at most 12 direct blocks
-        {  
-            if (ip->i_block[i] == 0)
-            {
-                break;
-            }
-
-            // YOU SHOULD print i_block[i] number here
-            get_block(dev, ip->i_block[i], sbuf);
-            dp = (DIR *)sbuf;
-            cp = sbuf;
-
-            puts(" Inode |   Size   | FName Size | File Name");
-
-            while(cp < sbuf + BLKSIZE)
-            {
-                strncpy(temp, dp->name, dp->name_len);
-                temp[dp->name_len] = 0;
-                printf("%4d       %4d      %4d        %s\n", 
-	                    dp->inode, dp->rec_len, dp->name_len, temp);
-                cp += dp->rec_len;
-                dp = (DIR *)cp;
-            }
+    for (i=0; i < 12; i++) //* assume DIR at most 12 direct blocks
+    {  
+        if (ip->i_block[i] == 0)
+        {
+            break;
         }
-    }   
+
+        // YOU SHOULD print i_block[i] number here
+        get_block(dev, ip->i_block[i], sbuf);
+        dp = (DIR *)sbuf;
+        cp = sbuf;
+
+        puts(" Inode |   Size   | FName Size | File Name");
+
+        while(cp < sbuf + BLKSIZE)
+        {
+            strncpy(temp, dp->name, dp->name_len);
+            temp[dp->name_len] = 0;
+            printf("%4d       %4d      %4d        %s\n", 
+                    dp->inode, dp->rec_len, dp->name_len, temp);
+            cp += dp->rec_len;
+            dp = (DIR *)cp;
+        }
+    }
+}
