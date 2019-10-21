@@ -43,6 +43,7 @@ DIR     *dp;
 
 //char *dev = "mydisk";
 char buf[1024], dbuf[1024], sbuf[256], devName[256];
+char indirect_blk_buff[1024], double_indirect_blk_buff[1024];
 
 int dev;//! File Descriptor for Device
 int bmap, imap, iblock;
@@ -71,7 +72,7 @@ int main(int argc, char const *argv[])
     else
     {
         strcpy(devName, "diskimage");
-        strcpy(pathName, "/Y/bigfile");
+        strcpy(pathName, "/Z/hugefile");
     }
     dir(devName, &pathName);
 
@@ -200,20 +201,59 @@ void *dir(char *devName, char pathName[])
 
     ip = path2inode(ip, pathName, inodes_start);
 
-
+    int j = 0;
     if(ip->i_block[12] > 0)
     {
         //TODO: search indirect blocks
-        printf("TESTING\n");
+        puts("\n-=0=-=0=-=0=-=0={ Indirect Blocks }=0=-=0=-=0=-=0=- ");
+        get_block(dev, ip->i_block[12], indirect_blk_buff);
+        int * ind_blk_buf_ptr = (int *)indirect_blk_buff;
+        for(i=0; i < 256; i++)
+        {
+            if(ind_blk_buf_ptr[i] == 0)
+            {
+                break;
+            }
+            printf("%d ", ind_blk_buf_ptr[i]);
+            fflush(stdout);
+        }
+        puts("\n-=0=-=0=-=0=-=0==0=-=0=-=0=-=0=-=0=-=0=-=0=-=0=- ");
     }
     if(ip->i_block[13] > 0)
     {
         //TODO: search double indirect blocks
+        get_block(dev, ip->i_block[13], indirect_blk_buff);
+        int * ind_blk_buf_ptr = (int *)indirect_blk_buff;
+        puts("\n-=0=-=0=-=0=-=0={ Double Indirect Blocks }=0=-=0=-=0=-=0=- ");
+        for(i=0; i < 256; i++)
+        {
+            if(ind_blk_buf_ptr[i] == 0)
+            {
+                break;
+            }
+            get_block(dev,ind_blk_buf_ptr[i], double_indirect_blk_buff);
+            int * doub_ind_blk_buf_ptr = (int *)double_indirect_blk_buff;
+            for(j=0; j < 256; j++)
+            {
+                if(doub_ind_blk_buf_ptr[j] == 0)
+                {
+                    break;
+                }
+                printf("%d ", doub_ind_blk_buf_ptr[j]);
+                fflush(stdout);
+            }
+        }
+        puts("\n-=0=-=0=-=0=-=0==0=-=0=-=0=-=0=-=0=-=0=-=0=-=0=-=0=-=0=-=0=- ");
     }
     if(ip->i_block[14] > 0)
     {
-        //TODO: search Triple indirect blocks
+        //TODO: Search Triple indirect blocks
+        //* NOT REQUIRED FOR FINAL PROJECT
     }
+
+
+
+
 
 /*  
     char *tokenizedPath[64];
@@ -275,6 +315,7 @@ void *dir(char *devName, char pathName[])
     {
         //show_dir(ip);
     } */
+
 }
 
 
@@ -287,7 +328,6 @@ int search(INODE *ip, char name[])
     char *cp;
     int ino, block, offset;
     int i=0;
-
 
     for(i=0; i < 12; i++)
     {
