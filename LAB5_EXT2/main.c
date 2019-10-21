@@ -68,6 +68,11 @@ int main(int argc, char const *argv[])
         {
             strcpy(pathName, argv[2]);
         }
+        else
+        {
+            strcpy(pathName, "/Z/hugefile");
+        }
+        
     }
     else
     {

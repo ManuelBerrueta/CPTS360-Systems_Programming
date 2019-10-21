@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${fileDirname}/${fileBasenameNoExtension}",
-            "args": [],
+            "args": ["diskimage", "/Z/hugefile"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
