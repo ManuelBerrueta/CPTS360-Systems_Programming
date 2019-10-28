@@ -12,6 +12,7 @@ extern int n;
 extern int fd, dev;
 extern int nblocks, ninodes, bmap, imap, inode_start;
 extern char line[256], cmd[32], pathname[256];
+char sbuf[256];
 
 int get_block(int dev, int blk, char *buf)
 {
@@ -28,6 +29,24 @@ int put_block(int dev, int blk, char *buf)
 int tokenize(char *pathname)
 {
     // tokenize pathname in GLOBAL gpath[]; pointer by name[i]; n tokens
+    int numOfComponents =0;
+    
+    if(pathname == 0)
+    {
+        printf("NULL STRING - Can't Tokenize Empty String!\n\n");
+        return -1;
+    }
+
+    char* tempPath;
+    gpath[numOfComponents++] = strtok(pathname, "/");
+
+    while((tempPath = strtok(NULL, "/")))
+    {
+        gpath[numOfComponents++] = tempPath;
+    }
+
+    return numOfComponents;
+
 }
 
 // return minode pointer to loaded INODE
@@ -110,9 +129,44 @@ int iput(MINODE *mip)
     put_block(mip->dev, block, buf);
 }
 
-int search(MINODE *mip, char *name)
+int search(INODE *ip, char *name)
 {
-    // YOUR serach() fucntion as in LAB 6
+    // YOUR search() fucntion as in LAB 6
+    char temp[256];
+    DIR *dp;
+    char *cp;
+    int ino, block, offset;
+    int i=0;
+
+    for(i=0; i < 12; i++)
+    {
+        if (ip->i_block[i] == 0)
+        {
+            break;
+        }
+        get_block(dev, ip->i_block[i], sbuf);
+        dp = (DIR *)sbuf;
+        cp = sbuf;
+
+        while(cp < sbuf + BLKSIZE)
+        {
+            strncpy(temp, dp->name, dp->name_len);
+            temp[dp->name_len] = 0; //add null char to the end off the dp->name
+
+            //TODO: strcmp to see if the given name exists
+            if (strcmp(&name[i], temp) == 0)
+            {
+                printf("*****={ inode %s found, inode# = %d }=*****\n", name, dp->inode);
+                printf("%4d       %4d      %4d        %s\n", 
+                dp->inode, dp->rec_len, dp->name_len, temp);
+                return dp->inode;
+            }
+            cp += dp->rec_len;
+            dp = (DIR *)cp;
+        }
+    }
+    printf("**inode %s, not found in data blocks\n\n", name);
+    return 0;
 }
 
 int getino(char *pathname)

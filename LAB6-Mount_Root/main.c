@@ -65,6 +65,12 @@ int mount_root()
 char *disk = "mydisk";
 int main(int argc, char *argv[])
 {
+    //* My Shell Stuff
+    time_t T = time(NULL);
+    struct tm tm = *localtime(&T);
+
+    
+    
     int ino;
     char buf[BLKSIZE];
     if (argc > 1)
@@ -115,19 +121,23 @@ int main(int argc, char *argv[])
     //printf("hit a key to continue : "); getchar();
     while (1)
     {
+        //printf("[ %04d/%02d/%02d ] BERR Shell [ %s ]\n|-$ ", tm.tm_year+1900, tm.tm_mon, tm.tm_mday, cwd);
+        printf("[ %04d/%02d/%02d ] BERR Shell [ cwd ]\n|-$ ", tm.tm_year+1900, tm.tm_mon, tm.tm_mday);
+        
         printf("input command : [ls|cd|pwd|quit] ");
         fgets(line, 128, stdin);
         line[strlen(line) - 1] = 0;
         if (line[0] == 0)
             continue;
         pathname[0] = 0;
+        bzero(pathname, 256);
         cmd[0] = 0;
 
         sscanf(line, "%s %s", cmd, pathname);
         printf("cmd=%s pathname=%s\n", cmd, pathname);
 
         if (strcmp(cmd, "ls") == 0)
-            list_file();
+            list_file(pathname, inode_start);
         if (strcmp(cmd, "cd") == 0)
             change_dir();
         if (strcmp(cmd, "pwd") == 0)

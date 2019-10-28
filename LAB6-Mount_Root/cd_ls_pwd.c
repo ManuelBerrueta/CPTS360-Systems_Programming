@@ -58,15 +58,80 @@ void *show_dir(INODE *ip)
 }
 
 
+void *printIPinfo(char fileName[], INODE *ip)
+{
+    int i = 0;
+    //TODO: Print information out of current ip
+    //! i_block[15] contains pointers to disck blocks of a file ref P305
+    printf("\n%s fileSize = %d\n", fileName,ip->i_size);
+    
+    printf("**i_block information***\n");
+    i=0;
+    while(i < 15)
+    {
+        printf("i_block[%d] = %d\n", i, ip->i_block[i]);
+        i++;
+    }
+}
 
-int list_file()
+
+INODE *path2inode(INODE *ip, char pathName[], int inodes_start)
+{
+    int i = 0;
+    int numOfComponents=0;
+    
+    if(pathName[0] != 0) //* If a pathname was passed
+    {
+        //* Tokenize path
+        numOfComponents = tokenize(pathName);
+        int j=0;
+        
+        //TODO:For debugging only
+        printf("Tokenized path:> ");
+        while(j < numOfComponents)
+        {
+            printf("/%s", gpath[j++]);
+            fflush(stdout);
+        }
+        puts("");
+        //TODO: Search will go here --!NOTE: may need to do ip
+        int ino, blk, offset;
+        int n = numOfComponents; 
+    
+        for (i=0; i < n; i++)
+        {
+            ino = search(ip, gpath[i]);
+        
+            if (ino==0)
+            {
+                printf("can't find %s\n", gpath[i]); 
+                exit(1);
+            }
+                // Mailman's algorithm: Convert (dev, ino) to INODE pointer
+            blk    = (ino - 1) / 8 + inodes_start; 
+            offset = (ino - 1) % 8;        
+            get_block(dev, blk, buf);
+            ip = (INODE *)buf + offset;   // ip -> new INODE
+        }
+        //*Print information out of current ip
+        printIPinfo(gpath[i-1], ip);
+        return ip;
+    }
+    else
+    {
+        show_dir(ip);
+    }
+}
+
+int list_file(char *pathname, int inode_start)
 {
     printf("list_file(): under construction\n");
 
     root->INODE.i_block[12]; //This is how you access inodes!
-    show_dir(&(root->INODE));
-
+    //show_dir(&(root->INODE));
+    path2inode(&(root->INODE), pathname, inode_start);
 }
+
 
 int pwd(MINODE *wd)
 {
