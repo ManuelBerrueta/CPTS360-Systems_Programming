@@ -30,6 +30,7 @@ int tokenize(char *pathname)
 {
     // tokenize pathname in GLOBAL gpath[]; pointer by name[i]; n tokens
     int numOfComponents =0;
+    strcpy(gpath, pathname);
     
     if(pathname == 0)
     {
@@ -37,16 +38,22 @@ int tokenize(char *pathname)
         return -1;
     }
 
+    if( strcmp(gpath, "/") == 0)
+    {
+        printf("Looking to LS root inode\n");
+        name[numOfComponents++] = gpath;
+        return;
+    }
+
     char* tempPath;
-    gpath[numOfComponents++] = strtok(pathname, "/");
+    name[numOfComponents++] = strtok(pathname, "/");
 
     while((tempPath = strtok(NULL, "/")))
     {
-        gpath[numOfComponents++] = tempPath;
+        name[numOfComponents++] = tempPath;
     }
 
     return numOfComponents;
-
 }
 
 // return minode pointer to loaded INODE
@@ -189,8 +196,7 @@ int getino(char *pathname)
     for (i = 0; i < n; i++)
     {
         printf("===========================================\n");
-        ino = search(mip, name[i]);
-
+        ino = search(&(mip->INODE), name[i]);
         if (ino == 0)
         {
             iput(mip);

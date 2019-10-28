@@ -90,7 +90,7 @@ INODE *path2inode(INODE *ip, char pathName[], int inodes_start)
         printf("Tokenized path:> ");
         while(j < numOfComponents)
         {
-            printf("/%s", gpath[j++]);
+            printf("/%s", name[j++]);
             fflush(stdout);
         }
         puts("");
@@ -100,11 +100,11 @@ INODE *path2inode(INODE *ip, char pathName[], int inodes_start)
     
         for (i=0; i < n; i++)
         {
-            ino = search(ip, gpath[i]);
+            ino = search(ip, name[i]);
         
             if (ino==0)
             {
-                printf("can't find %s\n", gpath[i]); 
+                printf("can't find %s\n", name[i]); 
                 exit(1);
             }
                 // Mailman's algorithm: Convert (dev, ino) to INODE pointer
@@ -114,7 +114,8 @@ INODE *path2inode(INODE *ip, char pathName[], int inodes_start)
             ip = (INODE *)buf + offset;   // ip -> new INODE
         }
         //*Print information out of current ip
-        printIPinfo(gpath[i-1], ip);
+        printIPinfo(name[i-1], ip);
+        show_dir(ip);
         return ip;
     }
     else
