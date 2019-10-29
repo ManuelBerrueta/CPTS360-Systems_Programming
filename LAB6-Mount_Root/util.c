@@ -191,7 +191,7 @@ int getino(char *pathname)
     else
         mip = iget(running->cwd->dev, running->cwd->ino);
 
-    tokenize(pathname);
+    n = tokenize(pathname);
 
     for (i = 0; i < n; i++)
     {

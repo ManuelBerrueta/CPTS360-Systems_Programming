@@ -139,7 +139,7 @@ int main(int argc, char *argv[])
         if (strcmp(cmd, "ls") == 0)
             list_file(pathname, inode_start);
         if (strcmp(cmd, "cd") == 0)
-            change_dir();
+            change_dir(pathname);
         if (strcmp(cmd, "pwd") == 0)
             pwd(running->cwd);
 
