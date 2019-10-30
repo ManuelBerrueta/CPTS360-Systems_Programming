@@ -20,7 +20,7 @@ char indirect_blk_buff[1024], double_indirect_blk_buff[1024];
 
 change_dir(char *pathname)
 {
-    printf("chage_dir(): to be constructed\n");
+    printf("chage_dir()\n");
     if(pathname == 0)
     {
         running->cwd = root;
@@ -139,7 +139,7 @@ INODE *path2inode(INODE *ip, char pathName[], int inodes_start)
 
 int list_file(char *pathname, int inode_start)
 {
-    printf("list_file(): under construction\n");
+    printf("list_file()\n");
 
     root->INODE.i_block[12]; //This is how you access inodes!
     //show_dir(&(root->INODE));
@@ -203,7 +203,7 @@ rpwd(MINODE *wd)
 
 int pwd(MINODE *wd)
 {
-    printf("pwd(): yet to be done by YOU\n");
+    printf("pwd()\n");
 
     if (wd == root)
     {
