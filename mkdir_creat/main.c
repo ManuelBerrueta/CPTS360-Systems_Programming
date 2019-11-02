@@ -21,11 +21,13 @@ char *name[64];  // assume at most 64 components in pathname
 int n;           // number of component strings
 
 int fd, dev;
-int nblocks, ninodes, bmap, imap, inode_start;
+int nblocks, ninodes, bmap, imap, inode_start, iblock;
 char line[256], cmd[32], pathname[256];
 
 #include "util.c"
 #include "cd_ls_pwd.c"
+#include "mkdir_creat.c"
+
 
 int init()
 {
@@ -71,7 +73,7 @@ int main(int argc, char *argv[])
 
     
     
-    int ino;
+    int i, ino;
     char buf[BLKSIZE];
     if (argc > 1)
         disk = argv[1];
@@ -87,22 +89,29 @@ int main(int argc, char *argv[])
     get_block(dev, 1, buf);
     sp = (SUPER *)buf;
 
-    /* verify it's an ext2 file system *****************/
+    /* Verify it's an EXT2 file system *****************/
     if (sp->s_magic != 0xEF53)
     {
         printf("magic = %x is not an ext2 filesystem\n", sp->s_magic);
         exit(1);
     }
-    printf("OK\n");
+    printf("VERIFIED EXT2 File System = OK\n");
     ninodes = sp->s_inodes_count;
     nblocks = sp->s_blocks_count;
+    printf("ninodes = %d nblocks = %d\n", ninodes, nblocks);
 
+    // read Group Descriptor 0 to get bmap, imap and iblock numbers
     get_block(dev, 2, buf);
     gp = (GD *)buf;
 
     bmap = gp->bg_block_bitmap;
     imap = gp->bg_inode_bitmap;
-    inode_start = gp->bg_inode_table;
+
+    //* Both iblock and inode_start poin to begining of inodes
+    //inode_start = gp->bg_inode_table;
+    iblock = gp->bg_inode_table;
+    inode_start = iblock;
+
     printf("bmp=%d imap=%d inode_start = %d\n", bmap, imap, inode_start);
 
     init();
