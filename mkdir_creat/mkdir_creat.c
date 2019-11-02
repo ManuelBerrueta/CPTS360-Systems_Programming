@@ -115,7 +115,7 @@ int decFreeBlocks(int dev)
     put_block(dev, 2, buf);
 }
 
-int balloc(int dev) // allocate an inode number
+int balloc(int dev) // allocate a block number
 {
     int i;
     char buf[BLKSIZE];
@@ -129,7 +129,6 @@ int balloc(int dev) // allocate an inode number
         {
             set_bit(buf, i);
             put_block(dev, bmap, buf);
-            //decFreeInodes(dev); //TODO: replace with decFreeBlocks
             decFreeBlocks(dev);
             return i + 1;
         }
@@ -188,14 +187,14 @@ int enter_name(MINODE *pip, int myino, char *myname)
             /*************************************************
                 print DIR record names while stepping through
             **************************************************/
-            printf("At DIR record %s", dp );
+            printf("At DIR record %s", dp->name); //*May need to fix this localy DIR* dp
 
             cp += dp->rec_len;
             dp = (DIR *)cp;
         } 
-        // dp NOW points at last entry in block
+        //! dp from above loop NOW points at last entry in block
 
-        Let remain = LAST entry's rec_len - its IDEAL_LENGTH;
+/*         Let remain = LAST entry's rec_len - its IDEAL_LENGTH;
 
             if (remain >= need_length){
             enter the new entry as the LAST entry and trim the previous entry
@@ -212,95 +211,67 @@ int enter_name(MINODE *pip, int myino, char *myname)
                                                         |     NEW entry
         --|-4---2----2--|----|---------|----ideal_len-----|--- rlen=remain ------|
         |ino rlen nlen NAME|.........|ino rlen nlen|NAME|myino rlen nlen myname|
-        --------------------------------------------------------------------------
+        -------------------------------------------------------------------------- */
+        int IDEAL_LEN = 4*((8 + dp->name_len + 3)/4);
+        int NEEDED_LEN = strlen(myname);
+        int CURRENT_LEN = dp->rec_len;
+        int REMAINING_LEN = CURRENT_LEN - (4*((8 + IDEAL_LEN + 3)/4));
+            
 
-    }
+        if (REMAINING_LEN >= NEEDED_LEN)
+        {
+            //*Trim the size of the previous entry to its IDEAL_LEN
+            dp->rec_len = IDEAL_LEN;
+            //*Move up to the empty space to enter new dir
+            //*We do this by moving up the new dp->rec_len of the current last DIR entry
+            cp += dp->rec_len;
+            dp = (DIR *)cp;
+            //* New entry size will now be the last entry,
+            //* Inherits the leftover size of rest of the block
+            dp->rec_len = REMAINING_LEN;
+            //* Enter new DIR entry information
+            strcpy(dp->name, myname); //Copy name into dp->name
+            dp->inode = myino;                     
+            dp->name_len = NEEDED_LEN;
+            //(6).Write data block to disk;
+            put_block(dev, BLKSIZE, buf); //! Writes block back to disk 
+            //TODO: Should probably return here, we are done making new dir
+            return;
+        }
+        else
+        {
+            /* (5).// Reach here means: NO space in existing data block(s)
+
+                Allocate a new data block; INC parent's size by BLKSIZE;
+                Enter new entry as the first entry in the new data block with rec_len=BLKSIZE.
+
+                |-------------------- rlen = BLKSIZE -------------------------------------
+                |myino rlen nlen myname                                                  |
+                -------------------------------------------------------------------------- */
+            int new_block = balloc(dev); //TODO: Up to here we should be goood
+
+            //TODO: Below not sure how to proceed
 
 
+            INODE *ip = &pip->INODE;
+
+            ip->i_mode = 0x41ED;		// OR 040755: DIR type and permissions
+            ip->i_uid  = running->uid;	// Owner uid 
+            ip->i_gid  = running->pid;  //running->gid;	// Group Id
+            ip->i_size += BLKSIZE;		// Size in bytes Increment Parents size by BLKSIZE
+            ip->i_links_count++;	        // Links count++ because of additional dir
+            ip->i_atime = ip->i_ctime = ip->i_mtime = time(0L);  // set to current time
+            ip->i_blocks = 2;                	// LINUX: Blocks count in 512-byte chunks 
+            ip->i_block[0] = new_block;             // new DIR has one data block   
+
+            
+            //(6).Write data block to disk;
+            put_block(dev, BLKSIZE, buf); //! Writes block back to disk 
+            //TODO: Should probably return here, we are done making new dir
+            return;
+        }
         i++;
     }
-    
-    
-
-
-
-
-
-    
-    
-    
-    (2). EXT2 DIR entries: Each DIR entry has rec_len and name_len. Each entry's
-         ideal length is   
-
-            IDEAL_LEN = 4*[ (8 + name_len + 3)/4 ]
-    
-         All DIR entries in a data block have rec_len = IDEAL_LEN, except the last
-         entry. The rec_len of the LAST entry is to the end of the block, which may
-         be larger than its IDEAL_LEN.
-
-      --|-4---2----2--|----|---------|--------- rlen ->------------------------|
-        |ino rlen nlen NAME|.........|ino rlen nlen|NAME                       |
-      --------------------------------------------------------------------------
-
-    (3). To enter a new entry of name with n_len, the needed length is
-
-            need_length = 4*[ (8 + n_len + 3)/4 ]  // a multiple of 4
-
-    (4). Step to the last entry in a data block (HOW?).
-    
-        // get parent's ith data block into a buf[ ] 
-
-            get_block(parent->dev, parent->INODE.i_block[i], buf);
-
-            dp = (DIR *)buf;
-            cp = buf;
-
-            // step to LAST entry in block: int blk = parent->INODE.i_block[i];
-
-            printf("step to LAST entry in data block %d\n", blk);
-            while (cp + dp->rec_len < buf + BLKSIZE){
-
-                /*************************************************
-                    print DIR record names while stepping through
-                **************************************************/
-
-                cp += dp->rec_len;
-                dp = (DIR *)cp;
-            } 
-            // dp NOW points at last entry in block
-
-            Let remain = LAST entry's rec_len - its IDEAL_LENGTH;
-
-            if (remain >= need_length){
-            enter the new entry as the LAST entry and trim the previous entry
-            to its IDEAL_LENGTH; 
-            goto (6) below.
-            } 
-
-                                    EXAMPLE:
-
-                                        |LAST entry 
-        --|-4---2----2--|----|---------|--------- rlen ->------------------------|
-        |ino rlen nlen NAME|.........|ino rlen nlen|NAME                       |
-        --------------------------------------------------------------------------
-                                                        |     NEW entry
-        --|-4---2----2--|----|---------|----ideal_len-----|--- rlen=remain ------|
-        |ino rlen nlen NAME|.........|ino rlen nlen|NAME|myino rlen nlen myname|
-        --------------------------------------------------------------------------
-
-    }
-    
-    (5).// Reach here means: NO space in existing data block(s)
-
-        Allocate a new data block; INC parent's isze by BLKSIZE;
-        Enter new entry as the first entry in the new data block with rec_len=BLKSIZE.
-
-        |-------------------- rlen = BLKSIZE -------------------------------------
-        |myino rlen nlen myname                                                  |
-        --------------------------------------------------------------------------
-
-    (6).Write data block to disk;
-
 }
 
 
@@ -386,7 +357,7 @@ int mymkdir(MINODE *pip, char *name)
     put_block(dev, BLKSIZE, localbuff); //! Writes block back to disk
 
 
-    //7. Finally, enter name ENTRY into parent's directory by //TODO: START HERE
+    //7. Finally, enter name ENTRY into parent's directory by 
     enter_name(pip, ino, name);
 }   
 //!!END  OF mymkdir
