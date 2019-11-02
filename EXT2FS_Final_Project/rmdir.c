@@ -117,106 +117,117 @@ int bdalloc(int dev, int blk) // deallocate a blk number
     incFreeBlocks(dev);
 }
 
-int getino(char *pathname)
-{
-    int i, ino, blk, disp;
-    INODE *ip;
-    MINODE *mip;
-
-    printf("getino: pathname=%s\n", pathname);
-    if (strcmp(pathname, "/") == 0)
-        return 2;
-
-    if (pathname[0] == '/')
-        mip = iget(dev, 2);
-    else
-        mip = iget(running->cwd->dev, running->cwd->ino);
-
-    tokenize(pathname);
-
-    for (i = 0; i < n; i++)
-    {
-        printf("===========================================\n");
-        ino = search(mip, name[i]);
-
-        if (ino == 0)
-        {
-            iput(mip);
-            printf("name %s does not exist\n", name[i]);
-            return 0;
-        }
-        iput(mip);
-        mip = iget(dev, ino);
-    }
-    iput(mip);
-    return ino;
-}
-
-
-
 // rm_child(): remove the entry [INO rlen nlen name] from parent's data block.
 
-int rm_child(MINODE *parent, char *name)
+int rm_child(MINODE *parent, char *myname)
 {
-   //1. Search parent INODE's data block(s) for the entry of name
+   //1. Search parent INODE's data block(s) for the entry of myname
     int i = 0;
     char buf[BLKSIZE];
 
     while( i < 12)
     {
-        
+        get_block(parent->dev, parent->INODE.i_block[i],buf);
+        dp = (DIR *) buf;
+        char *cp = buf;
+        char *cp2;
+        DIR *prevdp = dp;
+        int rec=-1;
+
+        while (cp < buf + BLKSIZE)
+        {
+            /*************************************************
+                print DIR record names while stepping through
+            **************************************************/
+            printf("At DIR record %s", dp->name); //*May need to fix this localy DIR* dp
+
+            if(strcmp(dp->name, myname) == 0)
+            {
+                if(cp + dp->rec_len >= buf + BLKSIZE)
+                {
+                    prevdp->rec_len += dp->rec_len;
+                    put_block(dev, parent->INODE.i_block[i], buf);
+                    return;
+                }
+                else if(dp->rec_len == BLKSIZE)
+                {
+                    bdalloc(dev, parent->INODE.i_block[i]);
+                    return;
+                }
+                else
+                {
+                        cp2 = cp + dp->rec_len;
+                        rec = dp->rec_len;
+                        dp = (DIR *)cp2;
+                        while (cp2 < buf + BLKSIZE)
+                        {
+                            memcpy(cp, cp2, dp->rec_len);
+                            dp = (DIR *)cp;
+                            cp2 += dp->rec_len;
+                            cp += dp->rec_len;
+                            dp = (DIR *)cp;
+                        }
+                        dp->rec_len += rec;
+                        put_block(dev, parent->INODE.i_block[i], buf);
+                        return 0;
+                }    
+            }
+            cp += dp->rec_len;
+            prevdp = dp;
+            dp = (DIR *)cp;
+        } 
+
+/*         2. Erase name entry from parent directory by
+            
+        (1). if LAST entry in block{
+                                                |remove this entry   |
+                -----------------------------------------------------
+                xxxxx|INO rlen nlen NAME |yyy  |zzz                 | 
+                -----------------------------------------------------
+
+                        becomes:
+                -----------------------------------------------------
+                xxxxx|INO rlen nlen NAME |yyy (add zzz len to yyy)  |
+                -----------------------------------------------------
+
+            }
+            
+        (2). if (first entry in a data block){
+                deallocate the data block; modify parent's file size;
+
+                -----------------------------------------------
+                |INO Rlen Nlen NAME                           | 
+                -----------------------------------------------
+                
+                Assume this is parent's i_block[i]:
+                move parent's NONZERO blocks upward, i.e. 
+                    i_block[i+1] becomes i_block[i]
+                    etc.
+                so that there is no HOLEs in parent's data block numbers
+            }
+
+        (3). if in the middle of a block{
+                move all entries AFTER this entry LEFT;
+                add removed rec_len to the LAST entry of the block;
+                no need to change parent's fileSize;
+
+                    | remove this entry   |
+                -----------------------------------------------
+                xxxxx|INO rlen nlen NAME   |yyy  |zzz         | 
+                -----------------------------------------------
+
+                        becomes:
+                -----------------------------------------------
+                xxxxx|yyy |zzz (rec_len INC by rlen)          |
+                -----------------------------------------------
+
+            }
+            
+        3. Write the parent's data block back to disk;
+            mark parent minode DIRTY for write-back */
+
+        i++;
     }
-
-
-
-   2. Erase name entry from parent directory by
-    
-  (1). if LAST entry in block{
-                                         |remove this entry   |
-          -----------------------------------------------------
-          xxxxx|INO rlen nlen NAME |yyy  |zzz                 | 
-          -----------------------------------------------------
-
-                  becomes:
-          -----------------------------------------------------
-          xxxxx|INO rlen nlen NAME |yyy (add zzz len to yyy)  |
-          -----------------------------------------------------
-
-      }
-    
-  (2). if (first entry in a data block){
-          deallocate the data block; modify parent's file size;
-
-          -----------------------------------------------
-          |INO Rlen Nlen NAME                           | 
-          -----------------------------------------------
-          
-          Assume this is parent's i_block[i]:
-          move parent's NONZERO blocks upward, i.e. 
-               i_block[i+1] becomes i_block[i]
-               etc.
-          so that there is no HOLEs in parent's data block numbers
-      }
-
-  (3). if in the middle of a block{
-          move all entries AFTER this entry LEFT;
-          add removed rec_len to the LAST entry of the block;
-          no need to change parent's fileSize;
-
-               | remove this entry   |
-          -----------------------------------------------
-          xxxxx|INO rlen nlen NAME   |yyy  |zzz         | 
-          -----------------------------------------------
-
-                  becomes:
-          -----------------------------------------------
-          xxxxx|yyy |zzz (rec_len INC by rlen)          |
-          -----------------------------------------------
-
-      }
-    
-  3. Write the parent's data block back to disk;
-     mark parent minode DIRTY for write-back
 }
 
 
@@ -323,6 +334,9 @@ int rmdir()
     int pino = search(mip, "..");
     MINODE *parentmip = iget(dev, pino);
 
+    char lmyname[256];
+    findmyname(parentmip, ino, lmyname);
+
     //6. ASSUME it passed the above checks. Deallocate its block and inode 
     for (i = 0; i < 12; i++)
     {
@@ -335,15 +349,20 @@ int rmdir()
 
     //TODO: Why are we
 
-  8. remove child's entry from parent directory by
+    //8. remove child's entry from parent directory by rm_child(MINODE *pip, char *name);
+            //pip->parent Minode, name = entry to remove
+    rm_child(parentmip, lmyname);
 
-        rm_child(MINODE *pip, char *name);
-           
-        pip->parent Minode, name = entry to remove
+    //9. decrement pip's link_count by 1; 
+    //touch pip's atime, mtime fields;
+    //mark pip dirty;
 
-  9. decrement pip's link_count by 1; 
-     touch pip's atime, mtime fields;
-     mark pip dirty;
-     iput(pip);
-     return SUCCESS;
+    parentmip->INODE.i_links_count--;
+
+    parentmip->INODE.i_mtime = parentmip->INODE.i_atime = time(0L);
+
+    parentmip->dirty = 1;
+    iput(parentmip);
+    //return SUCCESS;
+    return 1;
 }

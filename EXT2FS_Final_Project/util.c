@@ -209,3 +209,38 @@ int getino(char *pathname)
     iput(mip);
     return ino;
 }
+
+
+int findmyname(MINODE *parent, int myinode, char myname[])
+{
+    char buf[BLKSIZE];
+    INODE *ip =  &parent->INODE;
+    int i = 0;
+    DIR *dp;
+    char * cp;
+
+    while (i < 12)
+    {
+        if(ip->i_block[i] == 0)
+        {
+            break;
+        }
+        else
+        {
+            get_block(dev, ip->i_block[i], buf);
+            dp = (DIR *)buf;
+            cp = buf;
+
+            while( cp < buf + BLKSIZE)
+            {
+                if(dp->inode == myinode)
+                {
+                    strncpy(myname, dp->name, dp->name_len);
+                    return 0;
+                }
+                cp += dp->rec_len;
+                dp = (DIR *) cp;
+            }
+        }
+    } 
+}
