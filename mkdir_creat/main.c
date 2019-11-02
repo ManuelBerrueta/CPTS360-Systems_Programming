@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
     printf("checking EXT2 FS ....");
     if ((fd = open(disk, O_RDWR)) < 0)
     {
-        printf("open %s failed\n", disk);
+        printf("\n-={ open %s FAILED }=-\n", disk);
         exit(1);
     }
     dev = fd;
@@ -145,12 +145,17 @@ int main(int argc, char *argv[])
         sscanf(line, "%s %s", cmd, pathname);
         printf("cmd=%s pathname=%s\n", cmd, pathname);
 
+        //! This has to go in function pointers
         if (strcmp(cmd, "ls") == 0)
             list_file(pathname, inode_start);
         if (strcmp(cmd, "cd") == 0)
             change_dir(pathname);
         if (strcmp(cmd, "pwd") == 0)
             pwd(running->cwd);
+        if (strcmp(cmd, "mkdir") == 0)
+            //mkdir(pathname);//TODO:....mkdir doesnt take pathname?
+            make_dir();
+            
 
         if (strcmp(cmd, "quit") == 0)
             quit();
