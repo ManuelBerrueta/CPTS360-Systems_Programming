@@ -35,6 +35,7 @@ extern char line[256], command[32], pathname[256];
 
 char dname[64];         //? Directory string holder
 char bname[64];         //? Basename string holder
+int bno = -1;
 
 
 
@@ -130,6 +131,10 @@ int balloc(int dev) // allocate a block number
             set_bit(buf, i);
             put_block(dev, bmap, buf);
             decFreeBlocks(dev);
+
+            //clear buffer
+            memset(buf,0,BLKSIZE);
+            put_block(dev, i+1, buf); //write back to block
             return i + 1;
         }
     }
@@ -157,6 +162,8 @@ int enter_name(MINODE *pip, int myino, char *myname)
     //8. int enter_name(MINODE *pip, int myino, char *myname){
     // For each data block of parent DIR do { // assume: only 12 direct blocks
     //    if (i_block[i]==0) BREAK;
+
+
     int i = 0;
     while (i < 12)
     {
@@ -167,10 +174,9 @@ int enter_name(MINODE *pip, int myino, char *myname)
         }
         
         //(1). get parent's data block into a buf[];
-        //TODO: get_block into a buff
-        //TODO: cast as a dir
 
-        get_block(pip->dev, pip->INODE.i_block[i], buf);
+        get_block(pip->dev, pip->INODE.i_block[i], buf); //TODO: TEsting
+        
 
         //*dp is now pointing to the first dir entry in the parent directory
         dp = (DIR *)buf;
@@ -245,7 +251,7 @@ int enter_name(MINODE *pip, int myino, char *myname)
             dp->inode = myino;                     
             dp->name_len = NEEDED_LEN;
             //(6).Write data block to disk;
-            put_block(dev, BLKSIZE, buf); //! Writes block back to disk 
+            put_block(dev, bno , buf); //! Writes block back to disk -need to do it back in my_mkdir
             //TODO: Should probably return here, we are done making new dir
             return;
         }
@@ -261,6 +267,8 @@ int enter_name(MINODE *pip, int myino, char *myname)
                 -------------------------------------------------------------------------- */
             int new_block = balloc(dev); //TODO: Up to here we should be goood
 
+            
+            
             //TODO: Below not sure how to proceed
 
 
@@ -277,7 +285,7 @@ int enter_name(MINODE *pip, int myino, char *myname)
 
             
             //(6).Write data block to disk;
-            put_block(dev, BLKSIZE, buf); //! Writes block back to disk 
+            put_block(dev, bno, buf); //! Writes block back to disk 
             //TODO: Should probably return here, we are done making new dir
             return;
         }
@@ -298,9 +306,9 @@ int mymkdir(MINODE *pip, char *name)
     //        bno = balloc(dev);
     //    DO NOT WORK IN THE DARK: PRINT OUT THESE NUMBERS!!!
     int ino = ialloc(dev);
-    int bno = balloc(dev);
+    bno = balloc(dev);
 
-    printf("-=0={ NEW ALLOCATED: inode: %d  |  block: %d }=0=-", ino, bno);
+    printf("-=0={ NEW ALLOCATED: inode: %d  |  block: %d }=0=-\n", ino, bno);
 
     //3. mip = iget(dev, ino);  load the inode into a minode[] (in order to
     //   wirte contents to the INODE in memory.
@@ -313,7 +321,7 @@ int mymkdir(MINODE *pip, char *name)
 
     // C CODE of (3), (4) and (5):
     //**********************************************************************
-    mip = iget(dev,ino);
+    //mip = iget(dev,ino);
     INODE *ip = &mip->INODE;
     //Use ip-> to acess the INODE fields:
     ip->i_mode = 0x41ED;		// OR 040755: DIR type and permissions
@@ -323,7 +331,7 @@ int mymkdir(MINODE *pip, char *name)
     ip->i_links_count = 2;	        // Links count=2 because of . and ..
     ip->i_atime = ip->i_ctime = ip->i_mtime = time(0L);  // set to current time
     ip->i_blocks = 2;                	// LINUX: Blocks count in 512-byte chunks 
-    ip->i_block[0] = bno;             // new DIR has one data block   
+    ip->i_block[0] = bno;             // new DIR has one data block
     
     int i=1;
     //ip->i_block[1] to i_block[14] = 0;
@@ -365,11 +373,14 @@ int mymkdir(MINODE *pip, char *name)
     dp->rec_len = BLKSIZE - 12; //!@ this time this dir will span the rest of the block
     dp->name_len = 2;
     dp->name[0] = dp->name[1] = '.';
-    put_block(dev, BLKSIZE, localbuff); //! Writes block back to disk
+    
+    put_block(dev, bno, localbuff); //! Writes block back to disk
 
 
     //7. Finally, enter name ENTRY into parent's directory by 
     enter_name(pip, ino, name);
+    //put_block(dev, bno, localbuff); //! Writes block back to disk 
+    //TODO: Possibly make localbuff a global?
 }   
 //!!END  OF mymkdir
 

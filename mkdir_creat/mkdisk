@@ -1,3 +1,6 @@
 #! /bin/bash
-sudo dd if=/dev/zero of=mydisk bs=1024 count=4096
-sudo mkfs -b 1024 disk 4096
+#sudo dd if=/dev/zero of=mydisk bs=1024 count=4096
+#sudo mkfs -b 1024 disk 4096
+
+dd if=/dev/zero of=mydisk bs=1024 count=1440
+sudo mke2fs -b 1024 mydisk 1440
