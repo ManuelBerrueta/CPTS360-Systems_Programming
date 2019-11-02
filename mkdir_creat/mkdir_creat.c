@@ -140,6 +140,17 @@ int balloc(int dev) // allocate a block number
 
 
 //?================================= mkdir ===================================
+int dbname(char *pathname)
+{
+    //! dirname() and basename() from libgen.h destroy the pathname!
+    char temp[256];
+    strcpy(temp, pathname); //* Make a copy of the path name
+    strcpy(dname, dirname(temp));
+    strcpy(temp, pathname);
+    strcpy(bname, basename(temp));
+}
+
+
 int enter_name(MINODE *pip, int myino, char *myname)
 {
     char buf[BLKSIZE];
@@ -287,7 +298,7 @@ int mymkdir(MINODE *pip, char *name)
     //        bno = balloc(dev);
     //    DO NOT WORK IN THE DARK: PRINT OUT THESE NUMBERS!!!
     int ino = ialloc(dev);
-    int bno = baloc(dev);
+    int bno = balloc(dev);
 
     printf("-=0={ NEW ALLOCATED: inode: %d  |  block: %d }=0=-", ino, bno);
 
@@ -376,36 +387,44 @@ int make_dir()
     //     parent = dirname(pathname);   parent= "/a/b" OR "a/b"  = dname
     //     child  = basename(pathname);  child = "c"              = bname
     //!  WARNING: strtok(), dirname(), basename() destroy pathname
+
+    //TODO: This breaks if only one dir, need to deal with that case
+/*     strcpy(gpath, pathname); //! Did not work...
+    char *parent = dirname(gpath); 
     strcpy(gpath, pathname);
-    char *parent = dirname(gpath);
-    strcpy(gpath, pathname);
-    char *child = basename(gpath);
+    char *child = basename(gpath); */
+
+    dbname(pathname);
 
     //3. Get the In_MEMORY minode of parent:
              //pino  = getino(parent);
              //pip   = iget(dev, pino); 
-    int parentinode = getino(parent);
+    //int parentinode = getino(parent);
+    int parentinode = getino(dname);
     MINODE *parentmip = iget(dev, parentinode);
 
     //Verify : (1). parent INODE is a DIR (HOW?)   AND
     //         (2). child does NOT exists in the parent directory (HOW?);
-    if(!S_ISDIR(parentmip->INODE.i_mode))
+    if(!S_ISDIR(parentmip->INODE.i_mode)) 
     {
         printf("-={0  parentmip is NOT a DIR  0}=-\n");
         printf("-={0  mkdir FAILED  0}=-\n") ;
         return;
     }
     
-    if(search(parentmip, child) != 0) //!search returns 0 if child doesn't exists
+    //if(search(parentmip, child) != 0) //!search returns 0 if child doesn't exists
+    if(search(parentmip, bname) != 0) //!search returns 0 if child doesn't exists
     {
-        printf("-={0  child %s EXISTS 0}=-\n", child);
+        //printf("-={0  child %s EXISTS 0}=-\n", child);
+        printf("-={0  child %s EXISTS 0}=-\n", bname);
         printf("-={0  mkdir FAILED  0}=-\n") ;
         return;
     }
     
     //TODO: 4. 5. and 6.
     //! 4. call mymkdir(pip, child);
-    mymkdir(parentmip, child);
+    //mymkdir(parentmip, child);
+    mymkdir(parentmip, bname);
 
     //!5. inc parent inodes's link count by 1; 
        //* touch its atime and mark it DIRTY

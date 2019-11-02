@@ -11,7 +11,7 @@ extern int n;
 
 extern int fd, dev;
 extern int nblocks, ninodes, bmap, imap, inode_start;
-extern char line[256], cmd[32], pathname[256];
+//extern char line[256], cmd[32], pathname[256];
 char sbuf[256];
 
 int get_block(int dev, int blk, char *buf)
