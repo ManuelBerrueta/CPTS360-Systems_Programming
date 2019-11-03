@@ -15,6 +15,7 @@
 #include "cd_ls_pwd.c"
 #include "mkdir_creat.c"
 #include "rmdir.c"
+#include "link_unlink_symlink.c"
 
 MINODE minode[NMINODE];
 MINODE *root;
@@ -27,7 +28,7 @@ int n;           // number of component strings
 
 int fd, dev;
 int nblocks, ninodes, bmap, imap, inode_start, iblock;
-char line[256], cmd[32], pathname[256];
+char line[256], cmd[32], pathname[256], dirname2[256];
 
 
 
@@ -145,8 +146,8 @@ int main(int argc, char *argv[])
         bzero(pathname, 256);
         cmd[0] = 0;
 
-        sscanf(line, "%s %s", cmd, pathname);
-        printf("cmd=%s pathname=%s\n", cmd, pathname);
+        sscanf(line, "%s %s %s", cmd, pathname, dirname2);
+        printf("cmd=%s pathname=%s  dirname2=%s\n", cmd, pathname, dirname2);
 
         //! This has to go in function pointers
         if (strcmp(cmd, "ls") == 0)
@@ -161,7 +162,9 @@ int main(int argc, char *argv[])
         if (strcmp(cmd, "rmdir") == 0)
             //mkdir(pathname);//TODO:....mkdir doesnt take pathname?
             rmdir();
-            
+        if (strcmp(cmd, "link") == 0)
+            //mkdir(pathname);//TODO:....mkdir doesnt take pathname?
+            link();    
 
         if (strcmp(cmd, "quit") == 0)
             quit();
