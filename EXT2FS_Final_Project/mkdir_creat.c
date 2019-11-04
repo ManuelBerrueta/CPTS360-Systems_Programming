@@ -162,7 +162,8 @@ int enter_name(MINODE *pip, int myino, char *myname)
     //8. int enter_name(MINODE *pip, int myino, char *myname){
     // For each data block of parent DIR do { // assume: only 12 direct blocks
     //    if (i_block[i]==0) BREAK;
-
+    char *cp;
+    int blk = -1;
 
     int i = 0;
     while (i < 12)
@@ -170,7 +171,24 @@ int enter_name(MINODE *pip, int myino, char *myname)
         //* Looking for empty data block to enter name in parent's inode
         if(pip->INODE.i_block[i] == 0) 
         {
-            break; //* Once found empty data block break
+            int new_block = balloc(dev); //TODO: Up to here we should be goood
+            /* (5).// Reach here means: NO space in existing data block(s)
+
+                Allocate a new data block; INC parent's size by BLKSIZE;
+                Enter new entry as the first entry in the new data block with rec_len=BLKSIZE.
+
+                |-------------------- rlen = BLKSIZE -------------------------------------
+                |myino rlen nlen myname                                                  |
+                -------------------------------------------------------------------------- */
+            dp->rec_len =BLKSIZE;
+            //* Enter new DIR entry information
+            strncpy(dp->name, myname, strlen(myname)); //Copy name into dp->name
+            dp->inode = myino;                     
+            dp->name_len = strlen(myname);
+            //(6).Write data block to disk;
+            put_block(dev, new_block, buf); //! Writes block back to disk
+            return;
+            //break; //* Once found empty data block break
         }
         
         //(1). get parent's data block into a buf[];
@@ -180,7 +198,8 @@ int enter_name(MINODE *pip, int myino, char *myname)
 
         //*dp is now pointing to the first dir entry in the parent directory
         dp = (DIR *)buf;
-        char *cp = buf;
+        //char *cp = buf;
+        cp = buf;
 
         //(2). EXT2 DIR entries: Each DIR entry has rec_len and name_len. Each entry's
         // ideal length is IDEAL_LEN = 4*[ (8 + name_len + 3)/4 ]
@@ -196,7 +215,8 @@ int enter_name(MINODE *pip, int myino, char *myname)
 
 
         // step to LAST entry in block: int blk = parent->INODE.i_block[i];
-        int blk = pip->INODE.i_block[i];
+        //int blk = pip->INODE.i_block[i];
+        blk = pip->INODE.i_block[i];
     
         printf("step to LAST entry in data block %d\n", blk);
         while (cp + dp->rec_len < buf + BLKSIZE)
@@ -232,10 +252,9 @@ int enter_name(MINODE *pip, int myino, char *myname)
         int IDEAL_LEN = 4*((8 + dp->name_len + 3)/4);
         int NEEDED_LEN = strlen(myname);
         int CURRENT_LEN = dp->rec_len;
-        int REMAINING_LEN = CURRENT_LEN - (4*((8 + IDEAL_LEN + 3)/4));
-            
+        int REMAINING_LEN = CURRENT_LEN - IDEAL_LEN; //(4*((8 + IDEAL_LEN + 3)/4));
 
-        if (REMAINING_LEN >= NEEDED_LEN)
+        if (REMAINING_LEN >= IDEAL_LEN)
         {
             //*Trim the size of the previous entry to its IDEAL_LEN
             dp->rec_len = IDEAL_LEN;
@@ -247,45 +266,11 @@ int enter_name(MINODE *pip, int myino, char *myname)
             //* Inherits the leftover size of rest of the block
             dp->rec_len = REMAINING_LEN;
             //* Enter new DIR entry information
-            strcpy(dp->name, myname); //Copy name into dp->name
+            strncpy(dp->name, myname, NEEDED_LEN); //Copy name into dp->name
             dp->inode = myino;                     
             dp->name_len = NEEDED_LEN;
             //(6).Write data block to disk;
-            put_block(dev, bno , buf); //! Writes block back to disk -need to do it back in my_mkdir
-            //TODO: Should probably return here, we are done making new dir
-            return;
-        }
-        else
-        {
-            /* (5).// Reach here means: NO space in existing data block(s)
-
-                Allocate a new data block; INC parent's size by BLKSIZE;
-                Enter new entry as the first entry in the new data block with rec_len=BLKSIZE.
-
-                |-------------------- rlen = BLKSIZE -------------------------------------
-                |myino rlen nlen myname                                                  |
-                -------------------------------------------------------------------------- */
-            int new_block = balloc(dev); //TODO: Up to here we should be goood
-
-            
-            
-            //TODO: Below not sure how to proceed
-
-
-            INODE *ip = &pip->INODE;
-
-            ip->i_mode = 0x41ED;		// OR 040755: DIR type and permissions
-            ip->i_uid  = running->uid;	// Owner uid 
-            ip->i_gid  = running->pid;  //running->gid;	// Group Id
-            ip->i_size += BLKSIZE;		// Size in bytes Increment Parents size by BLKSIZE
-            ip->i_links_count++;	        // Links count++ because of additional dir
-            ip->i_atime = ip->i_ctime = ip->i_mtime = time(0L);  // set to current time
-            ip->i_blocks = 2;                	// LINUX: Blocks count in 512-byte chunks 
-            ip->i_block[0] = new_block;             // new DIR has one data block   
-
-            
-            //(6).Write data block to disk;
-            put_block(dev, bno, buf); //! Writes block back to disk 
+            put_block(dev, blk, buf); //! Writes block back to disk -need to do it back in my_mkdir
             //TODO: Should probably return here, we are done making new dir
             return;
         }
@@ -369,7 +354,7 @@ int mymkdir(MINODE *pip, char *name)
     //make second entry for ..
     //! NOTE: pino = parent DIR inpo, blk=allocated block
     dp = (char *)dp + 12; //* Moving 12 bytes (the size of the above dir) to next dir
-    dp->inode = pip;                 //TODO: Need to double check this    
+    dp->inode = pip->ino;                 //TODO: Need to double check this    
     dp->rec_len = BLKSIZE - 12; //!@ this time this dir will span the rest of the block
     dp->name_len = 2;
     dp->name[0] = dp->name[1] = '.';

@@ -136,7 +136,7 @@ int iput(MINODE *mip)
     put_block(mip->dev, block, buf);
 }
 
-int search(INODE *ip, char *name)
+int search(INODE *ip, char *fname)
 {
     // YOUR search() fucntion as in LAB 6
     char temp[256];
@@ -161,9 +161,9 @@ int search(INODE *ip, char *name)
             temp[dp->name_len] = 0; //add null char to the end off the dp->name
 
             //TODO: strcmp to see if the given name exists
-            if (strcmp(&name[i], temp) == 0)
+            if (strcmp(fname, temp) == 0)
             {
-                printf("*****={ inode %s found, inode# = %d }=*****\n", name, dp->inode);
+                printf("*****={ inode %s found, inode# = %d }=*****\n", fname, dp->inode);
                 printf("%4d       %4d      %4d        %s\n", 
                 dp->inode, dp->rec_len, dp->name_len, temp);
                 return dp->inode;
@@ -172,7 +172,7 @@ int search(INODE *ip, char *name)
             dp = (DIR *)cp;
         }
     }
-    printf("**inode %s, not found in data blocks\n\n", name);
+    printf("**inode %s, not found in data blocks\n\n", fname);
     return 0;
 }
 
