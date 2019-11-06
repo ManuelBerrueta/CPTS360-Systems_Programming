@@ -152,6 +152,18 @@ int rm_child(MINODE *parent, char *myname)
                 else if(dp->rec_len == BLKSIZE)
                 {
                     bdalloc(dev, parent->INODE.i_block[i]);
+
+                    //!New code after working
+                    for(i= +1; i < 12; i++)
+                    {
+                        if(parent->INODE.i_block[i] == 0)
+                        {
+                            parent->INODE.i_block[i-1] = 0;
+                            break;
+                        }
+                        parent->INODE.i_block[i-1] = parent->INODE.i_block[i];
+                    }
+
                     return;
                 }
                 else

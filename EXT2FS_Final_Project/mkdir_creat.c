@@ -279,7 +279,6 @@ int enter_name(MINODE *pip, int myino, char *myname)
 }
 
 
-
 int mymkdir(MINODE *pip, char *name)
 {
     MINODE *mip;
@@ -429,3 +428,149 @@ int make_dir()
     //6. iput(pip); //TODO: iput description
     iput(parentmip);
 } 
+
+
+int my_creat(MINODE *pip, char*name)
+{
+    MINODE *mip;
+
+    //1. pip points at the parent minode[] of "/a/b", name is a string "c") 
+
+    //2. allocate an inode and a disk block for the new directory;
+    //        ino = ialloc(dev);    
+    int ino = ialloc(dev);
+    //bno = balloc(dev); TODO: Don't need this because its a file
+
+    printf("-=0={ NEW ALLOCATED: inode: %d  }=0=-\n", ino);
+
+    //3. mip = iget(dev, ino);  load the inode into a minode[] (in order to
+    //   write contents to the INODE in memory.
+
+    mip = iget(dev,ino); //? Load new allocated inode into a memory inode ???
+
+    //4. Write contents to mip->INODE to make it as a REG File INODE.
+
+    //5. iput(mip); which should write the new INODE out to disk.
+
+    //**********************************************************************
+    //mip = iget(dev,ino);
+    INODE *ip = &mip->INODE;
+    //Use ip-> to acess the INODE fields:
+    ip->i_mode = 0x81A4;		// OR 0100644: REG File type and permissions
+    ip->i_uid  = running->uid;	// Owner uid 
+    ip->i_gid  = running->pid;  //running->gid;	// Group Id
+    ip->i_size = BLKSIZE;		// Size in bytes TODO: Do we just put 0?
+    ip->i_links_count = 1;	    // Links count=1 because it is a file entry
+    ip->i_atime = ip->i_ctime = ip->i_mtime = time(0L);  // set to current time
+    ip->i_blocks = 1;                	// LINUX: Blocks count in 512-byte chunks 
+    ip->i_block[0] = 0;             // new DIR has one data block
+    //TODO: Check if i_blocks,i_block[0], and i_size are properly set
+    
+    int i=1;
+    //ip->i_block[1] to i_block[14] = 0;
+    while(i < 15)
+    {
+        ip->i_block[i] = 0;
+        i++;
+    }
+
+    mip->dirty = 1;               // mark minode dirty
+    iput(mip);                    // write INODE to disk
+
+
+    //***** create data block for new DIR containing . and .. entries ******
+    //6. Write . and .. entries into a buf[ ] of BLKSIZE
+
+    //    | entry .     | entry ..                                             |
+        //----------------------------------------------------------------------
+        //|ino|12|1|.   |pino|1012|2|..                                        |
+        //----------------------------------------------------------------------
+
+    //    Then, write buf[ ] to the disk block bno;
+
+    char localbuff[BLKSIZE] = { 0 };
+    bzero(localbuff, BLKSIZE);
+
+    dp = (DIR *)localbuff;
+    
+    //make the first entry of .
+    dp->inode = ino;
+    dp->rec_len = 12;
+    dp->name_len = 1;
+    dp->name[0] = '.';
+
+    //make second entry for ..
+    //! NOTE: pino = parent DIR inpo, blk=allocated block
+    dp = (char *)dp + 12; //* Moving 12 bytes (the size of the above dir) to next dir
+    dp->inode = pip->ino;                 //TODO: Need to double check this    
+    dp->rec_len = BLKSIZE - 12; //!@ this time this dir will span the rest of the block
+    dp->name_len = 2;
+    dp->name[0] = dp->name[1] = '.';
+    
+    put_block(dev, bno, localbuff); //! Writes block back to disk
+
+
+    //7. Finally, enter name ENTRY into parent's directory by 
+    enter_name(pip, ino, name);
+    //put_block(dev, bno, localbuff); //! Writes block back to disk 
+    //TODO: Possibly make localbuff a global?
+}
+
+
+int creat_file()
+{
+    MINODE *start = root;		     
+    //1. pahtname = "/a/b/c" start = root;         dev = root->dev;
+    //            =  "a/b/c" start = running->cwd; dev = running->cwd->dev;
+    if(pathname[0] != '/')
+    {
+        start = running->cwd;
+    }
+    //2. Let  
+    //     parent = dirname(pathname);   parent= "/a/b" OR "a/b"  = dname
+    //     child  = basename(pathname);  child = "c"              = bname
+    //!  WARNING: strtok(), dirname(), basename() destroy pathname
+
+    //TODO: This breaks if only one dir, need to deal with that case
+/*     strcpy(gpath, pathname); //! Did not work...
+    char *parent = dirname(gpath); 
+    strcpy(gpath, pathname);
+    char *child = basename(gpath); */
+
+    dbname(pathname);
+
+    //3. Get the In_MEMORY minode of parent:
+             //pino  = getino(parent);
+             //pip   = iget(dev, pino); 
+    //int parentinode = getino(parent);
+    int parentinode = getino(dname);
+    MINODE *parentmip = iget(dev, parentinode);
+
+    //Verify : (1). parent INODE is a DIR (HOW?)   AND
+    //         (2). child does NOT exists in the parent directory (HOW?);
+    if(!S_ISDIR(parentmip->INODE.i_mode)) 
+    {
+        printf("-={0  parentmip is NOT a DIR  0}=-\n");
+        printf("-={0  mkdir FAILED  0}=-\n") ;
+        return;
+    }
+    
+    //if(search(parentmip, child) != 0) //!search returns 0 if child doesn't exists
+    if(search(parentmip, bname) != 0) //!search returns 0 if child doesn't exists
+    {
+        //printf("-={0  child %s EXISTS 0}=-\n", child);
+        printf("-={0  child %s EXISTS 0}=-\n", bname);
+        printf("-={0  mkdir FAILED  0}=-\n") ;
+        return;
+    }
+    
+    //TODO: 4. 5. and 6.
+    //! 4. call mymkdir(pip, child);
+    //mymkdir(parentmip, child);
+    my_creat(parentmip, bname);
+
+    //#For a file we do not increment parents link count
+
+    //TODO: Description
+    iput(parentmip);
+}

@@ -137,7 +137,7 @@ int main(int argc, char *argv[])
         //printf("[ %04d/%02d/%02d ] BERR Shell [ %s ]\n|-$ ", tm.tm_year+1900, tm.tm_mon, tm.tm_mday, cwd);
         printf("[ %04d/%02d/%02d ] BERR Shell [ cwd ]\n|-$ ", tm.tm_year+1900, tm.tm_mon, tm.tm_mday);
         
-        printf("input command : [ls|cd|pwd|quit|mkdir|rmdir]");
+        printf("input command : [ls|cd|pwd|quit|mkdir|creat|rmdir]");
         fgets(line, 128, stdin);
         line[strlen(line) - 1] = 0;
         if (line[0] == 0)
@@ -157,15 +157,13 @@ int main(int argc, char *argv[])
         if (strcmp(cmd, "pwd") == 0)
             pwd(running->cwd);
         if (strcmp(cmd, "mkdir") == 0)
-            //mkdir(pathname);//TODO:....mkdir doesnt take pathname?
             make_dir();
         if (strcmp(cmd, "rmdir") == 0)
-            //mkdir(pathname);//TODO:....mkdir doesnt take pathname?
             rmdir();
         if (strcmp(cmd, "link") == 0)
-            //mkdir(pathname);//TODO:....mkdir doesnt take pathname?
-            link();    
-
+            link();  
+        if (strcmp(cmd, "creat") == 0)
+            creat_file(); 
         if (strcmp(cmd, "quit") == 0)
             quit();
     }
