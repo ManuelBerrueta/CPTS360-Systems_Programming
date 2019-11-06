@@ -141,7 +141,7 @@ int rm_child(MINODE *parent, char *myname)
             **************************************************/
             printf("At DIR record %s", dp->name); //*May need to fix this localy DIR* dp
 
-            if(strcmp(dp->name, myname) == 0)
+            if(strcmp(dp->name, myname) == 0) //!If this is the dir we are trying to delete
             {
                 if(cp + dp->rec_len >= buf + BLKSIZE)
                 {
@@ -346,7 +346,7 @@ int rmdir()
     int pino = search(mip, "..");
     MINODE *parentmip = iget(dev, pino);
 
-    char lmyname[256];
+    char lmyname[256] = { 0 };
     findmyname(parentmip, ino, lmyname);
 
     //6. ASSUME it passed the above checks. Deallocate its block and inode 
