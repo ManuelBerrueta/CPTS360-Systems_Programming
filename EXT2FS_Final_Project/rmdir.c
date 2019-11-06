@@ -154,7 +154,7 @@ int rm_child(MINODE *parent, char *myname)
                     bdalloc(dev, parent->INODE.i_block[i]);
 
                     //!New code after working
-                    for(i= +1; i < 12; i++)
+/*                     for(i= +1; i < 12; i++)
                     {
                         if(parent->INODE.i_block[i] == 0)
                         {
@@ -162,7 +162,7 @@ int rm_child(MINODE *parent, char *myname)
                             break;
                         }
                         parent->INODE.i_block[i-1] = parent->INODE.i_block[i];
-                    }
+                    } */
 
                     return;
                 }
