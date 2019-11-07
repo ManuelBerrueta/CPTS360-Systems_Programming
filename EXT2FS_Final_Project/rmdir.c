@@ -174,19 +174,9 @@ int rm_child(MINODE *parent, char *myname)
                     cp2 = cp + dp->rec_len;//*next dir location
                     rec = dp->rec_len; //* length of current dir to delete
                     int bytesToMove = (buf+BLKSIZE) - (cp + dp->rec_len);
-                    //memcpy(cp,cp2, bytesToMove);
+                    //memcpy(cp,cp2, bytesToMove); //!Did not work right
                     memmove(cp,cp2, bytesToMove);
-                    /* dp = (DIR *)cp2;
-                    while (cp2 < buf + BLKSIZE)
-                    {
-                        memcpy(cp, cp2, dp->rec_len);
-                        dp = (DIR *)cp;
-                        cp2 += dp->rec_len;
-                        cp += dp->rec_len;
-                        dp = (DIR *)cp;
-                    } */
-                    dp = (DIR *)buf;
-                    cp = buf;
+
                     dp = (DIR *)cp; //*Casting newly moved dir at cp
                     
                     while((cp + dp->rec_len) < (buf + BLKSIZE - rec))
