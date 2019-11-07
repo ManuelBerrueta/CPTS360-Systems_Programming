@@ -129,12 +129,15 @@ int rm_child(MINODE *parent, char *myname)
     {
         get_block(parent->dev, parent->INODE.i_block[i],buf);
         dp = (DIR *) buf;
-        char *cp = buf;
+        char *cp = buf; //*You use cp(char pointer) to move one byte at a time
+                        //* That way you can move the rec_len over
         char *cp2;
         DIR *prevdp = dp;
         int rec=-1;
 
-        while (cp < buf + BLKSIZE)
+        //* Make sure we don't overrun the buffer
+        //* buf gives us the start, + BLKSIZE the end of that buffer
+        while (cp < buf + BLKSIZE) 
         {
             /*************************************************
                 print DIR record names while stepping through
@@ -154,34 +157,34 @@ int rm_child(MINODE *parent, char *myname)
                     bdalloc(dev, parent->INODE.i_block[i]);
 
                     //!New code after working
-/*                     for(i= +1; i < 12; i++)
+                    while(i < 12)
                     {
-                        if(parent->INODE.i_block[i] == 0)
+                        if(parent->INODE.i_block[i+1] == 0) //
                         {
-                            parent->INODE.i_block[i-1] = 0;
+                            parent->INODE.i_block[i] = 0;
                             break;
                         }
-                        parent->INODE.i_block[i-1] = parent->INODE.i_block[i];
-                    } */
-
+                        parent->INODE.i_block[i] = parent->INODE.i_block[i+1];
+                        i++;
+                    }
                     return;
                 }
                 else
                 {
-                        cp2 = cp + dp->rec_len;
-                        rec = dp->rec_len;
-                        dp = (DIR *)cp2;
-                        while (cp2 < buf + BLKSIZE)
-                        {
-                            memcpy(cp, cp2, dp->rec_len);
-                            dp = (DIR *)cp;
-                            cp2 += dp->rec_len;
-                            cp += dp->rec_len;
-                            dp = (DIR *)cp;
-                        }
-                        dp->rec_len += rec;
-                        put_block(dev, parent->INODE.i_block[i], buf);
-                        return 0;
+                    cp2 = cp + dp->rec_len;
+                    rec = dp->rec_len;
+                    dp = (DIR *)cp2;
+                    while (cp2 < buf + BLKSIZE)
+                    {
+                        memcpy(cp, cp2, dp->rec_len);
+                        dp = (DIR *)cp;
+                        cp2 += dp->rec_len;
+                        cp += dp->rec_len;
+                        dp = (DIR *)cp;
+                    }
+                    dp->rec_len += rec;
+                    put_block(dev, parent->INODE.i_block[i], buf);
+                    return 0;
                 }    
             }
             cp += dp->rec_len;

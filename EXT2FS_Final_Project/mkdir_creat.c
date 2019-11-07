@@ -430,7 +430,7 @@ int make_dir()
 } 
 
 
-int my_creat(MINODE *pip, char*name)
+int my_creat(MINODE *pip, char*name)//TODO: NEED TO FIX THIS...
 {
     MINODE *mip;
 
