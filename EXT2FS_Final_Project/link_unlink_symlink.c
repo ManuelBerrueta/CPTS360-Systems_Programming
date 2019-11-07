@@ -42,16 +42,16 @@ extern int bno;
 
 int my_linkcreat(MINODE *pip, char *name, int inoToLink)
 {
-        MINODE *mip;
+    //1. pip points at the target minode[] of "/a/b/x" where is is target file
+    
+    MINODE *mip;
 
-    //1. pip points at the parent minode[] of "/a/b", name is a string "c") 
-
-    //2. allocate an inode and a disk block for the new directory;
+    //2. allocate an inode and a disk block for the new directory; //! We don't allocate a new inode because we use t inoToLink
     //        ino = ialloc(dev);    
     //int ino = ialloc(dev);//TODO: REPLACED this with inoToLink
     //bno = balloc(dev); TODO: Don't need this because its a file
 
-    printf("-=0={ NEW ALLOCATED: inode: %d  }=0=-\n", inoToLink);
+    printf("-=0={ TARGET inode: %d  }=0=-\n", inoToLink);
 
     //3. mip = iget(dev, ino);  load the inode into a minode[] (in order to
     //   write contents to the INODE in memory.
@@ -66,7 +66,7 @@ int my_linkcreat(MINODE *pip, char *name, int inoToLink)
     //mip = iget(dev,ino);
     INODE *ip = &mip->INODE;
     //Use ip-> to acess the INODE fields:
-    ip->i_mode = 0x81A4;		// OR 0100644: REG File type and permissions
+    ip->i_mode = 0x1D4C0;		// OR 0100644: REG File type and permissions //TODO: FIND LINK CODE
     ip->i_uid  = running->uid;	// Owner uid 
     ip->i_gid  = running->pid;  //running->gid;	// Group Id
     ip->i_size = BLKSIZE;		// Size in bytes TODO: Do we just put 0?
@@ -128,12 +128,17 @@ int my_linkcreat(MINODE *pip, char *name, int inoToLink)
 
 int creat_link(int oldino)
 {
-    MINODE *start = root;		     
+    MINODE *start = root;	
+    MINODE *target_start = root;	     
     //1. pahtname = "/a/b/c" start = root;         dev = root->dev;
     //            =  "a/b/c" start = running->cwd; dev = running->cwd->dev;
     if(dirname2[0] != '/')
     {
         start = running->cwd;
+    }
+    if(pathname[0] != '/')
+    {
+        target_start = running->cwd;
     }
     //2. Let  
     //     parent = dirname(pathname);   parent= "/a/b" OR "a/b"  = dname
@@ -154,30 +159,48 @@ int creat_link(int oldino)
              //pino  = getino(parent);
              //pip   = iget(dev, pino); 
     //int parentinode = getino(parent);
+    //! /x/y dir where link will be created
     int parentinode = getino(dname);
     MINODE *parentmip = iget(dev, parentinode);
+
+    //*Get ino of target 
+    int targetinode = getino(pathname);
+    MINODE* targetmip = iget(dev, targetinode);
 
     //Verify : (1). parent INODE is a DIR (HOW?)   AND
     //         (2). child does NOT exists in the parent directory (HOW?);
     if(!S_ISDIR(parentmip->INODE.i_mode)) 
     {
         printf("-={0  parentmip is NOT a DIR  0}=-\n");
-        printf("-={0  mkdir FAILED  0}=-\n") ;
+        printf("-={0 creat_link FAILED  0}=-\n") ;
         return;
     }
+    if(S_ISDIR(targetmip->INODE.i_mode)) 
+    {
+        printf("-={0  targetmip is a DIR, link to a dirs is not allowed with link()  0}=-\n");
+        printf("-={0 creat_link FAILED  0}=-\n") ;
+        return;
+    }
+
     
     //if(search(parentmip, child) != 0) //!search returns 0 if child doesn't exists
     if(search(parentmip, bname) != 0) //!search returns 0 if child doesn't exists
     {
         //printf("-={0  child %s EXISTS 0}=-\n", child);
-        printf("-={0  child %s EXISTS 0}=-\n", bname);
-        printf("-={0  mkdir FAILED  0}=-\n") ;
-        return;
+        printf("-={0  Parent of link: %s ino#: EXISTS 0}=-\n", bname, parentmip->ino);
+        printf("-={0  Continue...  0}=-\n") ;
+    }
+
+    //* Check the file we are trying to create does not exist!
+    int newFileCheckino = getino(dirname2);
+    if(newFileCheckino== 0)
+    {
+        printf("-={0  new File DNE 0}=-\n", bname, parentmip->ino);
+        printf("-={0  Continue...  0}=-\n") ;
     }
     
-    //TODO: 4. 5. and 6.
-    //! 4. call mymkdir(pip, child);
-    //mymkdir(parentmip, child);
+    //TODO: Add an an try to /x/y that point to targetino
+
     my_linkcreat(parentmip, bname, oldino);
 
     //#For a file we do not increment parents link count
