@@ -142,14 +142,14 @@ int rm_child(MINODE *parent, char *myname)
             /*************************************************
                 print DIR record names while stepping through
             **************************************************/
-            printf("At DIR record %s", dp->name); //*May need to fix this localy DIR* dp
+            printf("At DIR record %\ns", dp->name); //*May need to fix this localy DIR* dp
 
             if(strcmp(dp->name, myname) == 0) //!If this is the dir we are trying to delete
             {
                 if(cp + dp->rec_len >= buf + BLKSIZE)
                 {
                     prevdp->rec_len += dp->rec_len;
-                    put_block(dev, parent->INODE.i_block[i], buf);
+                    put_block(dev, parent->INODE.i_block[i], buf); //put back current block
                     return;
                 }
                 else if(dp->rec_len == BLKSIZE)
@@ -169,11 +169,14 @@ int rm_child(MINODE *parent, char *myname)
                     }
                     return;
                 }
-                else
+                else //!Middle case
                 {
-                    cp2 = cp + dp->rec_len;
-                    rec = dp->rec_len;
-                    dp = (DIR *)cp2;
+                    cp2 = cp + dp->rec_len;//*next dir location
+                    rec = dp->rec_len; //* length of current dir to delete
+                    int bytesToMove = (buf+BLKSIZE) - (cp + dp->rec_len);
+                    //memcpy(cp,cp2, bytesToMove);
+                    memmove(cp,cp2, bytesToMove);
+                    /* dp = (DIR *)cp2;
                     while (cp2 < buf + BLKSIZE)
                     {
                         memcpy(cp, cp2, dp->rec_len);
@@ -181,8 +184,18 @@ int rm_child(MINODE *parent, char *myname)
                         cp2 += dp->rec_len;
                         cp += dp->rec_len;
                         dp = (DIR *)cp;
+                    } */
+                    dp = (DIR *)buf;
+                    cp = buf;
+                    dp = (DIR *)cp; //*Casting newly moved dir at cp
+                    
+                    while((cp + dp->rec_len) < (buf + BLKSIZE - rec))
+                    {
+                        cp += dp->rec_len;
+                        dp = (DIR *)cp;
                     }
-                    dp->rec_len += rec;
+                    dp->rec_len = dp->rec_len + rec;
+            
                     put_block(dev, parent->INODE.i_block[i], buf);
                     return 0;
                 }    
@@ -244,7 +257,6 @@ int rm_child(MINODE *parent, char *myname)
         i++;
     }
 }
-
 
 
 int rmdir()
