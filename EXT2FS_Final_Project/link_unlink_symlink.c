@@ -250,11 +250,30 @@ int link()
     newino = oldino;
     //create link file
     creat_link(oldino);
-
 }
+
+
+int truncate()
+{
+    
+}
+
 
 int unlink()
 {
+    int deleteino = getino(pathname); //Get the inode number for the path
+    MINODE *deletemip = iget(dev, deleteino);
+
+    if(S_ISDIR(deletemip->INODE.i_mode)) 
+    {
+        printf("\n-={0  deletetmip '%s' MUST NOT be a DIR  0}=-\n", pathname);
+        printf("-={0  UNLINK FAILED  0}=-\n") ;
+        deletemip->INODE.i_links_count--;
+
+
+        iput(deletemip);
+        return;
+    }
 
 }
 
