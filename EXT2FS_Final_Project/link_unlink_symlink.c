@@ -40,91 +40,16 @@ extern char dname[64]; //? Directory string holder
 extern char bname[64]; //? Basename string holder
 extern int bno;
 
-int my_linkcreat(MINODE *pip, char *name, int inoToLink)
-{
-    //1. pip points at the target minode[] of "/a/b/x" where is is target file
-    
-    MINODE *mip;
 
-    //2. allocate an inode and a disk block for the new directory; //! We don't allocate a new inode because we use t inoToLink
-    //        ino = ialloc(dev);    
-    //int ino = ialloc(dev);//TODO: REPLACED this with inoToLink
-    //bno = balloc(dev); TODO: Don't need this because its a file
-
-    printf("-=0={ TARGET inode: %d  }=0=-\n", inoToLink);
-
-    //3. mip = iget(dev, ino);  load the inode into a minode[] (in order to
-    //   write contents to the INODE in memory.
-
-    mip = iget(dev,inoToLink); //? Load new allocated inode into a memory inode ???
-
-    //4. Write contents to mip->INODE to make it as a REG File INODE.
-
-    //5. iput(mip); which should write the new INODE out to disk.
-
-    //**********************************************************************
-    //mip = iget(dev,ino);
-    INODE *ip = &mip->INODE;
-    //Use ip-> to acess the INODE fields:
-    ip->i_mode = 0x1D4C0;		// OR 0100644: REG File type and permissions //TODO: FIND LINK CODE
-    ip->i_uid  = running->uid;	// Owner uid 
-    ip->i_gid  = running->pid;  //running->gid;	// Group Id
-    ip->i_size = BLKSIZE;		// Size in bytes TODO: Do we just put 0?
-    ip->i_links_count = 1;	    // Links count=1 because it is a file entry
-    ip->i_atime = ip->i_ctime = ip->i_mtime = time(0L);  // set to current time
-    ip->i_blocks = 1;                	// LINUX: Blocks count in 512-byte chunks 
-    ip->i_block[0] = 0;             // new DIR has one data block
-    //TODO: Check if i_blocks,i_block[0], and i_size are properly set
-    
-    int i=1;
-    //ip->i_block[1] to i_block[14] = 0;
-    while(i < 15)
-    {
-        ip->i_block[i] = 0;
-        i++;
-    }
-
-    mip->dirty = 1;               // mark minode dirty
-    iput(mip);                    // write INODE to disk
-
-
-    //***** create data block for new DIR containing . and .. entries ******
-    //6. Write . and .. entries into a buf[ ] of BLKSIZE
-
-    //    | entry .     | entry ..                                             |
-        //----------------------------------------------------------------------
-        //|ino|12|1|.   |pino|1012|2|..                                        |
-        //----------------------------------------------------------------------
-
-    //    Then, write buf[ ] to the disk block bno;
-
-    char localbuff[BLKSIZE] = { 0 };
-    bzero(localbuff, BLKSIZE);
-
-    dp = (DIR *)localbuff;
-    
-    //make the first entry of .
-    dp->inode = inoToLink;
-    dp->rec_len = 12;
-    dp->name_len = 1;
-    dp->name[0] = '.';
-
-    //make second entry for ..
-    //! NOTE: pino = parent DIR inpo, blk=allocated block
-    dp = (char *)dp + 12; //* Moving 12 bytes (the size of the above dir) to next dir
-    dp->inode = pip->ino;                 //TODO: Need to double check this    
-    dp->rec_len = BLKSIZE - 12; //!@ this time this dir will span the rest of the block
-    dp->name_len = 2;
-    dp->name[0] = dp->name[1] = '.';
-    
-    put_block(dev, bno, localbuff); //! Writes block back to disk
-
-
-    //7. Finally, enter name ENTRY into parent's directory by 
-    enter_name(pip, inoToLink, name);
-    //put_block(dev, bno, localbuff); //! Writes block back to disk 
-    //TODO: Possibly make localbuff a global?
-}
+//!   Example: link     /a/b/c                      /x/y/z ==>
+//!                     /a/b/   datablock           /x/y    data block
+//!                 ------------------------        -------------------------
+//!                .. .|ino rlen nlen c|...        ....|ino rlen nlen z| ....
+//!                ------|-----------------        ------|------------------
+//!                      |                               |
+//!                    INODE <----------------------------
+//!
+//!                i_links_count = 1  <== INCrement i_links_count to 2
 
 
 int link()
@@ -158,7 +83,7 @@ int link()
     }
     
 
-    //*Split the new file path into bname and dname
+    //*Split the new file path into dname and bname
     char newPath[64] = { 0 };
     strcpy(newPath, dirname2);
 
@@ -193,20 +118,49 @@ int truncate()
 
 int unlink()
 {
-    int deleteino = getino(pathname); //Get the inode number for the path
-    MINODE *deletemip = iget(dev, deleteino);
+    int inoToDelete = getino(pathname); //Get the inode number for the path
+
+    if(inoToDelete == 0)
+    {
+        printf("\n-={0 ERROR: inoToDelete '%s' Does NOT Exist 0}=-\n", pathname);
+        printf("-={0  UNLINK FAILED  0}=-\n") ;
+        return 0;
+    }
+
+    MINODE *deletemip = iget(dev, inoToDelete);
 
     if(S_ISDIR(deletemip->INODE.i_mode)) 
     {
-        printf("\n-={0  deletetmip '%s' MUST NOT be a DIR  0}=-\n", pathname);
+        printf("\n-={0 ERROR: deletetmip '%s' is a DIR. MUST NOT be a DIR  0}=-\n", pathname);
         printf("-={0  UNLINK FAILED  0}=-\n") ;
-        deletemip->INODE.i_links_count--;
-
-
         iput(deletemip);
-        return;
+        return 0;
     }
 
+    //*Split the link to delete path into dname and bname
+    char newPath[64] = { 0 };
+    strcpy(newPath, pathname);
+
+    //* Remove entry from Parent's DIR's data block:
+    int parentino = getino(dname);
+    MINODE *parentmip = iget(dev, parentino);
+    //rm_child(parentmip, inoToDelete, bname);
+    rm_child(parentmip, bname);
+    parentmip->dirty = 1;
+    iput(parentmip);
+    
+    deletemip->INODE.i_links_count--;
+    if(deletemip->INODE.i_links_count > 0)
+    {
+        // Mark it dirty to be rewritten back to disk
+        deletemip->dirty = 1;
+    }
+    else //! if i_links_count == 0, then completely remove file
+    {
+        //TODO: deallocate all data blocks in INODE;
+        //TODO: deallocate INODE
+    }
+    iput(deletemip);
 }
 
 int symlink()
