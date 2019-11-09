@@ -55,8 +55,12 @@ extern int bno;
 int link()
 {
     int oldino = getino(pathname); //Get the inode number for the path
+    if(oldino == 0)
+    {
+        printf("=0={ERROR: File:%s to be symlinked Does Not Exist", pathname);
+        return 0;
+    }
     MINODE *oldmip = iget(dev, oldino);
-    MINODE *newmip;
     int newino = -1;
 
     if(S_ISDIR(oldmip->INODE.i_mode)) 
@@ -145,6 +149,8 @@ int unlink()
     int parentino = getino(dname);
     MINODE *parentmip = iget(dev, parentino);
     //rm_child(parentmip, inoToDelete, bname);
+
+    //TODO: Possibly move this 3 lines below the if
     rm_child(parentmip, bname);
     parentmip->dirty = 1;
     iput(parentmip);
@@ -159,6 +165,11 @@ int unlink()
     {
         //TODO: deallocate all data blocks in INODE;
         //TODO: deallocate INODE
+        for(int i=0; i < 12; i++)
+        {
+            bdalloc(dev, deletemip->INODE.i_block[i]);
+        }
+        idalloc(dev, deletemip->ino);
     }
     iput(deletemip);
 }
@@ -166,9 +177,93 @@ int unlink()
 int symlink()
 {
     //TODO: Create new file and change to link type to file type 
+    int oldino = getino(pathname); //Get the inode of file to be linked
+    if(oldino == 0)
+    {
+        printf("=0={ERROR: File:%s to be symlinked Does Not Exist", pathname);
+        return 0;
+    }
+    MINODE *oldmip = iget(dev, oldino);
+    int newino = -1;
+    //*If the file is not a DIR or a REG file throw error
+    if(!S_ISDIR(oldmip->INODE.i_mode) || !S_ISREG(oldmip->INODE.i_mode))
+    {
+        printf("\n-={0  parentmip '%s' MUST BE a DIR or REG file  0}=-\n", pathname);
+        printf("-={0  LINK FAILED: i_mode=%s  0}=-\n", oldmip->INODE.i_mode) ;
+        iput(oldmip);
+        return 0;
+    }
+
+    //*dirname2 is second argument paased to link in main
+    newino = getino(dirname2);
+    if(newino == 0) //* newfile must not exist!
+    {
+        printf("=={ %s Does Not Exist\n", dirname2);
+        puts("=={ Check Passed = Ready to check dname exists for new link()\n");
+    }
+    else
+    {
+        printf("=={ ERROR: File %s Exists = FAIL link()\n");
+        //TODO: must put ino back?
+        iput(oldmip);
+        return 0;
+    }
+    
+
+    //*Split the new file path into dname and bname
+    char newPath[64] = { 0 };
+    strcpy(newPath, dirname2);
+
+    dbname(newPath);//Split parent dir name and the new file to be name
+    
+    //*Get ino of the Parent dir of the new file to be created
+    int newDirtPathIno = getino(dname);
+    MINODE *parentmip = iget(dev, newDirtPathIno);
+    if(!S_ISDIR(parentmip->INODE.i_mode)) 
+    {
+        printf("\n-={0  parentmip '%s' is NOT a DIR. MUST be a parent DIR for new file: %s0}=-\n", dname, bname);
+        printf("-={0  link() FAILED  0}=-\n") ;
+        iput(oldmip);
+        return 0;
+    }
+
+    my_creat(parentmip, bname);
+    
+    //TODO:creat_file
+    //TODO: getino of new file
+    //TODO: put it in memmory = mip
+    //TODO: change the mode to 0XA000
+    //TODO: Write the string of oldName into the i_block[] array
+    //TODO: set file size to strlen(of oldName)
+    //TODO: Write INODE of new file back to disk
+
+    enter_name(parentmip, oldino, bname); //*bname is the child name
+
+    oldmip->INODE.i_links_count++;
+    oldmip->dirty = 1; //*it has been modified, therefore is now dirty
+
+    iput(oldmip);
+    iput(parentmip);
 }
 
 int readlink()
 {
+    int inoToCheck = getino(pathname);
+    if(inoToCheck == 0)
+    {
+        printf("=0={ERROR: File:%s to readlink() Does Not Exist", pathname);
+        return 0;
+    }
+    MINODE* checkIno = iget(dev, inoToCheck);
+    if(!S_ISLNK(checkIno->INODE.i_mode))
+    {
+        printf("-=0={ ERROR: File:%s is NOT a symlink file\n", pathname);
+        printf("-=0={ File's i_mode=%d", checkIno->INODE.i_mode);
+        return 0;
+    }
 
+    char symlnkname[128] = { 0 };
+    strcpy(symlink, (char*) checkIno->INODE.i_block); //TODO: Possible issues Here
+
+    return strlen(symlink);
 }

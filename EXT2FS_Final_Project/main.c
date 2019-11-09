@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
         //printf("[ %04d/%02d/%02d ] BERR Shell [ %s ]\n|-$ ", tm.tm_year+1900, tm.tm_mon, tm.tm_mday, cwd);
         printf("[ %04d/%02d/%02d ] BERR Shell [ cwd ]\n|-$ ", tm.tm_year+1900, tm.tm_mon, tm.tm_mday);
         
-        printf("input command : [ls|cd|pwd|quit|mkdir|creat|link|unlink|symlink|rmdir]");
+        printf("input command : [ls|cd|pwd|quit|mkdir|creat|link|unlink|symlink|readlink|rmdir]");
         fgets(line, 128, stdin);
         line[strlen(line) - 1] = 0;
         if (line[0] == 0)
@@ -167,9 +167,13 @@ int main(int argc, char *argv[])
         if (strcmp(cmd, "link") == 0)
             link();
         if (strcmp(cmd, "unlink") == 0)
-            unlink();  
+            unlink();
+        if (strcmp(cmd, "symlink") == 0)
+            symlink();
+        if (strcmp(cmd, "readlink") == 0)
+            readlink();
         if (strcmp(cmd, "creat") == 0)
-            creat_file(); 
+            creat_file();
         if (strcmp(cmd, "quit") == 0)
             quit();
     }

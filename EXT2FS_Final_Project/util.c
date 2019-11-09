@@ -14,6 +14,14 @@ extern int nblocks, ninodes, bmap, imap, inode_start;
 //extern char line[256], cmd[32], pathname[256];
 char sbuf[256];
 
+//if ((sp->st_mode & 0xF000) == 0x8000) // if (S_ISREG())
+    //printf("%c",'-');
+//if ((sp->st_mode & 0xF000) == 0x4000) // if (S_ISDIR())
+    //printf("%c",'d');
+//if ((sp->st_mode & 0xF000) == 0xA000) // if (S_ISLNK())
+    //printf("%c",'l');
+
+
 int get_block(int dev, int blk, char *buf)
 {
     lseek(dev, (long)blk * BLKSIZE, 0);
