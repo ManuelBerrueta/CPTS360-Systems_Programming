@@ -114,9 +114,19 @@ int link()
 }
 
 
-int truncate()
+int truncate(MINODE *mipToDelete)
 {
-    
+    //* Deallocate all data blocks in INODE:
+    for(int i=0; i < 12; i++)
+    {
+        if(mipToDelete->INODE.i_block[i] == 0)
+        {
+            break;
+        }
+        bdalloc(dev, mipToDelete->INODE.i_block[i]);
+    }
+    //* Deallocate INODE
+    idalloc(dev, mipToDelete->ino);
 }
 
 
@@ -151,9 +161,9 @@ int unlink()
     //rm_child(parentmip, inoToDelete, bname);
 
     //TODO: Possibly move this 3 lines below the if
-    rm_child(parentmip, bname);
-    parentmip->dirty = 1;
-    iput(parentmip);
+    //rm_child(parentmip, bname);
+    //parentmip->dirty = 1;
+    //iput(parentmip);
     
     deletemip->INODE.i_links_count--;
     if(deletemip->INODE.i_links_count > 0)
@@ -165,13 +175,15 @@ int unlink()
     {
         //TODO: deallocate all data blocks in INODE;
         //TODO: deallocate INODE
-        for(int i=0; i < 12; i++)
-        {
-            bdalloc(dev, deletemip->INODE.i_block[i]);
-        }
-        idalloc(dev, deletemip->ino);
+        //!use truncate function
+        truncate(deletemip);
     }
+    rm_child(parentmip, bname);
+    parentmip->dirty = 1;
+    iput(parentmip);
     iput(deletemip);
+
+    //TODO: Bug due to the name...may be check name before deleting link?
 }
 
 int symlink()
@@ -186,7 +198,7 @@ int symlink()
     MINODE *oldmip = iget(dev, oldino);
     int newino = -1;
     //*If the file is not a DIR or a REG file throw error
-    if(!S_ISDIR(oldmip->INODE.i_mode) || !S_ISREG(oldmip->INODE.i_mode))
+    if(!S_ISDIR(oldmip->INODE.i_mode) && !S_ISREG(oldmip->INODE.i_mode))
     {
         printf("\n-={0  parentmip '%s' MUST BE a DIR or REG file  0}=-\n", pathname);
         printf("-={0  LINK FAILED: i_mode=%d  0}=-\n", oldmip->INODE.i_mode) ;
@@ -258,11 +270,11 @@ int symlink()
     strcpy(oldFileName, bname);
     newmip->INODE.i_size = strlen(oldFileName);
     //*Write oldFileName into i_block[]
-    strcpy(newmip->INODE.i_block, oldFileName);
+    strcpy((char*)newmip->INODE.i_block, oldFileName);//TODO: Possible issue here
     newmip->dirty = 1;
     iput(newmip);
 
-    enter_name(parentmip, oldino, bname); //*bname is the child name
+    //enter_name(parentmip, oldino, bname); //*bname is the child name
 
     //oldmip->INODE.i_links_count++;
     parentmip->dirty = 1; //*it has been modified, therefore is now dirty
@@ -288,7 +300,7 @@ int readlink()
     }
 
     char symlnkname[128] = { 0 };
-    strcpy(symlink, (char*) checkIno->INODE.i_block); //TODO: Possible issues Here
+    strcpy(symlink, checkIno->INODE.i_block); //TODO: Possible issues Here
 
     return strlen(symlink);
 }
