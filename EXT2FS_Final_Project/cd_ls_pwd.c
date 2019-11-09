@@ -38,6 +38,7 @@ change_dir(char *pathname)
     }
 }
 
+
 void *show_dir(INODE *ip)
 {
     //char sbuf[BLKSIZE], char temp[256];
@@ -72,6 +73,7 @@ void *show_dir(INODE *ip)
     }
 }
 
+
 void *printIPinfo(char fileName[], INODE *ip)
 {
     int i = 0;
@@ -87,6 +89,7 @@ void *printIPinfo(char fileName[], INODE *ip)
         i++;
     }
 }
+
 
 INODE *path2inode(INODE *ip, char pathName[], int inodes_start)
 {
@@ -136,6 +139,7 @@ INODE *path2inode(INODE *ip, char pathName[], int inodes_start)
         show_dir(ip);
     }
 }
+
 
 int list_file(char *pathname, int inode_start)
 {

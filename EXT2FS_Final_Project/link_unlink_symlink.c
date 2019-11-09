@@ -126,89 +126,6 @@ int my_linkcreat(MINODE *pip, char *name, int inoToLink)
     //TODO: Possibly make localbuff a global?
 }
 
-int creat_link(int oldino)
-{
-    MINODE *start = root;	
-    MINODE *target_start = root;	     
-    //1. pahtname = "/a/b/c" start = root;         dev = root->dev;
-    //            =  "a/b/c" start = running->cwd; dev = running->cwd->dev;
-    if(dirname2[0] != '/')
-    {
-        start = running->cwd;
-    }
-    if(pathname[0] != '/')
-    {
-        target_start = running->cwd;
-    }
-    //2. Let  
-    //     parent = dirname(pathname);   parent= "/a/b" OR "a/b"  = dname
-    //     child  = basename(pathname);  child = "c"              = bname
-    //!  WARNING: strtok(), dirname(), basename() destroy pathname
-
-    //TODO: This breaks if only one dir, need to deal with that case
-/*     strcpy(gpath, pathname); //! Did not work...
-    char *parent = dirname(gpath); 
-    strcpy(gpath, pathname);
-    char *child = basename(gpath); */
-
-    char newPath[64] = { 0 };
-    strcpy(newPath, dirname2);
-    dbname(newPath);
-
-    //3. Get the In_MEMORY minode of parent:
-             //pino  = getino(parent);
-             //pip   = iget(dev, pino); 
-    //int parentinode = getino(parent);
-    //! /x/y dir where link will be created
-    int parentinode = getino(dname);
-    MINODE *parentmip = iget(dev, parentinode);
-
-    //*Get ino of target 
-    int targetinode = getino(pathname);
-    MINODE* targetmip = iget(dev, targetinode);
-
-    //Verify : (1). parent INODE is a DIR (HOW?)   AND
-    //         (2). child does NOT exists in the parent directory (HOW?);
-    if(!S_ISDIR(parentmip->INODE.i_mode)) 
-    {
-        printf("-={0  parentmip is NOT a DIR  0}=-\n");
-        printf("-={0 creat_link FAILED  0}=-\n") ;
-        return;
-    }
-    if(S_ISDIR(targetmip->INODE.i_mode)) 
-    {
-        printf("-={0  targetmip is a DIR, link to a dirs is not allowed with link()  0}=-\n");
-        printf("-={0 creat_link FAILED  0}=-\n") ;
-        return;
-    }
-
-    
-    //if(search(parentmip, child) != 0) //!search returns 0 if child doesn't exists
-    if(search(parentmip, bname) != 0) //!search returns 0 if child doesn't exists
-    {
-        //printf("-={0  child %s EXISTS 0}=-\n", child);
-        printf("-={0  Parent of link: %s ino#: EXISTS 0}=-\n", bname, parentmip->ino);
-        printf("-={0  Continue...  0}=-\n") ;
-    }
-
-    //* Check the file we are trying to create does not exist!
-    int newFileCheckino = getino(dirname2);
-    if(newFileCheckino== 0)
-    {
-        printf("-={0  new File DNE 0}=-\n", bname, parentmip->ino);
-        printf("-={0  Continue...  0}=-\n") ;
-    }
-    
-    //TODO: Add an an try to /x/y that point to targetino
-
-    my_linkcreat(parentmip, bname, oldino);
-
-    //#For a file we do not increment parents link count
-
-    //TODO: Description
-    iput(parentmip);
-}
-
 
 int link()
 {
@@ -225,31 +142,46 @@ int link()
         return;
     }
 
-    newino = getino(dirname2);//*dirname2 is second dir passed in in main
-    if(newino == 0)
+    //*dirname2 is second argument paased to link in main
+    newino = getino(dirname2);
+    if(newino == 0) //* newfile must not exist!
     {
-        printf("%s DNE, good ready to check dname exists for new link()\n", dirname2);
+        printf("=={ %s Does Not Exist\n", dirname2);
+        puts("=={ Check Passed = Ready to check dname exists for new link()\n");
     }
+    else
+    {
+        printf("=={ ERROR: File %s Exists = FAIL link()\n");
+        //TODO: must put ino back?
+        iput(oldmip);
+        return 0;
+    }
+    
 
     //*Split the new file path into bname and dname
     char newPath[64] = { 0 };
     strcpy(newPath, dirname2);
 
-    dbname(newPath);
-    //*Get ino of the path parent dir
+    dbname(newPath);//Split parent dir name and the new file to be name
+    
+    //*Get ino of the Parent dir of the new file to be created
     int newDirtPathIno = getino(dname);
     MINODE *parentmip = iget(dev, newDirtPathIno);
     if(!S_ISDIR(parentmip->INODE.i_mode)) 
     {
-        printf("\n-={0  parentmip '%s' MUST be a parent DIR for  new link()  0}=-\n", pathname);
-        printf("-={0  LINK FAILED  0}=-\n") ;
+        printf("\n-={0  parentmip '%s' is NOT a DIR. MUST be a parent DIR for new file: %s0}=-\n", dname, bname);
+        printf("-={0  link() FAILED  0}=-\n") ;
         iput(oldmip);
-        return;
+        return 0;
     }
 
-    newino = oldino;
-    //create link file
-    creat_link(oldino);
+    enter_name(parentmip, oldino, bname); //*bname is the child name
+
+    oldmip->INODE.i_links_count++;
+    oldmip->dirty = 1; //*it has been modified, therefore is now dirty
+
+    iput(oldmip);
+    iput(parentmip);
 }
 
 

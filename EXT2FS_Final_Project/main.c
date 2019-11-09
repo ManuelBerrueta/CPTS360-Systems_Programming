@@ -1,6 +1,9 @@
-/****************************************************************************
-*                   KCW testing ext2 file system                            *
-*****************************************************************************/
+/*******************************************************************************
+**                     CptS 360 - Systems Programming                         **
+**                     EXT2 File System Final Project                         **
+**                                  by                                        **
+**                            Manuel Berrueta                                 **
+*******************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -32,7 +35,6 @@ char line[256], cmd[32], pathname[256], dirname2[256];
 
 
 
-
 int init()
 {
     int i, j;
@@ -61,12 +63,14 @@ int init()
     }
 }
 
+
 // load root INODE and set root pointer to it
 int mount_root()
 {
     printf("mount_root()\n");
     root = iget(dev, 2);
 }
+
 
 char *disk = "mydisk";
 int main(int argc, char *argv[])
@@ -168,6 +172,7 @@ int main(int argc, char *argv[])
             quit();
     }
 }
+
 
 int quit()
 {
