@@ -300,7 +300,14 @@ int readlink()
     }
 
     char symlnkname[128] = { 0 };
-    strcpy(symlink, checkIno->INODE.i_block); //TODO: Possible issues Here
+    strcpy(symlnkname, (char *)checkIno->INODE.i_block); //TODO: Possible issues Here
 
-    return strlen(symlink);
+    int fileSize = strlen(symlnkname);
+
+    puts("====================================");
+    printf("=0={Readlink: %d\n", fileSize);
+    puts("====================================\n");
+
+    iput(checkIno);
+    return fileSize;
 }
