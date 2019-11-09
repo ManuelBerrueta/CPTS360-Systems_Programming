@@ -189,7 +189,7 @@ int symlink()
     if(!S_ISDIR(oldmip->INODE.i_mode) || !S_ISREG(oldmip->INODE.i_mode))
     {
         printf("\n-={0  parentmip '%s' MUST BE a DIR or REG file  0}=-\n", pathname);
-        printf("-={0  LINK FAILED: i_mode=%s  0}=-\n", oldmip->INODE.i_mode) ;
+        printf("-={0  LINK FAILED: i_mode=%d  0}=-\n", oldmip->INODE.i_mode) ;
         iput(oldmip);
         return 0;
     }
@@ -217,7 +217,12 @@ int symlink()
     dbname(newPath);//Split parent dir name and the new file to be name
     
     //*Get ino of the Parent dir of the new file to be created
-    int newDirtPathIno = getino(dname);
+    char parentName[128] = {0};
+    char childName[128] = {0};
+    strcpy(parentName, dname);
+    strcpy(childName, bname);
+
+    int newDirtPathIno = getino(parentName);
     MINODE *parentmip = iget(dev, newDirtPathIno);
     if(!S_ISDIR(parentmip->INODE.i_mode)) 
     {
@@ -227,8 +232,14 @@ int symlink()
         return 0;
     }
 
-    my_creat(parentmip, bname);
-    
+    my_creat(parentmip, childName);
+    newino = getino(dirname2);
+    if(newino == 0)
+    {
+        printf("ERROR: INODE for the new file created was not found\n");
+        iput(oldmip);
+        return 0;
+    }
     //TODO:creat_file
     //TODO: getino of new file
     //TODO: put it in memmory = mip
@@ -237,10 +248,24 @@ int symlink()
     //TODO: set file size to strlen(of oldName)
     //TODO: Write INODE of new file back to disk
 
+    MINODE *newmip = iget(dev, newino);
+    newmip->INODE.i_mode = 0xA000; //Set file type to link
+    
+    char oldFilePath[128] = {0};
+    strcpy(oldFilePath, pathname);
+    dbname(oldFilePath);
+    char oldFileName[64] = {0};
+    strcpy(oldFileName, bname);
+    newmip->INODE.i_size = strlen(oldFileName);
+    //*Write oldFileName into i_block[]
+    strcpy(newmip->INODE.i_block, oldFileName);
+    newmip->dirty = 1;
+    iput(newmip);
+
     enter_name(parentmip, oldino, bname); //*bname is the child name
 
-    oldmip->INODE.i_links_count++;
-    oldmip->dirty = 1; //*it has been modified, therefore is now dirty
+    //oldmip->INODE.i_links_count++;
+    parentmip->dirty = 1; //*it has been modified, therefore is now dirty
 
     iput(oldmip);
     iput(parentmip);
