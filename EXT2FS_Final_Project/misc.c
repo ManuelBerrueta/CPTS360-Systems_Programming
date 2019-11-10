@@ -33,3 +33,14 @@ extern char *name[64];  // pointers to token strings
 
 extern char line[256], command[32], pathname[256];
 
+int my_chmod(char *fileName)
+{
+
+    return 1;
+}
+
+int utime(char *fileName)
+{
+
+    return 1;
+}

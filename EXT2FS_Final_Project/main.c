@@ -19,6 +19,8 @@
 #include "mkdir_creat.c"
 #include "rmdir.c"
 #include "link_unlink_symlink.c"
+#include "misc.c"
+#include "open_close_lseek.c"
 
 MINODE minode[NMINODE];
 MINODE *root;
@@ -32,6 +34,11 @@ int n;           // number of component strings
 int fd, dev;
 int nblocks, ninodes, bmap, imap, inode_start, iblock;
 char line[256], cmd[32], pathname[256], dirname2[256];
+
+#define RD 0;
+#define WR 1;
+#define RW 2;
+#define AP 3;
 
 
 
@@ -141,7 +148,7 @@ int main(int argc, char *argv[])
         //printf("[ %04d/%02d/%02d ] BERR Shell [ %s ]\n|-$ ", tm.tm_year+1900, tm.tm_mon, tm.tm_mday, cwd);
         printf("[ %04d/%02d/%02d ] BERR Shell [ cwd ]\n|-$ ", tm.tm_year+1900, tm.tm_mon, tm.tm_mday);
         
-        printf("input command : [ls|cd|pwd|quit|mkdir|creat|link|unlink|symlink|readlink|rmdir]");
+        printf("input command : [ls|cd|pwd|quit|mkdir|creat|link|unlink|symlink|readlink|rmdir|open]\nBERSH::> ");
         fgets(line, 128, stdin);
         line[strlen(line) - 1] = 0;
         if (line[0] == 0)
@@ -174,6 +181,8 @@ int main(int argc, char *argv[])
             readlink();
         if (strcmp(cmd, "creat") == 0)
             creat_file();
+        if (strcmp(cmd, "open") == 0)
+            open_file(pathname, dirname2);
         if (strcmp(cmd, "quit") == 0)
             quit();
     }
