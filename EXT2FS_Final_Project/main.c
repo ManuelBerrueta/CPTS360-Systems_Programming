@@ -25,6 +25,7 @@
 MINODE minode[NMINODE];
 MINODE *root;
 PROC proc[NPROC], *running;
+OFT fileTable[NOFT];
 
 
 char gpath[256]; // global for tokenized components
@@ -35,10 +36,7 @@ int fd, dev;
 int nblocks, ninodes, bmap, imap, inode_start, iblock;
 char line[256], cmd[32], pathname[256], dirname2[256];
 
-#define RD 0;
-#define WR 1;
-#define RW 2;
-#define AP 3;
+
 
 
 

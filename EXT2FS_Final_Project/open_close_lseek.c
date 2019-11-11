@@ -24,6 +24,7 @@ extern DIR *dp;
 extern MINODE minode[NMINODE];
 extern MINODE *root;
 extern PROC proc[NPROC], *running;
+extern OFT fileTable[NOFT];
 
 /********** globals *************/
 extern int fd, dev;                         // dev = fd
@@ -61,7 +62,7 @@ extern int bno;
   | ------  |             --------------------------------    
   ===========        logical view of file: a sequence of bytes */
 
-int open_file(char *filePath, int flags)
+int open_file(char *filePath, int mode)
 {
     MINODE *parentmip;
     MINODE *mip;
@@ -92,6 +93,21 @@ int open_file(char *filePath, int flags)
         }
     }
     mip = iget(dev, ino);
+
+
+    running->fd[0]->mode = mode;
+    running->fd[0]->mptr = mip;
+    running->fd[0]->refCount++;
+    
+    if(mode == RD || mode == WR || mode == RW)
+    {
+        running->fd[0]->offset = 0;    
+    }
+    else
+    {
+        running->fd[0]->offset = mip->INODE.i_size;
+    }
+    
 
     return;
 }
