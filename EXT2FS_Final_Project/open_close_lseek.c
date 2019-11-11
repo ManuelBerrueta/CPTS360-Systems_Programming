@@ -94,20 +94,146 @@ int open_file(char *filePath, int mode)
     }
     mip = iget(dev, ino);
 
+    OFT *oftptr = allocateOFT();
+    oftptr->mode = mode;
+    oftptr->mptr = mip;
+    oftptr->refCount++;
 
-    running->fd[0]->mode = mode;
-    running->fd[0]->mptr = mip;
-    running->fd[0]->refCount++;
-    
     if(mode == RD || mode == WR || mode == RW)
     {
-        running->fd[0]->offset = 0;    
+        oftptr->offset = 0;    
     }
     else
     {
-        running->fd[0]->offset = mip->INODE.i_size;
+        oftptr->offset = mip->INODE.i_size;
     }
     
+    int i=0;
+    for(i=0; i < NFD; i++)
+    {
+        if(running->fd[i] == 0)
+        {
+            running->fd[i] = oftptr;
+            break;
+        }
+    }
 
-    return;
+    switch (mode)
+    {
+    case 0:
+        mip->INODE.i_atime = time(0L);
+        mip->dirty = 1;
+        break;
+    case 1:
+    case 2:
+    case 3:
+        mip->INODE.i_atime = mip->INODE.i_mtime = time(0L);
+        mip->dirty = 1;
+        break;
+    }
+
+    return i; //*Returning FD index
+}
+
+
+int close(int fd)
+{
+    OFT *oftptr;
+    MINODE * mip;
+
+    if(fd >= NFD) //Checking out of bounds
+    {
+        printf("-=0={ ERROR: fd out of range\n");
+        return -1;
+    }
+    if(running->fd[fd] == 0)
+    {
+        printf("-=0={ERROR: FILE IS NOT OPEN!");
+        return -1;
+    }
+
+    oftptr = running->fd[fd];
+    running->fd[fd] = 0;
+    oftptr->refCount--;
+
+    if(oftptr->refCount == 0)
+    {
+        mip = oftptr->mptr;
+        iput(mip);
+    }
+    return 0;
+}
+
+
+int lseek(int fd, int position)
+{
+    OFT *oftptr;
+    int pos;
+
+    oftptr = running->fd[fd];
+
+    pos = oftptr->offset;
+    
+    if(position >= oftptr->mptr->INODE.i_size || position < 0)
+    {
+        printf("-=0={ERROR: Out Of Bounds\n");
+        return -1;
+    }
+
+    oftptr->offset = position;
+
+    return pos;
+}
+
+int pfd()
+{
+    int i=0;
+    for(i=0; i < NFD; i++)
+    {
+        printf("%d ", i);
+        
+        switch (running->fd[i]->mode)
+        {
+        case 0:
+            printf("READ ");
+            break;
+        case 1:
+            printf("WRITE ");
+            break;
+        case 2:
+            printf("RD|WR ");
+            break;
+        case 3:
+            printf("APPED ");
+            break;
+        }
+        printf("%d ", running->fd[i]->offset);
+        printf("[%d, %d]\n", running->fd[i]->mptr->dev, running->fd[i]->mptr->ino);
+    }
+}
+
+int dup(int fd)
+{
+    int i;
+    if(running->fd[fd] == 0)
+    {
+        printf("-=0={ERRROR: NOT AN OPEN FILE\n");
+        return -1;
+    }
+    for(i=0; i < NFD; i++)
+    {
+        if(running->fd[i] == 0)
+        {
+            running->fd[i] = running->fd[fd];
+            return i;
+        }
+    }
+    printf("-=0={ERROR: CANNOT DUP fd\n");
+    return -1;
+}
+
+int dup2(int fd, int gd)
+{
+    close(gd);
+    dup(fd);
 }

@@ -9,10 +9,13 @@ extern char gpath[256];
 extern char *name[64];
 extern int n;
 
+extern OFT fileTable[NOFT];
+
 extern int fd, dev;
 extern int nblocks, ninodes, bmap, imap, inode_start;
 //extern char line[256], cmd[32], pathname[256];
 char sbuf[256];
+
 
 //if ((sp->st_mode & 0xF000) == 0x8000) // if (S_ISREG())
     //printf("%c",'-');
@@ -251,4 +254,16 @@ int findmyname(MINODE *parent, int myinode, char myname[])
             }
         }
     } 
+}
+
+
+OFT *allocateOFT()
+{
+    for(int i=0; i < NOFT; i++)
+    {
+        if(fileTable[i].refCount == 0)
+        {
+            return &fileTable[i];
+        }
+    }
 }

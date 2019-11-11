@@ -116,6 +116,8 @@ int link()
 
 int truncate(MINODE *mipToDelete)
 {
+    int i, j, *p, *q;
+    char lbuf[BLKSIZE], lbuf2[BLKSIZE];
     //* Deallocate all data blocks in INODE:
     for(int i=0; i < 12; i++)
     {
@@ -125,8 +127,44 @@ int truncate(MINODE *mipToDelete)
         }
         bdalloc(dev, mipToDelete->INODE.i_block[i]);
     }
-    //* Deallocate INODE
-    idalloc(dev, mipToDelete->ino);
+
+    get_block(dev, mipToDelete->INODE.i_block[12], lbuf);
+    p = (int *)lbuf;
+
+    for(i=0; i < 256; i++)
+    {
+        if(p[i] == 0)
+        {
+            break;
+        }
+        bdalloc(dev,p[i]);
+    }
+    bdalloc(dev, mipToDelete->INODE.i_block[12]);
+
+    get_block(dev, mipToDelete->INODE.i_block[13], lbuf);
+    p = (int *)buf;
+    for(i = 0; i < 256; i++)
+    {
+        if(p[i] == 0)
+        {
+            break;
+        }
+        get_block(dev, p[i], lbuf2);
+        q = (int *)lbuf2;
+        for(j = 0; j < 256; j++)
+        {
+            if(q[j] == 0)
+            {
+                break;
+            }
+            bdalloc(dev, q[j]);
+        }
+        bdalloc(dev, p[i]);
+    }
+    bdalloc(dev, mipToDelete->INODE.i_block[13]);
+
+    mipToDelete->INODE.i_size = 0;
+    mipToDelete->dirty = 1;
 }
 
 
@@ -137,7 +175,7 @@ int unlink()
     if(inoToDelete == 0)
     {
         printf("\n-={0 ERROR: inoToDelete '%s' Does NOT Exist 0}=-\n", pathname);
-        printf("-={0  UNLINK FAILED  0}=-\n") ;
+        printf("-={0  UNLINK FAILED  0}=-\n");
         return 0;
     }
 
@@ -177,6 +215,8 @@ int unlink()
         //TODO: deallocate INODE
         //!use truncate function
         truncate(deletemip);
+        //* Deallocate INODE
+        idalloc(dev, deletemip->ino);
     }
     rm_child(parentmip, bname);
     parentmip->dirty = 1;
