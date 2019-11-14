@@ -165,7 +165,7 @@ int close(int fd)
 }
 
 
-int lseek(int fd, int position)
+/* int lseek(int fd, int position)
 {
     OFT *oftptr;
     int pos;
@@ -183,7 +183,7 @@ int lseek(int fd, int position)
     oftptr->offset = position;
 
     return pos;
-}
+} */
 
 int pfd()
 {
@@ -235,5 +235,5 @@ int dup(int fd)
 int dup2(int fd, int gd)
 {
     close(gd);
-    dup(fd);
+    dup(fd); 
 }
