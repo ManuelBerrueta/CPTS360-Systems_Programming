@@ -3,6 +3,12 @@
 **                     EXT2 File System Final Project                         **
 **                                  by                                        **
 **                            Manuel Berrueta                                 **
+**                                                                            **
+**    Prereqs:  sudo apt install e2fslibs-dev                                 **
+**              sudo apt-get install build-essential gdb                      **
+**              sudo apt-get install gcc-multilib                             **
+**    To build:                                                               **
+**              gcc -m32 flag is required                                      **
 *******************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
