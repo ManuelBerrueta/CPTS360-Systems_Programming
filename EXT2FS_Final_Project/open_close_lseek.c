@@ -35,7 +35,7 @@ extern char gpath[256]; // token strings
 extern int n;           // number of token strings
 extern char *name[64];  // pointers to token strings
 
-extern char line[256], command[32], pathname[256];
+extern char line[256], command[32], pathname[256], dirname2[256];
 extern char dname[64]; //? Directory string holder
 extern char bname[64]; //? Basename string holder
 extern int bno;
