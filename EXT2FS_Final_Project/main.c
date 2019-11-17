@@ -8,8 +8,12 @@
 **              sudo apt-get install build-essential gdb                      **
 **              sudo apt-get install gcc-multilib                             **
 **    To build:                                                               **
-**              gcc -m32 flag is required                                      **
+**              gcc -m32 flag is required                                     **
+**    
 *******************************************************************************/
+//To Run on WSL: 
+//https://stackoverflow.com/questions/42120938/exec-format-error-32-bit-executable-windows-subsystem-for-linux
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
