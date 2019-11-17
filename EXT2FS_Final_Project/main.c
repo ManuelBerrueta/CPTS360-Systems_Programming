@@ -159,7 +159,7 @@ int main(int argc, char *argv[])
         //printf("[ %04d/%02d/%02d ] BERR Shell [ %s ]\n|-$ ", tm.tm_year+1900, tm.tm_mon, tm.tm_mday, cwd);
         printf("[ %04d/%02d/%02d ] BERR Shell [ cwd ]\n|-$ ", tm.tm_year+1900, tm.tm_mon, tm.tm_mday);
         
-        printf("input command : [ls|cd|pwd|quit|mkdir|creat|link|unlink|symlink|readlink|rmdir|open|close|lseek|pfd|dup|dup2|read|write]\nBERSH::> ");
+        printf("input command : [ls|cd|pwd|quit|mkdir|creat|link|unlink|symlink|readlink|rmdir|open|close|lseek|pfd|dup|dup2|read|cat|write]\nBERSH::> ");
         fgets(line, 128, stdin);
         line[strlen(line) - 1] = 0;
         if (line[0] == 0)
@@ -206,6 +206,8 @@ int main(int argc, char *argv[])
             dup2(atoi(pathname), atoi(dirname2));
         if (strcmp(cmd, "read") == 0)
             my_read(atoi(pathname), buf, atoi(dirname2));
+        if (strcmp(cmd, "cat") == 0)
+            cat(pathname);
         if (strcmp(cmd, "quit") == 0)
             quit();
     }

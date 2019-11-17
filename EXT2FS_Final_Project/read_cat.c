@@ -64,7 +64,7 @@ extern int bno;
 //* lbk   0    1 .....     |rem|                   |
 //*                      start                   fsize  
 
-int map(INODE ino, int logicBlk)
+int map(INODE ino, int logicBlk, char buff[])
 {
     int blk = -1;
     int ibuff[256] = { 0 };
@@ -75,7 +75,7 @@ int map(INODE ino, int logicBlk)
     }
     else if(12 <= logicBlk < 12+256) //*indirect blocks
     {
-        memcpy(ibuff, ino.i_block[12], 256); //read i_block 12 into ibuff
+        get_block(dev, ino.i_block[12], buff); //read i_block 12 into ibuff
         blk = ibuff[logicBlk - 12];
     }
     else
@@ -128,7 +128,7 @@ int my_read(int fd, char buf[], int numBytes)
 
         //*Convert Logibal Block # to Physical Block # through INODE_i_block[ ]
         //int physicalBlock = running->fd[fd]->mptr->INODE.i_block[logicalBlock];
-        int physicalBlock = map(running->fd[fd]->mptr->INODE, logicalBlock);
+        int physicalBlock = map(running->fd[fd]->mptr->INODE, logicalBlock, buf);
 
         get_block(dev, physicalBlock, kbuff);
 
@@ -154,4 +154,20 @@ int my_read(int fd, char buf[], int numBytes)
     return count;
 }
 
-//!NOTE: We use logical blocks because a file may be bigger then one block      
+//!NOTE: We use logical blocks because a file may be bigger then one block 
+
+int cat(int fileName)
+{
+    char mybuff[1024], dummy = 0; //a null char at end of mybuff[]
+    int n;
+
+    int fd = open_file(fileName, RD);
+
+    while(n = read(fd, mybuff, 1024))
+    {
+        mybuff[n] = 0;
+        printf("%s", mybuff);
+        //TODO: HANDLE '\n'
+    }
+    close(fd);
+}
