@@ -185,30 +185,34 @@ int my_lseek(int fd, int position)
     return pos;
 }
 
+//*File Decscriptor Information
 int pfd()
 {
     int i=0;
     for(i=0; i < NFD; i++)
     {
-        printf("%d ", i);
-        
-        switch (running->fd[i]->mode)
+        if(running->fd[i] != 0)
         {
-        case 0:
-            printf("READ ");
-            break;
-        case 1:
-            printf("WRITE ");
-            break;
-        case 2:
-            printf("RD|WR ");
-            break;
-        case 3:
-            printf("APPED ");
-            break;
+            printf("%d ", i);
+        
+            switch (running->fd[i]->mode)
+            {
+            case 0:
+                printf("READ ");
+                break;
+            case 1:
+                printf("WRITE ");
+                break;
+            case 2:
+                printf("RD|WR ");
+                break;
+            case 3:
+                printf("APPED ");
+                break;
+            }
+            printf("%d ", running->fd[i]->offset);
+            printf("[%d, %d]\n", running->fd[i]->mptr->dev, running->fd[i]->mptr->ino);
         }
-        printf("%d ", running->fd[i]->offset);
-        printf("[%d, %d]\n", running->fd[i]->mptr->dev, running->fd[i]->mptr->ino);
     }
 }
 

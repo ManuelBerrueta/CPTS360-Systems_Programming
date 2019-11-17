@@ -68,6 +68,7 @@ int map(INODE ino, int logicBlk, char buff[])
 {
     int blk = -1;
     int ibuff[256] = { 0 };
+    int doub_ibuff[256] = { 0 };
 
     if(logicBlk < 12)
     {
@@ -75,12 +76,16 @@ int map(INODE ino, int logicBlk, char buff[])
     }
     else if(12 <= logicBlk < 12+256) //*indirect blocks
     {
-        get_block(dev, ino.i_block[12], buff); //read i_block 12 into ibuff
+        get_block(dev, ino.i_block[12], ibuff); //read i_block 12 into ibuff
         blk = ibuff[logicBlk - 12];
     }
     else
     {
         // TODO:  double indirect
+        get_block(dev, ino.i_block[13], ibuff);
+        blk = ibuff[(logicBlk - 256 -12) / 256];
+        get_block(dev, blk, doub_ibuff);
+        blk = doub_ibuff[(logicBlk - 256 -12) % 256];
     }
     return blk;
 }
@@ -95,7 +100,10 @@ int my_read(int fd, char buf[], int numBytes)
     return(myread(fd, buf, nbytes)); */
     int count = 0;  //* # of bytes to read
     char kbuff[BLKSIZE];
-        
+    OFT *oftp = running->fd[fd];
+    MINODE *mip = oftp->mptr;
+
+    
     printf("fdIndex = %d\n", fd);
     int numOfBytes = atoi(dirname2);
 
@@ -104,7 +112,7 @@ int my_read(int fd, char buf[], int numBytes)
         puts("Read requires fd to be open!");
         return -1;
     }
-    if(running->fd[fd]->mode != (RW || RD))
+    if(running->fd[fd]->mode != 0 && running->fd[fd]->mode != 2) // 0=Read, 1=Write, 2=ReadWrite, 3=Append
     {
         puts("Read requires fd to be open for RW or RD");
         return -1;
@@ -115,20 +123,26 @@ int my_read(int fd, char buf[], int numBytes)
         return -1;
     }
 
-    int offset = running->fd[fd]->offset;   //* Current file offest in file
+    //int offset = oftp->offset;   //* Current file offest in file
     //* Compute bytes available in file
-    int availableBytes = running->fd[fd]->mptr->INODE.i_size - offset;
+    int availableBytes = running->fd[fd]->mptr->INODE.i_size - oftp->offset;
+
 
     while(numBytes && availableBytes)
     {
+        int ind_blk[256], doub_ind_blk[256];
         //*Compute Logical Block
-        int logicalBlock = offset / BLKSIZE;
+        int logicalBlock = oftp->offset / BLKSIZE;
         //*Compute Start byte in Logical block
-        int startByte = offset % BLKSIZE;
+        int startByte = oftp->offset % BLKSIZE;
 
         //*Convert Logibal Block # to Physical Block # through INODE_i_block[ ]
         //int physicalBlock = running->fd[fd]->mptr->INODE.i_block[logicalBlock];
-        int physicalBlock = map(running->fd[fd]->mptr->INODE, logicalBlock, buf);
+        int physicalBlock = -1;
+        
+
+        physicalBlock = map(mip->INODE, logicalBlock, buf);
+
 
         get_block(dev, physicalBlock, kbuff);
 
@@ -140,12 +154,12 @@ int my_read(int fd, char buf[], int numBytes)
         while(remaining)
         {
             *buf++ = *cp++; //the contents of cp into buff 1 byte @ a time
-            offset++;
+            oftp->offset++;
             count++;
             remaining--;
             availableBytes--;
             numBytes--;
-            if(numBytes == 0 || availableBytes == 0)
+            if(numBytes <= 0 || availableBytes <= 0)
             {
                 break;
             }
@@ -156,14 +170,14 @@ int my_read(int fd, char buf[], int numBytes)
 
 //!NOTE: We use logical blocks because a file may be bigger then one block 
 
-int cat(int fileName)
+int cat(char fileName[])
 {
     char mybuff[1024], dummy = 0; //a null char at end of mybuff[]
     int n;
 
     int fd = open_file(fileName, RD);
 
-    while(n = read(fd, mybuff, 1024))
+    while(n = my_read(fd, mybuff, 1024))
     {
         mybuff[n] = 0;
         printf("%s", mybuff);

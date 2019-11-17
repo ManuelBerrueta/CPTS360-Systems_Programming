@@ -50,9 +50,6 @@ int nblocks, ninodes, bmap, imap, inode_start, iblock;
 char line[256], cmd[32], pathname[256], dirname2[256];
 
 
-
-
-
 int init()
 {
     int i, j;
@@ -193,7 +190,31 @@ int main(int argc, char *argv[])
         if (strcmp(cmd, "creat") == 0)
             creat_file();
         if (strcmp(cmd, "open") == 0)
-            open_file(pathname, dirname2);
+            if(strcmp(dirname2, "R") == 0)
+            {
+                int mode = 0;
+                open_file(pathname, mode);
+            }
+            else if(strcmp(dirname2, "W") == 0)
+            {
+                int mode = 1;
+                open_file(pathname, mode);
+            }
+            else if(strcmp(dirname2, "RW") == 0)
+            {
+                int mode = 2;
+                open_file(pathname, mode);
+            }
+            else if(strcmp(dirname2, "A") == 0)
+            {
+                int mode = 3;
+                open_file(pathname, mode);
+            }
+            else
+            {
+                puts("WRONG MODE FOR OPEN\n");
+            }
+            
         if (strcmp(cmd, "close") == 0)
             close(atoi(pathname));
         if (strcmp(cmd, "lseek") == 0)
