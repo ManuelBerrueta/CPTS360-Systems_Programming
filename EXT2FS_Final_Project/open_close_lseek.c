@@ -165,7 +165,7 @@ int close(int fd)
 }
 
 
-/* int lseek(int fd, int position)
+int my_lseek(int fd, int position)
 {
     OFT *oftptr;
     int pos;
@@ -183,7 +183,7 @@ int close(int fd)
     oftptr->offset = position;
 
     return pos;
-} */
+}
 
 int pfd()
 {

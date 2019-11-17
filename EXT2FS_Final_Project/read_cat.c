@@ -40,7 +40,6 @@ extern char dname[64]; //? Directory string holder
 extern char bname[64]; //? Basename string holder
 extern int bno;
 
-char lbuff[1024];
 
 //* int myread(int fd, char buf[ ], nbytes) behaves EXACTLY the same as the
 //* read() system call in Unix/Linux. 
@@ -65,31 +64,47 @@ char lbuff[1024];
 //* lbk   0    1 .....     |rem|                   |
 //*                      start                   fsize  
 
-
-int myread(int fd, char buf[], int numBytes)
+int map(INODE ino, int logicBlk)
 {
-    
+    int blk = -1;
+    int ibuff[256] = { 0 };
+
+    if(logicBlk < 12)
+    {
+        blk = ino.i_block[logicBlk];
+    }
+    else if(12 <= logicBlk < 12+256) //*indirect blocks
+    {
+        memcpy(ibuff, ino.i_block[12], 256); //read i_block 12 into ibuff
+        blk = ibuff[logicBlk - 12];
+    }
+    else
+    {
+        // TODO:  double indirect
+    }
+    return blk;
 }
 
-int read_file()
+
+int my_read(int fd, char buf[], int numBytes)
 {
     /* Preparations: 
     ASSUME: file is opened for RD or RW;
     ask for a fd  and  nbytes to read;
     verify that fd is indeed opened for RD or RW;
     return(myread(fd, buf, nbytes)); */
-    
-    int fdIndex = atoi(pathname);
-    printf("fdIndex = %d\n", fdIndex);
-
+    int count = 0;  //* # of bytes to read
+    char kbuff[BLKSIZE];
+        
+    printf("fdIndex = %d\n", fd);
     int numOfBytes = atoi(dirname2);
 
-    if(!running->fd[fdIndex])
+    if(!running->fd[fd])
     {
         puts("Read requires fd to be open!");
         return -1;
     }
-    if(running->fd[fdIndex]->mode != (RW || RD))
+    if(running->fd[fd]->mode != (RW || RD))
     {
         puts("Read requires fd to be open for RW or RD");
         return -1;
@@ -99,5 +114,44 @@ int read_file()
         puts("Read requires # of bytes to read as a second argument!");
         return -1;
     }
-    return(myread(fd, lbuff, numOfBytes));
+
+    int offset = running->fd[fd]->offset;   //* Current file offest in file
+    //* Compute bytes available in file
+    int availableBytes = running->fd[fd]->mptr->INODE.i_size - offset;
+
+    while(numBytes && availableBytes)
+    {
+        //*Compute Logical Block
+        int logicalBlock = offset / BLKSIZE;
+        //*Compute Start byte in Logical block
+        int startByte = offset % BLKSIZE;
+
+        //*Convert Logibal Block # to Physical Block # through INODE_i_block[ ]
+        //int physicalBlock = running->fd[fd]->mptr->INODE.i_block[logicalBlock];
+        int physicalBlock = map(running->fd[fd]->mptr->INODE, logicalBlock);
+
+        get_block(dev, physicalBlock, kbuff);
+
+        char *cp = kbuff + startByte;
+
+        int remaining = BLKSIZE - startByte;
+
+        //TODO: (5) 
+        while(remaining)
+        {
+            *buf++ = *cp++; //the contents of cp into buff 1 byte @ a time
+            offset++;
+            count++;
+            remaining--;
+            availableBytes--;
+            numBytes--;
+            if(numBytes == 0 || availableBytes == 0)
+            {
+                break;
+            }
+        }
+    }
+    return count;
 }
+
+//!NOTE: We use logical blocks because a file may be bigger then one block      
