@@ -13,7 +13,9 @@
 *******************************************************************************/
 //To Run on WSL: 
 //https://stackoverflow.com/questions/42120938/exec-format-error-32-bit-executable-windows-subsystem-for-linux
-
+// Need to reactivate: sudo service binfmt-support start
+//More on running 32-bit programs on 64-bit
+//https://unix.stackexchange.com/questions/12956/how-do-i-run-32-bit-programs-on-a-64-bit-debian-ubuntu
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
