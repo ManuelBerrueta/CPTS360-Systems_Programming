@@ -79,7 +79,7 @@ int open_file(char *filePath, int mode)
         if(parentino == 0)
         {
             printf("-=0={ ERROR: getino failed on parentino: %s\n", dname);
-            return 0;
+            return -1;
         }
 
         parentmip = iget(dev, parentino);
@@ -89,7 +89,7 @@ int open_file(char *filePath, int mode)
         if(ino == 0)
         {
             printf("-=0={ ERROR: getino failed on new file: %s\n", filePath);
-            return 0;
+            return -1;
         }
     }
     mip = iget(dev, ino);

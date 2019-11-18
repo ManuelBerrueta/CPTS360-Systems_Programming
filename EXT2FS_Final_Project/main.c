@@ -34,6 +34,7 @@
 #include "misc.c"
 #include "open_close_lseek.c"
 #include "read_cat.c"
+#include "write_cp.c"
 
 MINODE minode[NMINODE];
 MINODE *root;
@@ -188,7 +189,7 @@ int main(int argc, char *argv[])
         if (strcmp(cmd, "readlink") == 0)
             readlink();
         if (strcmp(cmd, "creat") == 0)
-            creat_file();
+            creat_file(pathname);
         if (strcmp(cmd, "open") == 0)
             if(strcmp(dirname2, "R") == 0)
             {

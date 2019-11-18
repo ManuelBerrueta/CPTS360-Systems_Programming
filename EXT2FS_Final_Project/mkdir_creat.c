@@ -517,7 +517,7 @@ int my_creat(MINODE *pip, char*name)//TODO: NEED TO FIX THIS...
 }
 
 
-int creat_file()
+int creat_file(char pathname[])
 {
     MINODE *start = root;		     
     //1. pahtname = "/a/b/c" start = root;         dev = root->dev;
