@@ -203,6 +203,17 @@ int cat(char fileName[])
     int n;
 
     int fd = open_file(fileName, RD);
+    if(fd < 0)
+    {
+        printf("-=0={ERROR: File '%s' FAILED to OPEN\n", fileName);
+    }
+    else
+    {
+        printf("-=0=[Start cat file: '%s' @ fd=%d\n", fileName, fd);
+        puts("===================================================");
+    }
+    
+
 
     while(n = my_read(fd, mybuff, 1024))
     {
@@ -210,5 +221,7 @@ int cat(char fileName[])
         printf("%s", mybuff);
         //TODO: HANDLE '\n'
     }
+    puts("===================================================");
+    printf("-=0=[END cat file: '%s' @ fd=%d\n", fileName, fd);
     close(fd);
 }
