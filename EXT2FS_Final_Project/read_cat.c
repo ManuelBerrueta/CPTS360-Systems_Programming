@@ -105,7 +105,6 @@ int my_read(int fd, char buf[], int numBytes)
 
     
     printf("fdIndex = %d\n", fd);
-    int numOfBytes = atoi(dirname2);
 
     if(!running->fd[fd])
     {
@@ -126,6 +125,10 @@ int my_read(int fd, char buf[], int numBytes)
     //int offset = oftp->offset;   //* Current file offest in file
     //* Compute bytes available in file
     int availableBytes = running->fd[fd]->mptr->INODE.i_size - oftp->offset;
+    if(availableBytes < 0)
+    {
+        availableBytes = 0;
+    }
 
 
     while(numBytes && availableBytes)
@@ -139,10 +142,8 @@ int my_read(int fd, char buf[], int numBytes)
         //*Convert Logibal Block # to Physical Block # through INODE_i_block[ ]
         //int physicalBlock = running->fd[fd]->mptr->INODE.i_block[logicalBlock];
         int physicalBlock = -1;
-        
 
         physicalBlock = map(mip->INODE, logicalBlock, buf);
-
 
         get_block(dev, physicalBlock, kbuff);
 
@@ -150,8 +151,35 @@ int my_read(int fd, char buf[], int numBytes)
 
         int remaining = BLKSIZE - startByte;
 
+        while(numBytes)
+        {
+            if(remaining <= numBytes)
+            {
+                oftp->offset += remaining;
+                count += remaining;
+                numBytes -= remaining;
+                availableBytes -= remaining;
+                if(availableBytes < 0)
+                {
+                    availableBytes = 0;
+                }
+                strncpy(buf, cp, remaining);
+            }
+            else
+            {
+                oftp->offset += remaining;
+                count += numBytes;
+                strncpy(buf, cp, numBytes);
+                availableBytes -= remaining;
+                if(availableBytes < 0)
+                {
+                    availableBytes = 0;
+                }
+            }
+        }
+
         //TODO: (5) 
-        while(remaining)
+/*         while(remaining)
         {
             *buf++ = *cp++; //the contents of cp into buff 1 byte @ a time
             oftp->offset++;
@@ -162,8 +190,7 @@ int my_read(int fd, char buf[], int numBytes)
             if(numBytes <= 0 || availableBytes <= 0)
             {
                 break;
-            }
-        }
+            } */
     }
     return count;
 }
