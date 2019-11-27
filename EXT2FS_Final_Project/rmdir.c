@@ -142,7 +142,7 @@ int rm_child(MINODE *parent, char *myname)
             /*************************************************
                 print DIR record names while stepping through
             **************************************************/
-            printf("At DIR record %\ns", dp->name); //*May need to fix this localy DIR* dp
+            printf("At DIR record %s\n", dp->name); //*May need to fix this localy DIR* dp
 
             if(strcmp(dp->name, myname) == 0) //!If this is the dir we are trying to delete
             {

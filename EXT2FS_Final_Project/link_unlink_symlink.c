@@ -114,60 +114,6 @@ int link()
 }
 
 
-int truncate(MINODE *mipToDelete)
-{
-    int i, j, *p, *q;
-    char lbuf[BLKSIZE], lbuf2[BLKSIZE];
-    //* Deallocate all data blocks in INODE:
-    for(int i=0; i < 12; i++)
-    {
-        if(mipToDelete->INODE.i_block[i] == 0)
-        {
-            break;
-        }
-        bdalloc(dev, mipToDelete->INODE.i_block[i]);
-    }
-
-    get_block(dev, mipToDelete->INODE.i_block[12], lbuf);
-    p = (int *)lbuf;
-
-    for(i=0; i < 256; i++)
-    {
-        if(p[i] == 0)
-        {
-            break;
-        }
-        bdalloc(dev,p[i]);
-    }
-    bdalloc(dev, mipToDelete->INODE.i_block[12]);
-
-    get_block(dev, mipToDelete->INODE.i_block[13], lbuf);
-    p = (int *)buf;
-    for(i = 0; i < 256; i++)
-    {
-        if(p[i] == 0)
-        {
-            break;
-        }
-        get_block(dev, p[i], lbuf2);
-        q = (int *)lbuf2;
-        for(j = 0; j < 256; j++)
-        {
-            if(q[j] == 0)
-            {
-                break;
-            }
-            bdalloc(dev, q[j]);
-        }
-        bdalloc(dev, p[i]);
-    }
-    bdalloc(dev, mipToDelete->INODE.i_block[13]);
-
-    mipToDelete->INODE.i_size = 0;
-    mipToDelete->dirty = 1;
-}
-
-
 int unlink()
 {
     int inoToDelete = getino(pathname); //Get the inode number for the path
