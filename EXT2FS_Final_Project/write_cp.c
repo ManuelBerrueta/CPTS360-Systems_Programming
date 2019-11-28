@@ -138,7 +138,8 @@ int my_write(int fd, char *buf, int nbytes) {
                 count += remain;
                 nbytes -= remain;
                 mip->INODE.i_size = remain;
-                strncpy(buf, cp, remain);
+                //strncpy(buf, cp, remain);
+                strncpy(cp, buf, remain);
                 remain =0;
             }
             else
@@ -146,8 +147,9 @@ int my_write(int fd, char *buf, int nbytes) {
                 oftp->offset += remain;
                 count += nbytes;
                 mip->INODE.i_size += nbytes;
-                strncpy(buf, cp, nbytes);
-                
+                //strncpy(buf, cp, nbytes);
+                strncpy(cp, buf, remain);
+
                 if(nbytes == 0)
                 {
                     break;
