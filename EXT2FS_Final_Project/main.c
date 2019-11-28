@@ -157,7 +157,7 @@ int main(int argc, char *argv[])
         //printf("[ %04d/%02d/%02d ] BERR Shell [ %s ]\n|-$ ", tm.tm_year+1900, tm.tm_mon, tm.tm_mday, cwd);
         printf("[ %04d/%02d/%02d ] BERR Shell [ cwd ]\n|-$ ", tm.tm_year+1900, tm.tm_mon, tm.tm_mday);
         
-        printf("input command : [ls|cd|pwd|quit|mkdir|creat|link|unlink|symlink|readlink|rmdir|open|close|lseek|pfd|dup|dup2|read|cat|write]\nBERSH::> ");
+        printf("Input command : [ls|cd|pwd|quit|mkdir|creat|link|unlink|symlink|readlink|rmdir|open|close|lseek|pfd|dup|dup2|read|cat|cp|mv|write]\nBERSH::> ");
         fgets(line, 128, stdin);
         line[strlen(line) - 1] = 0;
         if (line[0] == 0)
@@ -219,7 +219,7 @@ int main(int argc, char *argv[])
         if (strcmp(cmd, "close") == 0)
             close(atoi(pathname));
         if (strcmp(cmd, "lseek") == 0)
-            my_lseek(atoi(pathname), dirname2);
+            my_lseek(atoi(pathname), atoi(dirname2));
         if (strcmp(cmd, "pfd") == 0)
             pfd();
         if (strcmp(cmd, "dup") == 0)
@@ -230,6 +230,15 @@ int main(int argc, char *argv[])
             my_read(atoi(pathname), buf, atoi(dirname2));
         if (strcmp(cmd, "cat") == 0)
             cat(pathname);
+        if (strcmp(cmd, "cp") == 0)
+            cp(pathname, dirname2);
+        if (strcmp(cmd, "mv") == 0)
+            mv(pathname, dirname2);
+        if (strcmp(cmd, "write") == 0)
+        {
+            int sizeToWrite = strlen(dirname2);
+            my_write(atoi(pathname), dirname2, sizeToWrite);
+        }
         if (strcmp(cmd, "quit") == 0)
             quit();
     }

@@ -61,7 +61,7 @@ extern int bno;
 //* lbk   0    1 .....     |rem|            |
 //*                      start           fileSize (in INODE)  
 
-int my_write(fd, buf, nbytes) {
+int my_write(int fd, char *buf, int nbytes) {
     int lbk, start, blk, remain, i;
     OFT *oftp = running->fd[fd];
     MINODE *mip = oftp->mptr;
@@ -69,6 +69,12 @@ int my_write(fd, buf, nbytes) {
     char writebuf[BLKSIZE];
     int count;
     char *cq = buf;
+
+    if(running->fd[fd] == 0)
+    {
+        printf("-=0={ERROR fd='%d' is NOT open, file must be open prior to writing!\n\n", fd);
+        return -1;
+    }
 
     while (nbytes > 0) {
         lbk = oftp->offset / BLKSIZE;
@@ -196,6 +202,8 @@ int cp(char source[], char dest[])
     {
         my_write(gd, cpybuff, 1024);
     }
+    close(fd);
+    close(fd);
     return 0;
 }
 

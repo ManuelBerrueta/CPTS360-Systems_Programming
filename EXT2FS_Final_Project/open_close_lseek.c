@@ -239,5 +239,18 @@ int dup(int fd)
 int dup2(int fd, int gd)
 {
     close(gd);
-    dup(fd); 
+    //dup(fd);
+
+    if(running->fd[fd] == 0)
+    {
+        printf("-=0={ERRROR: NOT AN OPEN FILE\n");
+        return -1;
+    }
+    else
+    {
+        running->fd[gd] = running->fd[fd];
+        return gd;
+    }
+    printf("-=0={ERROR: CANNOT DUP2 fd into gd\n");
+    return -1;
 }
