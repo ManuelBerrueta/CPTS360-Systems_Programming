@@ -65,7 +65,7 @@ int my_write(int fd, char *buf, int nbytes) {
     int lbk, start, blk, remain, i;
     OFT *oftp = running->fd[fd];
     MINODE *mip = oftp->mptr;
-    int ind_blk[256], d_ind_blk[256];
+    int indirect_blk[256], dub_indirect_blk[256];
     char writebuf[BLKSIZE];
     int count;
     char *cq = buf;
@@ -76,55 +76,60 @@ int my_write(int fd, char *buf, int nbytes) {
         return -1;
     }
 
-    while (nbytes > 0) {
+    while (nbytes > 0)
+    {
         lbk = oftp->offset / BLKSIZE;
         start = oftp->offset % BLKSIZE;
     
-        if (lbk < 12) {
+        if (lbk < 12)
+        {
             if (mip->INODE.i_block[lbk] == 0) {
                 mip->INODE.i_block[lbk] = balloc(mip->dev); 
             }
             blk = mip->INODE.i_block[lbk];
         }
-        else if (lbk >= 12 && lbk < 256 + 12) {
+        else if (lbk >= 12 && lbk < 256 + 12)
+        {
             if (mip->INODE.i_block[12] == 0) {
                 mip->INODE.i_block[12] = balloc(mip->dev);
-                get_block(mip->dev, mip->INODE.i_block[12], ind_blk);
+                get_block(mip->dev, mip->INODE.i_block[12], indirect_blk);
                 for (i = 0; i < 256; i++) {
-                    ind_blk[i] = 0;
+                    indirect_blk[i] = 0;
                 }
-                put_block(mip->dev, mip->INODE.i_block[12], ind_blk);
+                put_block(mip->dev, mip->INODE.i_block[12], indirect_blk);
             }
-            blk = ind_blk[lbk - 12];
-            if (blk == 0) {
+            get_block(mip->dev, mip->INODE.i_block[12], indirect_blk);
+            blk = indirect_blk[lbk - 12];
+            if (blk == 0)
+            {
                 blk = balloc(mip->dev);
-                ind_blk[lbk - 12] = blk;
+                indirect_blk[lbk - 12] = blk;
             }
         }
         else {
             if (mip->INODE.i_block[13] == 0) {    //alloc i_block[13]
                 mip->INODE.i_block[13] = balloc(mip->dev);
-                get_block(mip->dev, mip->INODE.i_block[13], ind_blk);
+                get_block(mip->dev, mip->INODE.i_block[13], indirect_blk);
                 for (i = 0; i < 256; i++) {
-                    ind_blk[i] = 0;
+                    indirect_blk[i] = 0;
                 }
-                put_block(mip->dev, mip->INODE.i_block[13], ind_blk);
+                put_block(mip->dev, mip->INODE.i_block[13], indirect_blk);
             }
             blk = (lbk - 256 - 12) / BLKSIZE;            
-            if (ind_blk[blk] == 0) {
-                ind_blk[blk] = balloc(mip->dev);
-                get_block(mip->dev, ind_blk[blk], d_ind_blk);
+            if (indirect_blk[blk] == 0) {
+                indirect_blk[blk] = balloc(mip->dev);
+                get_block(mip->dev, indirect_blk[blk], dub_indirect_blk);
                 for (i = 0; i < 256; i++) {
-                    d_ind_blk[i] = 0;
+                    dub_indirect_blk[i] = 0;
                 }
-                put_block(mip->dev, ind_blk[blk], ind_blk);
+                put_block(mip->dev, indirect_blk[blk], indirect_blk);
             }
             blk = (lbk - 256 - 12) % BLKSIZE;
-            if (d_ind_blk[blk] == 0) {
-                d_ind_blk[blk] = balloc(mip->dev);
+            if (dub_indirect_blk[blk] == 0) {
+                dub_indirect_blk[blk] = balloc(mip->dev);
             }
         }
-        get_block(mip->dev, d_ind_blk[blk], writebuf);
+        get_block(mip->dev, dub_indirect_blk[blk], writebuf);
 
         char *cp = writebuf + start;
 
