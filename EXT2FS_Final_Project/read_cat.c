@@ -139,6 +139,8 @@ int my_read(int fd, char buf[], int numBytes)
         //*Compute Start byte in Logical block
         int startByte = oftp->offset % BLKSIZE;
 
+        printf("\n  ---- start lbk %d ------------\n\n", logicalBlock);
+
         //*Convert Logibal Block # to Physical Block # through INODE_i_block[ ]
         //int physicalBlock = running->fd[fd]->mptr->INODE.i_block[logicalBlock];
         int physicalBlock = -1;
@@ -149,9 +151,20 @@ int my_read(int fd, char buf[], int numBytes)
 
         char *cp = kbuff + startByte;
 
-        int remaining = BLKSIZE - startByte;
+        int leftInBlock = 0;
+        if (availableBytes >= BLKSIZE)
+        {
+            leftInBlock = BLKSIZE;
+        }
+        else
+        {
+            leftInBlock = availableBytes;
+        }
+        
 
-        while(numBytes)
+        int remaining = leftInBlock - startByte; // remaining bytes to read
+
+        while(leftInBlock)
         {
             if(remaining <= numBytes)
             {
@@ -163,6 +176,7 @@ int my_read(int fd, char buf[], int numBytes)
                 {
                     availableBytes = 0;
                 }
+                leftInBlock -= remaining;
                 strncpy(buf, cp, remaining);
             }
             else
@@ -175,6 +189,7 @@ int my_read(int fd, char buf[], int numBytes)
                 {
                     availableBytes = 0;
                 }
+                leftInBlock -= remaining;
             }
         }
 
@@ -214,12 +229,16 @@ int cat(char fileName[])
     }
     
 
-
+    int debug = 0;
     while(n = my_read(fd, mybuff, 1024))
     {
+        if (debug == 11) 
+            debug *= -1;
+
         mybuff[n] = 0;
         printf("%s", mybuff);
         //TODO: HANDLE '\n'
+        debug++;
     }
     puts("===================================================");
     printf("-=0=[END cat file: '%s' @ fd=%d\n", fileName, fd);

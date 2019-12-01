@@ -62,7 +62,7 @@ extern int bno;
 //*                      start           fileSize (in INODE)  
 
 int my_write(int fd, char *buf, int nbytes) {
-    int lbk, start, blk, remain, i;
+    int lbk, start, blk, remain, i, diskBlk;
     OFT *oftp = running->fd[fd];
     MINODE *mip = oftp->mptr;
     int indirect_blk[256], dub_indirect_blk[256];
@@ -87,6 +87,7 @@ int my_write(int fd, char *buf, int nbytes) {
                 mip->INODE.i_block[lbk] = balloc(mip->dev); 
             }
             blk = mip->INODE.i_block[lbk];
+            diskBlk = blk;
         }
         else if (lbk >= 12 && lbk < 256 + 12)
         {
@@ -104,7 +105,9 @@ int my_write(int fd, char *buf, int nbytes) {
             {
                 blk = balloc(mip->dev);
                 indirect_blk[lbk - 12] = blk;
+                put_block(mip->dev, mip->INODE.i_block[12], indirect_blk);
             }
+            diskBlk = blk;
         }
         else {
             if (mip->INODE.i_block[13] == 0) {    //alloc i_block[13]
@@ -128,12 +131,13 @@ int my_write(int fd, char *buf, int nbytes) {
             if (dub_indirect_blk[blk] == 0) {
                 dub_indirect_blk[blk] = balloc(mip->dev);
             }
+            diskBlk = dub_indirect_blk[blk];
         }
-        get_block(mip->dev, dub_indirect_blk[blk], writebuf);
+        get_block(mip->dev, diskBlk, writebuf);
 
         char *cp = writebuf + start;
 
-        remain = BLKSIZE - start;
+        remain = BLKSIZE - start; // remaining space in buf for writing
 
         while (remain > 0)
         {
@@ -141,20 +145,20 @@ int my_write(int fd, char *buf, int nbytes) {
             {
                 oftp->offset += remain;
                 count += remain;
-                nbytes -= remain;
-                mip->INODE.i_size = remain;
+                mip->INODE.i_size += remain;
                 //strncpy(buf, cp, remain);
                 strncpy(cp, buf, remain);
+                nbytes -= remain;
                 remain =0;
             }
             else
             {
-                oftp->offset += remain;
+                oftp->offset += nbytes;
                 count += nbytes;
                 mip->INODE.i_size += nbytes;
                 //strncpy(buf, cp, nbytes);
-                strncpy(cp, buf, remain);
-
+                strncpy(cp, buf, nbytes);
+                nbytes = 0;
                 if(nbytes == 0)
                 {
                     break;
@@ -175,7 +179,7 @@ int my_write(int fd, char *buf, int nbytes) {
             }
             if (nbytes <= 0) break;
         } */
-        put_block(mip->dev, blk, writebuf);
+        put_block(mip->dev, diskBlk, writebuf);
     }
     mip->dirty = 1;
     printf("wrote %d char into file descriptor fd=%d\n", count, fd);
@@ -205,9 +209,16 @@ int cp(char source[], char dest[])
         }
     }
 
+    int debug = 0;
     while(n = my_read(fd, cpybuff, 1024))
     {
-        my_write(gd, cpybuff, 1024);
+        if (debug == 11) 
+            debug *= -1;
+
+        my_write(gd, cpybuff, n);
+        memset(cpybuff, 0, BLKSIZE);
+
+        debug++;
     }
     close(fd);
     close(fd);
