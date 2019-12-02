@@ -24,11 +24,18 @@ DIR   *dp;
 #define NFD         8
 #define NPROC       2
 #define NOFT       40
+#define NMTABLE    10
+
+#define SUPERBLOCK  1
+#define GDBLOCK     2
+#define MAGIC       0xEF53
+#define DIR_MODE    0x41ED
 
 #define RD 0
 #define WR 1
 #define RW 2
 #define AP 3
+
 
 typedef struct minode{
   INODE INODE;
@@ -37,8 +44,23 @@ typedef struct minode{
   int dirty;
   // for level-3
   int mounted;
-  struct mntable *mptr;
+  struct mount *mptr;
 }MINODE;
+
+
+typedef struct mount{
+  int dev;
+  int ninodes;
+  int nblocks;
+  int free_blocks;
+  int free_inodes;
+  int bmap;
+  int imap;
+  int iblock;
+  MINODE *mntDirPtr;
+  char devName[256];
+  char mntName[64];
+}MOUNT;
 
 
 typedef struct oft{ // for level-2

@@ -35,11 +35,13 @@
 #include "open_close_lseek.c"
 #include "read_cat.c"
 #include "write_cp.c"
+#include "mount_umount.c"
 
 MINODE minode[NMINODE];
 MINODE *root;
 PROC proc[NPROC], *running;
 OFT fileTable[NOFT];
+MOUNT mntTable[NMTABLE];
 
 
 char gpath[256]; // global for tokenized components
