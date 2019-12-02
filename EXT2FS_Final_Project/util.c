@@ -198,7 +198,7 @@ int getino(char *pathname)
         return 2;
 
     if (pathname[0] == '/')
-        mip = iget(dev, 2);
+        mip = iget(root->dev, 2);
     else
         mip = iget(running->cwd->dev, running->cwd->ino);
 
@@ -207,7 +207,14 @@ int getino(char *pathname)
     for (i = 0; i < n; i++)
     {
         printf("===========================================\n");
+        if(mip->mounted){
+            mip = iget(mip->mptr->dev, mip->mptr->iblock);
+        }
+
+        dev = mip->dev;
+        
         ino = search(&(mip->INODE), name[i]);
+
         if (ino == 0)
         {
             iput(mip);

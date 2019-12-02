@@ -150,7 +150,7 @@ int mount(char *inFileSys, char *mount_point)
         strcpy(mp->devName, inFileSys);
         strcpy(mp->mntName, mount_point);
 
-        //ino = getino();
+        ino = getino(mount_point);
         mip = iget(dev, ino);
 
         if(mip->INODE.i_mode != DIR_MODE){

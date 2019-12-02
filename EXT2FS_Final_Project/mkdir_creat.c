@@ -171,7 +171,7 @@ int enter_name(MINODE *pip, int myino, char *myname)
         //* Looking for empty data block to enter name in parent's inode
         if(pip->INODE.i_block[i] == 0) 
         {
-            int new_block = balloc(dev); //TODO: Up to here we should be goood
+            int new_block = balloc(pip->dev); //TODO: Up to here we should be goood
             /* (5).// Reach here means: NO space in existing data block(s)
 
                 Allocate a new data block; INC parent's size by BLKSIZE;
@@ -186,7 +186,7 @@ int enter_name(MINODE *pip, int myino, char *myname)
             dp->inode = myino;                     
             dp->name_len = strlen(myname);
             //(6).Write data block to disk;
-            put_block(dev, new_block, buf); //! Writes block back to disk
+            put_block(pip->dev, new_block, buf); //! Writes block back to disk
             return;
             //break; //* Once found empty data block break
         }
@@ -270,7 +270,7 @@ int enter_name(MINODE *pip, int myino, char *myname)
             dp->inode = myino;                     
             dp->name_len = NEEDED_LEN;
             //(6).Write data block to disk;
-            put_block(dev, blk, buf); //! Writes block back to disk -need to do it back in my_mkdir
+            put_block(pip->dev, blk, buf); //! Writes block back to disk -need to do it back in my_mkdir
             //TODO: Should probably return here, we are done making new dir
             return;
         }
@@ -289,15 +289,15 @@ int mymkdir(MINODE *pip, char *name)
     //        ino = ialloc(dev);    
     //        bno = balloc(dev);
     //    DO NOT WORK IN THE DARK: PRINT OUT THESE NUMBERS!!!
-    int ino = ialloc(dev);
-    bno = balloc(dev);
+    int ino = ialloc(pip->dev);
+    bno = balloc(pip->dev);
 
     printf("-=0={ NEW ALLOCATED: inode: %d  |  block: %d }=0=-\n", ino, bno);
 
     //3. mip = iget(dev, ino);  load the inode into a minode[] (in order to
     //   wirte contents to the INODE in memory.
 
-    mip = iget(dev,ino); //? Load new allocated inode into a memory inode ???
+    mip = iget(pip->dev,ino); //? Load new allocated inode into a memory inode ???
 
     //4. Write contents to mip->INODE to make it as a DIR INODE.
 
@@ -358,7 +358,7 @@ int mymkdir(MINODE *pip, char *name)
     dp->name_len = 2;
     dp->name[0] = dp->name[1] = '.';
     
-    put_block(dev, bno, localbuff); //! Writes block back to disk
+    put_block(pip->dev, bno, localbuff); //! Writes block back to disk
 
 
     //7. Finally, enter name ENTRY into parent's directory by 
@@ -438,7 +438,7 @@ int my_creat(MINODE *pip, char*name)//TODO: NEED TO FIX THIS...
 
     //2. allocate an inode and a disk block for the new directory;
     //        ino = ialloc(dev);    
-    int ino = ialloc(dev);
+    int ino = ialloc(pip->dev);
     //bno = balloc(dev); TODO: Don't need this because its a file
 
     printf("-=0={ NEW ALLOCATED: inode: %d  }=0=-\n", ino);
@@ -446,7 +446,7 @@ int my_creat(MINODE *pip, char*name)//TODO: NEED TO FIX THIS...
     //3. mip = iget(dev, ino);  load the inode into a minode[] (in order to
     //   write contents to the INODE in memory.
 
-    mip = iget(dev,ino); //? Load new allocated inode into a memory inode ???
+    mip = iget(pip->dev,ino); //? Load new allocated inode into a memory inode ???
 
     //4. Write contents to mip->INODE to make it as a REG File INODE.
 
@@ -507,7 +507,7 @@ int my_creat(MINODE *pip, char*name)//TODO: NEED TO FIX THIS...
     dp->name_len = 2;
     dp->name[0] = dp->name[1] = '.';
     
-    put_block(dev, bno, localbuff); //! Writes block back to disk
+    put_block(pip->dev, bno, localbuff); //! Writes block back to disk
 
 
     //7. Finally, enter name ENTRY into parent's directory by 

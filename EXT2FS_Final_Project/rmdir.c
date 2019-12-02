@@ -149,12 +149,12 @@ int rm_child(MINODE *parent, char *myname)
                 if(cp + dp->rec_len >= buf + BLKSIZE)
                 {
                     prevdp->rec_len += dp->rec_len;
-                    put_block(dev, parent->INODE.i_block[i], buf); //put back current block
+                    put_block(parent->dev, parent->INODE.i_block[i], buf); //put back current block
                     return;
                 }
                 else if(dp->rec_len == BLKSIZE)
                 {
-                    bdalloc(dev, parent->INODE.i_block[i]);
+                    bdalloc(parent->dev, parent->INODE.i_block[i]);
 
                     //!New code after working
                     while(i < 12)
@@ -186,7 +186,7 @@ int rm_child(MINODE *parent, char *myname)
                     }
                     dp->rec_len = dp->rec_len + rec;
             
-                    put_block(dev, parent->INODE.i_block[i], buf);
+                    put_block(parent->dev, parent->INODE.i_block[i], buf);
                     return 0;
                 }    
             }

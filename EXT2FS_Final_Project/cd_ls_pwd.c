@@ -28,6 +28,9 @@ change_dir(char *pathname)
     else
     {
         int curr_ino = getino(pathname);
+
+        //TODO: Find how to handle '..'
+
         MINODE *mip = iget(dev, curr_ino);
         if(!S_ISDIR(mip->INODE.i_mode))
         {

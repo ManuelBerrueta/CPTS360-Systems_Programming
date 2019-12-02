@@ -43,7 +43,7 @@ typedef struct minode{
   int refCount;
   int dirty;
   // for level-3
-  int mounted;
+  int mounted; //
   struct mount *mptr;
 }MINODE;
 
