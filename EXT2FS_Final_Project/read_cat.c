@@ -74,10 +74,16 @@ int map(INODE ino, int logicBlk, char buff[])
     {
         blk = ino.i_block[logicBlk];
     }
-    else if(12 <= logicBlk < 12+256) //*indirect blocks
+    //else if(12 <= logicBlk < 12+256) //*indirect blocks
+    else if(logicBlk < 12+256) //*indirect blocks
     {
         get_block(dev, ino.i_block[12], ibuff); //read i_block 12 into ibuff
         blk = ibuff[logicBlk - 12];
+
+        //!Debug
+        if(logicBlk == 268){
+            printf("Debug logicblk!\n\n");
+        }
     }
     else
     {
