@@ -185,7 +185,8 @@ INODE *path2inode(INODE *ip, char pathName[], int inodes_start)
     }
     else
     {
-        show_dir(ip);
+        //show_dir(ip);
+        show_dir(running->cwd);
     }
 }
 
