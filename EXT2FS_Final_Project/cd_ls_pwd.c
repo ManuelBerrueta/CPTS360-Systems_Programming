@@ -18,6 +18,9 @@ char indirect_blk_buff[1024], double_indirect_blk_buff[1024];
 #define GROUP 000070
 #define OTHER 000007
 
+char *t1 = "xwrxwrxwr-------";
+char *t2 = "----------------";
+
 change_dir(char *pathname)
 {
     printf("chage_dir()\n");
@@ -46,6 +49,7 @@ void *show_dir(INODE *ip)
 {
     //char sbuf[BLKSIZE], char temp[256];
     char temp[256];
+    char ftime[64];
     DIR *dp;
     char *cp;
     int i;
@@ -62,14 +66,56 @@ void *show_dir(INODE *ip)
         dp = (DIR *)sbuf;
         cp = sbuf;
 
-        puts(" Inode |   Size   | FName Size | File Name");
+        //puts(" Inode |   |   File Size   |Size   | FName Size | File Name");
+        //puts(" Inode |   |   File Size   |Size   | FName Size | File Name");
 
         while (cp < sbuf + BLKSIZE)
         {
             strncpy(temp, dp->name, dp->name_len);
-            temp[dp->name_len] = 0;
-            printf("%4d       %4d      %4d        %s\n",
-                   dp->inode, dp->rec_len, dp->name_len, temp);
+            temp[dp->name_len] = 0;//*Temp name place holder
+            MINODE *mip = iget(dev, dp->inode);
+
+            //printf("%4d       %4d      %4d        %s\n",
+            //       dp->inode, dp->rec_len, dp->name_len, temp);
+            //TODO: getino to get information, then put ino
+            /* printf("%4d       %s\n",
+                   mip->INODE.i_size, temp); */
+
+
+            if ((mip->INODE.i_mode & 0xF000) == 0x8000) // if (S_ISREG())
+                printf("%c",'-');
+            if ((mip->INODE.i_mode & 0xF000) == 0x4000) // if (S_ISDIR())
+                printf("%c",'d');
+            if ((mip->INODE.i_mode & 0xF000) == 0xA000) // if (S_ISLNK())
+                printf("%c",'l');
+            for (int j = 8; j >= 0; j--)
+            {
+                if (mip->INODE.i_mode & (1 << j)) // print r|w|x
+                {
+                    printf("%c", t1[j]);
+                }
+                else
+                {
+                    printf("%c", t2[j]);
+                }
+                // or print -
+            }
+
+
+
+            printf("%4d ", mip->INODE.i_links_count);   // link count
+            printf("%4d ", mip->INODE.i_gid);     // gid
+            printf("%4d ", mip->INODE.i_uid);     // uid
+            fflush(stdout);
+
+            // print time
+            strcpy(ftime, ctime(&mip->INODE.i_ctime)); // print time in calendar form
+            ftime[strlen(ftime) - 1] = 0;   // kill \n at end
+            printf("%s ", ftime);
+            printf("%8d ", mip->INODE.i_size);    // file size
+            printf("%s\n", temp);
+            
+            iput(mip);
             cp += dp->rec_len;
             dp = (DIR *)cp;
         }

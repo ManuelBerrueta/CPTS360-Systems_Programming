@@ -159,7 +159,7 @@ int main(int argc, char *argv[])
         //printf("[ %04d/%02d/%02d ] BERR Shell [ %s ]\n|-$ ", tm.tm_year+1900, tm.tm_mon, tm.tm_mday, cwd);
         printf("[ %04d/%02d/%02d ] BERR Shell [ cwd ]\n|-$ ", tm.tm_year+1900, tm.tm_mon, tm.tm_mday);
         
-        printf("Input command : [ls|cd|pwd|quit|mkdir|creat|link|unlink|symlink|readlink|rmdir|open|close|lseek|pfd|dup|dup2|read|cat|cp|mv|write]\nBERSH::> ");
+        printf("Input command : [ls|cd|pwd|quit|mkdir|creat|link|unlink|symlink|readlink|rmdir|open|close|lseek|pfd|dup|dup2|read|cat|cp|mv|write|mount|umount]\nBERSH::> ");
         fgets(line, 128, stdin);
         line[strlen(line) - 1] = 0;
         if (line[0] == 0)
@@ -241,6 +241,10 @@ int main(int argc, char *argv[])
             int sizeToWrite = strlen(dirname2);
             my_write(atoi(pathname), dirname2, sizeToWrite);
         }
+        if (strcmp(cmd, "mount") == 0)
+            mount(pathname, dirname2);
+        if (strcmp(cmd, "unmount") == 0)
+            umount(pathname);
         if (strcmp(cmd, "quit") == 0)
             quit();
     }

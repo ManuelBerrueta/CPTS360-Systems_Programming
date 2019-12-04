@@ -83,7 +83,7 @@ MINODE *iget(int dev, int ino)
         if (mip->refCount && mip->dev == dev && mip->ino == ino)
         {
             mip->refCount++;
-            printf("found [%d %d] as minode[%d] in core\n", dev, ino, i);
+            //!printf("found [%d %d] as minode[%d] in core\n", dev, ino, i);
             return mip;
         }
     }
@@ -133,7 +133,7 @@ int iput(MINODE *mip)
         return;
 
     /* write back */
-    printf("iput: dev=%d ino=%d\n", mip->dev, mip->ino);
+    //!printf("iput: dev=%d ino=%d\n", mip->dev, mip->ino);
 
     block = ((mip->ino - 1) / 8) + inode_start;
     offset = (mip->ino - 1) % 8;
