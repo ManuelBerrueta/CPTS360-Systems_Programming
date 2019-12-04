@@ -98,6 +98,7 @@ MINODE *iget(int dev, int ino)
             mip->dev = dev;
             mip->ino = ino;
 
+
             // get INODE of ino to buf
             blk = (ino - 1) / 8 + inode_start;
             disp = (ino - 1) % 8;

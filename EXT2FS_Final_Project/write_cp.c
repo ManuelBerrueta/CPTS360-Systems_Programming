@@ -118,6 +118,10 @@ int my_write(int fd, char *buf, int nbytes) {
                 }
                 put_block(mip->dev, mip->INODE.i_block[13], indirect_blk);
             }
+            
+            //!Testing
+            get_block(mip->dev, mip->INODE.i_block[13], indirect_blk);
+            
             blk = (lbk - 256 - 12) / BLKSIZE;            
             if (indirect_blk[blk] == 0) {
                 indirect_blk[blk] = balloc(mip->dev);
@@ -125,7 +129,8 @@ int my_write(int fd, char *buf, int nbytes) {
                 for (i = 0; i < 256; i++) {
                     dub_indirect_blk[i] = 0;
                 }
-                put_block(mip->dev, indirect_blk[blk], indirect_blk);
+                //put_block(mip->dev, indirect_blk[blk], indirect_blk);
+                put_block(mip->dev, indirect_blk[blk], dub_indirect_blk);
             }
             blk = (lbk - 256 - 12) % BLKSIZE;
             if (dub_indirect_blk[blk] == 0) {
@@ -229,7 +234,7 @@ int cp(char source[], char dest[])
 int mv(char source[], char dest[])
 {
     MINODE *smip, *dmip;
-    char tempbuff[256];
+    char tempbuff[256] = {0};
     int ino;
 
     strcpy(tempbuff, dest);

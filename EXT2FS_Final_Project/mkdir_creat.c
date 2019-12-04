@@ -459,7 +459,7 @@ int my_creat(MINODE *pip, char*name)//TODO: NEED TO FIX THIS...
     ip->i_mode = 0x81A4;		// OR 0100644: REG File type and permissions
     ip->i_uid  = running->uid;	// Owner uid 
     ip->i_gid  = running->pid;  //running->gid;	// Group Id
-    ip->i_size = BLKSIZE;		// Size in bytes TODO: Do we just put 0?
+    ip->i_size = 0; //BLKSIZE;		// Size in bytes TODO: Do we just put 0?
     ip->i_links_count = 1;	    // Links count=1 because it is a file entry
     ip->i_atime = ip->i_ctime = ip->i_mtime = time(0L);  // set to current time
     ip->i_blocks = 1;                	// LINUX: Blocks count in 512-byte chunks 
