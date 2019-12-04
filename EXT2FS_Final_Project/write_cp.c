@@ -62,7 +62,7 @@ extern int bno;
 //*                      start           fileSize (in INODE)  
 
 int my_write(int fd, char *buf, int nbytes) {
-    int lbk, start, blk, remain, i, diskBlk;
+    int lbk, start, blk, dblk, remain, i, diskBlk;
     OFT *oftp = running->fd[fd];
     MINODE *mip = oftp->mptr;
     int indirect_blk[256], dub_indirect_blk[256];
@@ -112,7 +112,7 @@ int my_write(int fd, char *buf, int nbytes) {
         else {
             if (mip->INODE.i_block[13] == 0) {    //alloc i_block[13]
                 mip->INODE.i_block[13] = balloc(mip->dev);
-                get_block(mip->dev, mip->INODE.i_block[13], indirect_blk);
+                //get_block(mip->dev, mip->INODE.i_block[13], indirect_blk);
                 for (i = 0; i < 256; i++) {
                     indirect_blk[i] = 0;
                 }
@@ -125,20 +125,24 @@ int my_write(int fd, char *buf, int nbytes) {
             blk = (lbk - 256 - 12) / BLKSIZE;            
             if (indirect_blk[blk] == 0) {
                 indirect_blk[blk] = balloc(mip->dev);
-                get_block(mip->dev, indirect_blk[blk], dub_indirect_blk);
+                //get_block(mip->dev, indirect_blk[blk], dub_indirect_blk);
                 for (i = 0; i < 256; i++) {
                     dub_indirect_blk[i] = 0;
                 }
-                //put_block(mip->dev, indirect_blk[blk], indirect_blk);
                 put_block(mip->dev, indirect_blk[blk], dub_indirect_blk);
+                put_block(mip->dev, mip->INODE.i_block[13], indirect_blk);
             }
-            blk = (lbk - 256 - 12) % BLKSIZE;
-            if (dub_indirect_blk[blk] == 0) {
-                dub_indirect_blk[blk] = balloc(mip->dev);
+            //get_block(mip->dev, mip->INODE.i_block[13], indirect_blk);
+            get_block(mip->dev, indirect_blk[blk], dub_indirect_blk);
+            dblk = (lbk - 256 - 12) % BLKSIZE;
+            if (dub_indirect_blk[dblk] == 0) {
+                dub_indirect_blk[dblk] = balloc(mip->dev);
+                put_block(mip->dev,indirect_blk[blk], dub_indirect_blk);
+                //put_block(mip->dev, mip->INODE.i_block[13], indirect_blk);
             }
-            diskBlk = dub_indirect_blk[blk];
+            diskBlk = dub_indirect_blk[dblk];
         }
-        get_block(mip->dev, diskBlk, writebuf);
+        //get_block(mip->dev, diskBlk, writebuf);
 
         char *cp = writebuf + start;
 
