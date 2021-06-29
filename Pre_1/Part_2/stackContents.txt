@@ -1,0 +1,159 @@
+enter main
+&argc=ffbdd0f0 argv=ffbdd184 env=ffbdd18c
+&a=ffbdd0ac &b=ffbdd0b0 &c=ffbdd0b4
+Value of argc is: 1
+The contents of the 0 argument is: ./a.out
+enter A
+Address of d: ffbdd060
+Address of e: ffbdd064
+Address of f: ffbdd068
+enter B
+Address of g: ffbdd030
+Address of h: ffbdd034
+Address of i: ffbdd038
+enter C
+Address of u: ffbdcff8
+Address of v: ffbdcffc
+Address of w: ffbdd000
+Address of i: ffbdd004
+Address of *p: ffbdd008
+
+Printing stack frame list:
+*FP=ffbdd048 	|	 FP=ffbdd018  	|
+*FP=ffbdd078 	|	 FP=ffbdd048  	|
+*FP=ffbdd0d8 	|	 FP=ffbdd078  	|
+*FP=0    	|	 FP=ffbdd0d8  	|
+
+Printing stack content:
+At i=0  	|	 p=ffbdd008  	|	*p=ffbdd008
+At i=1  	|	 p=ffbdd008  	|	*p=ffbdd008
+At i=2  	|	 p=ffbdd00c  	|	*p=c5e6f800
+At i=3  	|	 p=ffbdd010  	|	*p=ffbdd0f0
+At i=4  	|	 p=ffbdd014  	|	*p=565adfd0
+At i=5  	|	 p=ffbdd018  	|	*p=ffbdd048
+At i=6  	|	 p=ffbdd01c  	|	*p=565ab438
+At i=7  	|	 p=ffbdd020  	|	*p=       7
+At i=8  	|	 p=ffbdd024  	|	*p=       8
+At i=9  	|	 p=ffbdd028  	|	*p=ffbdd078
+At i=10  	|	 p=ffbdd02c  	|	*p=565ab3ae
+At i=11  	|	 p=ffbdd030  	|	*p=       7
+At i=12  	|	 p=ffbdd034  	|	*p=       8
+At i=13  	|	 p=ffbdd038  	|	*p=       9
+At i=14  	|	 p=ffbdd03c  	|	*p=c5e6f800
+At i=15  	|	 p=ffbdd040  	|	*p=ffbdd0f0
+At i=16  	|	 p=ffbdd044  	|	*p=565adfd0
+At i=17  	|	 p=ffbdd048  	|	*p=ffbdd078
+At i=18  	|	 p=ffbdd04c  	|	*p=565ab376
+At i=19  	|	 p=ffbdd050  	|	*p=       4
+At i=20  	|	 p=ffbdd054  	|	*p=       5
+At i=21  	|	 p=ffbdd058  	|	*p=ffbdd0d8
+At i=22  	|	 p=ffbdd05c  	|	*p=565ab2ec
+At i=23  	|	 p=ffbdd060  	|	*p=       4
+At i=24  	|	 p=ffbdd064  	|	*p=       5
+At i=25  	|	 p=ffbdd068  	|	*p=       6
+At i=26  	|	 p=ffbdd06c  	|	*p=c5e6f800
+At i=27  	|	 p=ffbdd070  	|	*p=ffbdd0f0
+At i=28  	|	 p=ffbdd074  	|	*p=565adfd0
+At i=29  	|	 p=ffbdd078  	|	*p=ffbdd0d8
+At i=30  	|	 p=ffbdd07c  	|	*p=565ab2aa
+At i=31  	|	 p=ffbdd080  	|	*p=       1
+At i=32  	|	 p=ffbdd084  	|	*p=       2
+At i=33  	|	 p=ffbdd088  	|	*p=ffbde379
+At i=34  	|	 p=ffbdd08c  	|	*p=ffbdd0b4
+At i=35  	|	 p=ffbdd090  	|	*p=       0
+At i=36  	|	 p=ffbdd094  	|	*p=f7f97000
+At i=37  	|	 p=ffbdd098  	|	*p=ffbdd18c
+At i=38  	|	 p=ffbdd09c  	|	*p=ffbdd184
+At i=39  	|	 p=ffbdd0a0  	|	*p=f7fc85c0
+At i=40  	|	 p=ffbdd0a4  	|	*p=f7f97000
+At i=41  	|	 p=ffbdd0a8  	|	*p=       0
+At i=42  	|	 p=ffbdd0ac  	|	*p=       1
+At i=43  	|	 p=ffbdd0b0  	|	*p=       2
+At i=44  	|	 p=ffbdd0b4  	|	*p=       3
+At i=45  	|	 p=ffbdd0b8  	|	*p=       1
+At i=46  	|	 p=ffbdd0bc  	|	*p=c5e6f800
+At i=47  	|	 p=ffbdd0c0  	|	*p=       1
+At i=48  	|	 p=ffbdd0c4  	|	*p=ffbdd184
+At i=49  	|	 p=ffbdd0c8  	|	*p=ffbdd18c
+At i=50  	|	 p=ffbdd0cc  	|	*p=ffbdd0f0
+At i=51  	|	 p=ffbdd0d0  	|	*p=       0
+At i=52  	|	 p=ffbdd0d4  	|	*p=f7f97000
+At i=53  	|	 p=ffbdd0d8  	|	*p=       0
+At i=54  	|	 p=ffbdd0dc  	|	*p=f7dd9751
+At i=55  	|	 p=ffbdd0e0  	|	*p=f7f97000
+At i=56  	|	 p=ffbdd0e4  	|	*p=f7f97000
+At i=57  	|	 p=ffbdd0e8  	|	*p=       0
+At i=58  	|	 p=ffbdd0ec  	|	*p=f7dd9751
+At i=59  	|	 p=ffbdd0f0  	|	*p=       1
+At i=60  	|	 p=ffbdd0f4  	|	*p=ffbdd184
+At i=61  	|	 p=ffbdd0f8  	|	*p=ffbdd18c
+At i=62  	|	 p=ffbdd0fc  	|	*p=ffbdd114
+At i=63  	|	 p=ffbdd100  	|	*p=f7fb8a64
+At i=64  	|	 p=ffbdd104  	|	*p=f7fe1000
+At i=65  	|	 p=ffbdd108  	|	*p=f7f97000
+At i=66  	|	 p=ffbdd10c  	|	*p=ffffffff
+At i=67  	|	 p=ffbdd110  	|	*p=f7fe1950
+At i=68  	|	 p=ffbdd114  	|	*p=       0
+At i=69  	|	 p=ffbdd118  	|	*p=f7f97000
+At i=70  	|	 p=ffbdd11c  	|	*p=f7f97000
+At i=71  	|	 p=ffbdd120  	|	*p=       0
+At i=72  	|	 p=ffbdd124  	|	*p=57c9ca59
+At i=73  	|	 p=ffbdd128  	|	*p=97460c49
+At i=74  	|	 p=ffbdd12c  	|	*p=       0
+At i=75  	|	 p=ffbdd130  	|	*p=       0
+At i=76  	|	 p=ffbdd134  	|	*p=       0
+At i=77  	|	 p=ffbdd138  	|	*p=       0
+At i=78  	|	 p=ffbdd13c  	|	*p=       0
+At i=79  	|	 p=ffbdd140  	|	*p=       0
+At i=80  	|	 p=ffbdd144  	|	*p=       0
+At i=81  	|	 p=ffbdd148  	|	*p=f7fc8469
+At i=82  	|	 p=ffbdd14c  	|	*p=565adfd0
+At i=83  	|	 p=ffbdd150  	|	*p=       1
+At i=84  	|	 p=ffbdd154  	|	*p=565ab080
+At i=85  	|	 p=ffbdd158  	|	*p=       0
+At i=86  	|	 p=ffbdd15c  	|	*p=565ab0b1
+At i=87  	|	 p=ffbdd160  	|	*p=565ab1b9
+At i=88  	|	 p=ffbdd164  	|	*p=       1
+At i=89  	|	 p=ffbdd168  	|	*p=ffbdd184
+At i=90  	|	 p=ffbdd16c  	|	*p=565ab660
+At i=91  	|	 p=ffbdd170  	|	*p=565ab6c0
+At i=92  	|	 p=ffbdd174  	|	*p=f7fc85c0
+At i=93  	|	 p=ffbdd178  	|	*p=ffbdd17c
+At i=94  	|	 p=ffbdd17c  	|	*p=f7fe1950
+At i=95  	|	 p=ffbdd180  	|	*p=       1
+At i=96  	|	 p=ffbdd184  	|	*p=ffbde379
+At i=97  	|	 p=ffbdd188  	|	*p=       0
+At i=98  	|	 p=ffbdd18c  	|	*p=ffbde381
+At i=99  	|	 p=ffbdd190  	|	*p=ffbde391
+At i=100  	|	 p=ffbdd194  	|	*p=ffbde3e3
+At i=101  	|	 p=ffbdd198  	|	*p=ffbde3f6
+At i=102  	|	 p=ffbdd19c  	|	*p=ffbde40a
+At i=103  	|	 p=ffbdd1a0  	|	*p=ffbde437
+At i=104  	|	 p=ffbdd1a4  	|	*p=ffbde44e
+At i=105  	|	 p=ffbdd1a8  	|	*p=ffbde47a
+At i=106  	|	 p=ffbdd1ac  	|	*p=ffbde48d
+At i=107  	|	 p=ffbdd1b0  	|	*p=ffbde49f
+At i=108  	|	 p=ffbdd1b4  	|	*p=ffbde4d5
+At i=109  	|	 p=ffbdd1b8  	|	*p=ffbde4f5
+At i=110  	|	 p=ffbdd1bc  	|	*p=ffbde51e
+At i=111  	|	 p=ffbdd1c0  	|	*p=ffbde532
+At i=112  	|	 p=ffbdd1c4  	|	*p=ffbde549
+At i=113  	|	 p=ffbdd1c8  	|	*p=ffbde55c
+At i=114  	|	 p=ffbdd1cc  	|	*p=ffbde578
+At i=115  	|	 p=ffbdd1d0  	|	*p=ffbde587
+At i=116  	|	 p=ffbdd1d4  	|	*p=ffbde5c7
+At i=117  	|	 p=ffbdd1d8  	|	*p=ffbde5d6
+At i=118  	|	 p=ffbdd1dc  	|	*p=ffbde5f1
+At i=119  	|	 p=ffbdd1e0  	|	*p=ffbde606
+At i=120  	|	 p=ffbdd1e4  	|	*p=ffbde63a
+At i=121  	|	 p=ffbdd1e8  	|	*p=ffbde663
+At i=122  	|	 p=ffbdd1ec  	|	*p=ffbde684
+At i=123  	|	 p=ffbdd1f0  	|	*p=ffbde691
+At i=124  	|	 p=ffbdd1f4  	|	*p=ffbde6a3
+At i=125  	|	 p=ffbdd1f8  	|	*p=ffbde6b3
+At i=126  	|	 p=ffbdd1fc  	|	*p=ffbde6c5
+At i=127  	|	 p=ffbdd200  	|	*p=ffbde6d6
+exit C
+exit B
+exit A
+exit main
